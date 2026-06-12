@@ -1,0 +1,70 @@
+<div>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="page-title">Loyalty Programs</h1>
+    <button (click)="showForm = true; form.reset({requiredStamps: 10, isActive: true, autoResetStamps: true})" class="btn-primary flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      New Program
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center py-12">
+    <div class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+  </div>
+
+  <div *ngIf="!loading" class="space-y-4">
+    <div *ngFor="let p of programs" class="card">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-2">
+            <h3 class="font-semibold text-lg text-gray-900">{{ p.name }}</h3>
+            <span [class]="p.isActive ? 'badge-success' : 'badge-gray'">{{ p.isActive ? 'Active' : 'Inactive' }}</span>
+          </div>
+          <p class="text-gray-500 text-sm mb-3">{{ p.description || 'No description' }}</p>
+          <div class="grid grid-cols-3 gap-4 text-sm">
+            <div class="bg-orange-50 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-orange-600">{{ p.requiredStamps }}</p>
+              <p class="text-gray-500 text-xs">Stamps for reward</p>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-blue-600">{{ p.configurations?.length || 0 }}</p>
+              <p class="text-gray-500 text-xs">Configurations</p>
+            </div>
+            <div class="bg-green-50 rounded-lg p-3 text-center">
+              <p class="text-lg font-bold text-green-600">{{ p.autoResetStamps ? '✓' : '✗' }}</p>
+              <p class="text-gray-500 text-xs">Auto reset</p>
+            </div>
+          </div>
+        </div>
+        <button (click)="toggleActive(p)" [class]="p.isActive ? 'bg-green-500' : 'bg-gray-300'" class="w-12 h-6 rounded-full relative ml-4 transition-colors">
+          <span [class]="p.isActive ? 'translate-x-6' : 'translate-x-0'" class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform inline-block"></span>
+        </button>
+      </div>
+    </div>
+    <p *ngIf="!programs.length" class="text-center text-gray-400 py-12">No loyalty programs yet</p>
+  </div>
+
+  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+      <div class="flex items-center justify-between p-6 border-b">
+        <h2 class="font-bold">New Loyalty Program</h2>
+        <button (click)="showForm = false">✕</button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="save()" class="p-6 space-y-4">
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Program Name *</label>
+          <input formControlName="name" class="input-field" placeholder="e.g. Stamp Card"></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea formControlName="description" class="input-field" rows="2"></textarea></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Required Stamps for Reward *</label>
+          <input formControlName="requiredStamps" type="number" class="input-field"></div>
+        <div class="flex gap-6">
+          <label class="flex items-center gap-2 text-sm"><input formControlName="isActive" type="checkbox"> Active</label>
+          <label class="flex items-center gap-2 text-sm"><input formControlName="autoResetStamps" type="checkbox"> Auto reset after reward</label>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="submit" [disabled]="saving" class="btn-primary flex-1">{{ saving ? 'Creating...' : 'Create' }}</button>
+          <button type="button" (click)="showForm = false" class="btn-secondary flex-1">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

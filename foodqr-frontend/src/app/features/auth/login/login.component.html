@@ -1,0 +1,122 @@
+<div class="min-h-screen flex">
+  <!-- Left panel – branding -->
+  <div class="hidden lg:flex lg:w-[44%] xl:w-1/2 bg-slate-900 flex-col justify-between p-12 relative overflow-hidden">
+    <!-- Decorative circles -->
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 w-80 h-80 bg-orange-600/10 rounded-full blur-3xl"></div>
+
+    <div class="relative">
+      <div class="flex items-center gap-3 mb-16">
+        <div class="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+          </svg>
+        </div>
+        <span class="text-white text-xl font-bold tracking-tight">FoodQR</span>
+      </div>
+
+      <h2 class="text-4xl xl:text-5xl font-bold text-white leading-tight">
+        The smarter way<br>to run your<br>
+        <span class="text-orange-400">restaurant</span>
+      </h2>
+      <p class="text-slate-400 mt-5 text-lg leading-relaxed">
+        QR ordering, kitchen display, loyalty programs,<br>and multi-branch management — all in one platform.
+      </p>
+
+      <!-- Feature list -->
+      <div class="mt-10 space-y-4">
+        <div *ngFor="let f of features" class="flex items-center gap-3">
+          <div class="w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+            <svg class="w-3.5 h-3.5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-slate-300 text-sm">{{ f }}</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-slate-600 text-xs relative">© 2025 FoodQR. All rights reserved.</p>
+  </div>
+
+  <!-- Right panel – form -->
+  <div class="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 bg-gray-50">
+    <div class="w-full max-w-md">
+      <!-- Mobile logo -->
+      <div class="flex items-center gap-3 mb-8 lg:hidden">
+        <div class="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"/>
+          </svg>
+        </div>
+        <span class="font-bold text-xl text-gray-900">FoodQR</span>
+      </div>
+
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Welcome back</h1>
+        <p class="text-gray-500 mt-1.5">Sign in to your account to continue</p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="space-y-5">
+            <div>
+              <label class="label">Email address</label>
+              <input formControlName="email" type="email" class="input-field"
+                placeholder="you@company.com" autocomplete="email">
+              <p *ngIf="form.get('email')?.touched && form.get('email')?.errors?.['required']" class="form-error mt-1">Email is required</p>
+              <p *ngIf="form.get('email')?.touched && form.get('email')?.errors?.['email']" class="form-error mt-1">Enter a valid email</p>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="label mb-0">Password</label>
+                <a routerLink="/auth/forgot-password" class="text-xs text-orange-600 hover:text-orange-700 font-medium">Forgot password?</a>
+              </div>
+              <div class="relative">
+                <input formControlName="password" [type]="showPassword ? 'text' : 'password'"
+                  class="input-field pr-11" placeholder="••••••••" autocomplete="current-password">
+                <button type="button" (click)="showPassword = !showPassword"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      [attr.d]="showPassword
+                        ? 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21'
+                        : 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'"/>
+                  </svg>
+                </button>
+              </div>
+              <p *ngIf="form.get('password')?.touched && form.get('password')?.errors?.['required']" class="form-error mt-1">Password is required</p>
+            </div>
+
+            <button type="submit" [disabled]="loading" class="btn-primary w-full py-3 text-base mt-2">
+              <svg *ngIf="loading" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+              {{ loading ? 'Signing in...' : 'Sign in' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <p class="text-center text-sm text-gray-500 mt-5">
+        Don't have an account?
+        <a routerLink="/auth/register" class="text-orange-600 hover:text-orange-700 font-semibold">Create one free</a>
+      </p>
+
+      <!-- Role info hint -->
+      <div class="mt-6 bg-blue-50 border border-blue-100 rounded-xl p-4">
+        <p class="text-xs text-blue-700 font-semibold mb-2 uppercase tracking-wide">Role-based access</p>
+        <div class="grid grid-cols-2 gap-1 text-xs text-blue-600">
+          <span>🔑 Admin → Full access</span>
+          <span>🏢 Branch Manager → Branch ops</span>
+          <span>👨‍🍳 Chef → Kitchen display</span>
+          <span>🧑‍💼 Waiter → Orders &amp; tables</span>
+          <span>💻 POS Operator → Point of sale</span>
+          <span>👤 Customer → Online ordering</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

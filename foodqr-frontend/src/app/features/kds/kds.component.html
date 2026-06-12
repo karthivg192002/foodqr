@@ -1,0 +1,80 @@
+<div class="min-h-screen bg-gray-900 p-4">
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
+        <span class="text-white font-bold">KDS</span>
+      </div>
+      <div>
+        <h1 class="text-white font-bold text-xl">Kitchen Display</h1>
+        <p class="text-gray-400 text-sm">Auto-refreshes every 10 seconds</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 text-green-400">
+      <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+      <span class="text-sm font-medium">Live</span>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center py-10">
+    <div class="animate-spin w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+  </div>
+
+  <div *ngIf="!loading && !orders.length" class="text-center py-20">
+    <div class="text-6xl mb-4">✅</div>
+    <p class="text-gray-400 text-lg font-medium">All caught up! No pending orders.</p>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div *ngFor="let order of orders" [ngClass]="statusColor(order.status)"
+      class="rounded-2xl border-2 p-4 flex flex-col gap-3">
+
+      <div class="flex items-center justify-between">
+        <span class="font-bold text-gray-900 text-lg">#{{ order.orderSerialNo }}</span>
+        <span class="text-xs font-semibold uppercase px-2 py-1 rounded-full"
+          [ngClass]="order.status === 'pending' ? 'bg-yellow-200 text-yellow-800' : order.status === 'accepted' ? 'bg-blue-200 text-blue-800' : order.status === 'preparing' ? 'bg-orange-200 text-orange-800' : 'bg-green-200 text-green-800'">
+          {{ order.status }}
+        </span>
+      </div>
+
+      <div class="text-xs text-gray-500 font-medium">
+        {{ order.orderType | uppercase }} · {{ order.createdAt | date:'h:mm a' }}
+      </div>
+
+      <!-- Items list -->
+      <div class="space-y-1 flex-1">
+        <div *ngFor="let item of order.items" class="flex justify-between text-sm">
+          <span class="font-medium text-gray-800">{{ item.itemName }}</span>
+          <span class="font-bold text-gray-900">x{{ item.quantity }}</span>
+        </div>
+      </div>
+
+      <!-- Special notes -->
+      <div *ngIf="order.orderNote" class="text-xs bg-white/60 rounded-lg p-2 text-gray-700 italic">
+        📝 {{ order.orderNote }}
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-2 mt-2">
+        <button *ngIf="order.status === OrderStatus.PENDING"
+          (click)="updateStatus(order.id, OrderStatus.ACCEPTED)"
+          class="flex-1 bg-blue-500 text-white text-sm font-semibold py-2 rounded-xl">
+          Accept
+        </button>
+        <button *ngIf="order.status === OrderStatus.ACCEPTED"
+          (click)="updateStatus(order.id, OrderStatus.PREPARING)"
+          class="flex-1 bg-orange-500 text-white text-sm font-semibold py-2 rounded-xl">
+          Start Preparing
+        </button>
+        <button *ngIf="order.status === OrderStatus.PREPARING"
+          (click)="updateStatus(order.id, OrderStatus.PREPARED)"
+          class="flex-1 bg-green-500 text-white text-sm font-semibold py-2 rounded-xl">
+          Mark Ready
+        </button>
+        <button *ngIf="order.status === OrderStatus.PREPARED"
+          class="flex-1 bg-gray-300 text-gray-600 text-sm font-semibold py-2 rounded-xl cursor-default">
+          Ready for Pickup
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

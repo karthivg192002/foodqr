@@ -1,0 +1,38 @@
+<div class="px-4 py-4">
+  <h1 class="font-bold text-xl text-gray-900 mb-5">My Profile</h1>
+
+  <div class="bg-white rounded-2xl p-5 shadow-sm">
+    <div class="flex items-center gap-4 mb-5">
+      <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-3xl">
+        👤
+      </div>
+      <div>
+        <h2 class="font-bold text-gray-900">{{ user.name }}</h2>
+        <p class="text-sm text-gray-500">{{ user.email }}</p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <input [(ngModel)]="user.name" type="text" class="input-field w-full">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input [(ngModel)]="user.email" type="email" class="input-field w-full">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+        <input [(ngModel)]="user.phone" type="tel" class="input-field w-full">
+      </div>
+
+      <button (click)="save()" [disabled]="saving" class="btn-primary w-full py-3">
+        {{ saving ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+  </div>
+
+  <button (click)="logout()" class="mt-4 w-full py-3 bg-red-50 text-red-600 rounded-2xl font-semibold">
+    Logout
+  </button>
+</div>

@@ -1,0 +1,83 @@
+<div>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="page-title">Offers & Banners</h1>
+    <button (click)="activeTab === 'offers' ? openNewOffer() : openNewBanner()" class="btn-primary flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Add {{ activeTab === 'offers' ? 'Offer' : 'Banner' }}
+    </button>
+  </div>
+
+  <div class="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
+    <button (click)="activeTab = 'offers'" [class]="activeTab === 'offers' ? 'bg-white shadow text-gray-900' : 'text-gray-500'" class="px-5 py-2 rounded-lg text-sm font-medium">Offers</button>
+    <button (click)="activeTab = 'banners'" [class]="activeTab === 'banners' ? 'bg-white shadow text-gray-900' : 'text-gray-500'" class="px-5 py-2 rounded-lg text-sm font-medium">Banners</button>
+  </div>
+
+  <!-- Offers -->
+  <div *ngIf="activeTab === 'offers'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div *ngFor="let offer of offers" class="card">
+      <img *ngIf="offer.image" [src]="offer.image" class="w-full h-32 object-cover rounded-lg mb-3">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 class="font-semibold text-gray-900">{{ offer.title }}</h3>
+          <p class="text-sm text-gray-500 mt-0.5">{{ offer.description || 'No description' }}</p>
+        </div>
+        <span *ngIf="offer.badgeText" [style.background-color]="offer.badgeColor" class="text-white text-xs px-2 py-1 rounded">{{ offer.badgeText }}</span>
+      </div>
+      <div class="flex items-center justify-between mt-3">
+        <span [class]="offer.status ? 'badge-success' : 'badge-gray'">{{ offer.status ? 'Active' : 'Inactive' }}</span>
+        <button (click)="deleteOffer(offer.id)" class="text-red-500 hover:text-red-600 text-xs">Delete</button>
+      </div>
+    </div>
+    <p *ngIf="!offers.length" class="col-span-full text-center text-gray-400 py-12">No offers yet</p>
+  </div>
+
+  <!-- Banners -->
+  <div *ngIf="activeTab === 'banners'" class="space-y-4">
+    <div *ngFor="let banner of banners" class="card flex gap-4">
+      <img *ngIf="banner.image" [src]="banner.image" class="w-32 h-20 object-cover rounded-lg flex-shrink-0">
+      <div class="flex-1">
+        <h3 class="font-semibold text-gray-900">{{ banner.title }}</h3>
+        <p class="text-sm text-gray-500">{{ banner.subtitle }}</p>
+        <p *ngIf="banner.linkUrl" class="text-xs text-blue-500 mt-1">{{ banner.linkUrl }}</p>
+      </div>
+      <div class="flex flex-col items-end gap-2">
+        <span [class]="banner.status ? 'badge-success' : 'badge-gray'">{{ banner.status ? 'Active' : 'Inactive' }}</span>
+        <button (click)="deleteBanner(banner.id)" class="text-red-500 hover:text-red-600 text-xs">Delete</button>
+      </div>
+    </div>
+    <p *ngIf="!banners.length" class="text-center text-gray-400 py-12">No banners yet</p>
+  </div>
+
+  <!-- Form Modal -->
+  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+      <div class="flex items-center justify-between p-6 border-b">
+        <h2 class="font-bold">New {{ formType === 'offer' ? 'Offer' : 'Banner' }}</h2>
+        <button (click)="showForm = false">✕</button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+          <input [(ngModel)]="formData.title" class="input-field"></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea [(ngModel)]="formData.description" class="input-field" rows="2"></textarea></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+          <input [(ngModel)]="formData.image" class="input-field" placeholder="https://..."></div>
+        <ng-container *ngIf="formType === 'offer'">
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Badge Text</label>
+              <input [(ngModel)]="formData.badgeText" class="input-field"></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Badge Color</label>
+              <input [(ngModel)]="formData.badgeColor" type="color" class="input-field h-10"></div>
+          </div>
+        </ng-container>
+        <label class="flex items-center gap-2 text-sm">
+          <input [(ngModel)]="formData.status" type="checkbox"> Active
+        </label>
+        <div class="flex gap-3">
+          <button (click)="save()" [disabled]="saving" class="btn-primary flex-1">{{ saving ? 'Saving...' : 'Create' }}</button>
+          <button (click)="showForm = false" class="btn-secondary flex-1">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

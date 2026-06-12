@@ -1,0 +1,54 @@
+<div class="px-4 py-6">
+  <div *ngIf="loading" class="flex justify-center py-10">
+    <div class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+  </div>
+
+  <ng-container *ngIf="!loading && order">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <span class="text-4xl">
+          {{ order.status === 'delivered' ? '🎉' : order.status === 'preparing' ? '👨‍🍳' : '📋' }}
+        </span>
+      </div>
+      <h1 class="text-xl font-bold text-gray-900">Order #{{ order.orderSerialNo }}</h1>
+      <p class="text-gray-500 text-sm mt-1">We're updating your order status in real-time</p>
+    </div>
+
+    <!-- Status Timeline -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm mb-5">
+      <div class="space-y-4">
+        <div *ngFor="let step of statusSteps; let last = last" class="flex gap-4">
+          <div class="flex flex-col items-center">
+            <div [class]="isCompleted(step) ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-400'"
+              class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg *ngIf="isCompleted(step)" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <span *ngIf="!isCompleted(step)" class="text-xs font-bold">{{ statusSteps.indexOf(step) + 1 }}</span>
+            </div>
+            <div *ngIf="!last" [class]="isCompleted(statusSteps[statusSteps.indexOf(step) + 1]) ? 'bg-orange-400' : 'bg-gray-200'" class="w-0.5 flex-1 mt-1 min-h-[1.5rem]"></div>
+          </div>
+          <div class="pb-4">
+            <p [class]="isCompleted(step) ? 'text-gray-900 font-semibold' : 'text-gray-400'" class="text-sm">
+              {{ statusLabel(step) }}
+            </p>
+            <p *ngIf="order.status === step" class="text-xs text-orange-500 font-medium mt-0.5">Current status</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order summary -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm">
+      <h3 class="font-semibold text-gray-900 mb-3">Order Summary</h3>
+      <div class="space-y-2">
+        <div *ngFor="let item of order.items" class="flex justify-between text-sm">
+          <span class="text-gray-700">{{ item.itemName }} x{{ item.quantity }}</span>
+          <span class="font-medium">${{ item.subtotal | number:'1.2-2' }}</span>
+        </div>
+        <div class="flex justify-between font-bold text-base pt-2 border-t">
+          <span>Total</span><span class="text-orange-600">${{ order.total | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

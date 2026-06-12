@@ -1,0 +1,117 @@
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { LoyaltyProgram } from './entities/loyalty-program.entity';
+import { LoyaltyConfiguration } from './entities/loyalty-configuration.entity';
+import { LoyaltyStamp } from './entities/loyalty-stamp.entity';
+import { LoyaltyReward } from './entities/loyalty-reward.entity';
+import { User } from '../users/entities/user.entity';
+import { LoyaltyStampCalculationType, LoyaltyRewardType } from '../../common/enums';
+
+@Injectable()
+export class LoyaltyService {
+  constructor(
+    @InjectRepository(LoyaltyProgram) private programRepo: Repository<LoyaltyProgram>,
+    @InjectRepository(LoyaltyConfiguration) private configRepo: Repository<LoyaltyConfiguration>,
+    @InjectRepository(LoyaltyStamp) private stampRepo: Repository<LoyaltyStamp>,
+    @InjectRepository(LoyaltyReward) private rewardRepo: Repository<LoyaltyReward>,
+    @InjectRepository(User) private userRepo: Repository<User>,
+  ) {}
+
+  async getPrograms() {
+    return this.programRepo.find({ relations: ['configurations'], order: { createdAt: 'DESC' } });
+  }
+
+  async getActiveProgram() {
+    return this.programRepo.findOne({
+      where: { isActive: true },
+      relations: ['configurations'],
+    });
+  }
+
+  async createProgram(data: Partial<LoyaltyProgram>) {
+    const program = this.programRepo.create(data);
+    return this.programRepo.save(program);
+  }
+
+  async updateProgram(id: string, data: Partial<LoyaltyProgram>) {
+    await this.programRepo.update(id, data);
+    return this.programRepo.findOne({ where: { id }, relations: ['configurations'] });
+  }
+
+  async addConfiguration(programId: string, data: Partial<LoyaltyConfiguration>) {
+    const program = await this.programRepo.findOne({ where: { id: programId } });
+    if (!program) throw new NotFoundException('Program not found');
+    const config = this.configRepo.create({ ...data, loyaltyProgramId: programId });
+    return this.configRepo.save(config);
+  }
+
+  async getUserDashboard(userId: string) {
+    const program = await this.getActiveProgram();
+    if (!program) return { program: null, stamps: 0, rewards: [], nextRewardAt: null };
+
+    const stamps = await this.stampRepo.sum('stampCount', {
+      userId,
+      loyaltyProgramId: program.id,
+    });
+
+    const pendingRewards = await this.rewardRepo.find({
+      where: { userId, loyaltyProgramId: program.id, isRedeemed: false },
+    });
+
+    return {
+      program,
+      totalStamps: stamps || 0,
+      pendingRewards,
+      nextRewardAt: program.requiredStamps,
+      progressPercent: Math.min(100, Math.round(((stamps || 0) / program.requiredStamps) * 100)),
+    };
+  }
+
+  async earnStamps(userId: string, orderId: string, orderAmount: number) {
+    const program = await this.getActiveProgram();
+    if (!program) return;
+
+    for (const config of program.configurations) {
+      let stamps = 0;
+      if (config.calculationType === LoyaltyStampCalculationType.FIXED_PER_ORDER) {
+        stamps = config.stampsPerThreshold;
+      } else if (config.calculationType === LoyaltyStampCalculationType.ORDER_AMOUNT) {
+        stamps = Math.floor(orderAmount / config.thresholdValue) * config.stampsPerThreshold;
+      } else if (config.calculationType === LoyaltyStampCalculationType.PERCENTAGE_BASED) {
+        stamps = Math.floor((orderAmount * config.thresholdValue) / 100);
+      }
+
+      if (stamps > 0) {
+        const stamp = this.stampRepo.create({
+          userId,
+          orderId,
+          loyaltyProgramId: program.id,
+          stampCount: stamps,
+          sourceType: 'order',
+        });
+        await this.stampRepo.save(stamp);
+      }
+    }
+
+    const totalStamps = await this.stampRepo.sum('stampCount', { userId, loyaltyProgramId: program.id });
+    if (totalStamps >= program.requiredStamps) {
+      const reward = this.rewardRepo.create({ userId, loyaltyProgramId: program.id });
+      await this.rewardRepo.save(reward);
+      if (program.autoResetStamps) {
+        await this.stampRepo.delete({ userId, loyaltyProgramId: program.id });
+      }
+    }
+  }
+
+  async redeemReward(userId: string, rewardId: string, orderId?: string) {
+    const reward = await this.rewardRepo.findOne({ where: { id: rewardId, userId, isRedeemed: false } });
+    if (!reward) throw new NotFoundException('Reward not found or already redeemed');
+    await this.rewardRepo.update(rewardId, { isRedeemed: true, redeemedAt: new Date(), redeemedOrderId: orderId });
+    return { message: 'Reward redeemed successfully' };
+  }
+
+  async getCustomerStamps(userId: string) {
+    return this.stampRepo.find({ where: { userId }, order: { earnedAt: 'DESC' }, take: 50 });
+  }
+}

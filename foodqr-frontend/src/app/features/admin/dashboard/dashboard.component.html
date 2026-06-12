@@ -1,0 +1,204 @@
+<!-- Loading -->
+<div *ngIf="loading" class="flex items-center justify-center h-64">
+  <div class="w-10 h-10 border-[3px] border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+</div>
+
+<div *ngIf="!loading" class="space-y-6">
+  <!-- Page header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Here's what's happening at your restaurant today</p>
+    </div>
+    <div class="flex items-center gap-2 text-sm text-gray-500 bg-white border border-gray-200 rounded-lg px-3 py-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      {{ today | date:'EEEE, MMM d, y' }}
+    </div>
+  </div>
+
+  <!-- Stats cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+    <!-- Total Revenue -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+          <p class="text-3xl font-bold text-gray-900 mt-1">${{ stats?.totalRevenue | number:'1.0-0' }}</p>
+          <p class="text-xs text-emerald-600 font-medium mt-1.5 flex items-center gap-1">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+            All time
+          </p>
+        </div>
+        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Orders -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Total Orders</p>
+          <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats?.totalOrders | number }}</p>
+          <p class="text-xs text-orange-600 font-medium mt-1.5">{{ stats?.todayOrders || 0 }} today</p>
+        </div>
+        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customers -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Customers</p>
+          <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats?.totalCustomers | number }}</p>
+          <p class="text-xs text-blue-600 font-medium mt-1.5">Registered users</p>
+        </div>
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Orders -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Pending Orders</p>
+          <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats?.pendingOrders | number }}</p>
+          <p class="text-xs text-amber-600 font-medium mt-1.5">Awaiting action</p>
+        </div>
+        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secondary stats row -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
+      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Today Revenue</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">${{ stats?.todayRevenue | number:'1.0-0' }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
+      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">This Month</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">${{ stats?.monthRevenue | number:'1.0-0' }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
+      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Menu Items</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">{{ stats?.totalItems | number }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
+      <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Dining Tables</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">{{ stats?.totalTables | number }}</p>
+    </div>
+  </div>
+
+  <!-- Revenue by type + Recent orders -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Revenue by order type -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+      <div class="px-5 py-4 border-b border-gray-100">
+        <h3 class="font-semibold text-gray-900">Revenue by Order Type</h3>
+      </div>
+      <div class="p-5 space-y-3">
+        <div *ngFor="let type of salesByType" class="flex items-center gap-3">
+          <div [ngClass]="getTypeColor(type.type)" class="w-3 h-3 rounded-full flex-shrink-0"></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700 capitalize">{{ type.type?.replace('_', ' ') }}</span>
+              <span class="text-sm font-semibold text-gray-900">${{ type.revenue | number:'1.0-0' }}</span>
+            </div>
+            <div class="h-1.5 bg-gray-100 rounded-full">
+              <div [ngClass]="getTypeColor(type.type)"
+                class="h-1.5 rounded-full transition-all"
+                [style.width]="getTypePercent(type.revenue) + '%'"></div>
+            </div>
+          </div>
+        </div>
+        <p *ngIf="!salesByType.length" class="text-sm text-gray-400 text-center py-3">No data yet</p>
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="font-semibold text-gray-900">Recent Orders</h3>
+        <a routerLink="/admin/orders" class="text-sm text-orange-500 hover:text-orange-600 font-medium">View all →</a>
+      </div>
+      <div class="divide-y divide-gray-50">
+        <div *ngFor="let order of recentOrders" class="px-5 py-3.5 flex items-center gap-4">
+          <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900">#{{ order.orderSerialNo }}</p>
+            <p class="text-xs text-gray-500">{{ order.user?.name || 'Guest' }} · <span class="capitalize">{{ order.orderType?.replace('_', ' ') }}</span></p>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <p class="text-sm font-bold text-gray-900">${{ order.total | number:'1.2-2' }}</p>
+            <span [ngClass]="getOrderStatusBadge(order.status)" class="capitalize">{{ order.status }}</span>
+          </div>
+        </div>
+        <div *ngIf="!recentOrders.length" class="px-5 py-8 text-center text-sm text-gray-400">No orders yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top selling items -->
+  <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-900">Top Selling Items</h3>
+      <a routerLink="/admin/reports" class="text-sm text-orange-500 hover:text-orange-600 font-medium">Full report →</a>
+    </div>
+    <div class="p-5">
+      <div *ngIf="!topItems.length" class="text-center text-sm text-gray-400 py-4">No sales data yet</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div *ngFor="let item of topItems; let i = index" class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <span class="w-7 h-7 bg-orange-100 rounded-lg text-xs font-bold text-orange-600 flex items-center justify-center flex-shrink-0">#{{ i + 1 }}</span>
+          <div class="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+            <img *ngIf="item.item_thumbImage" [src]="item.item_thumbImage" class="w-full h-full object-cover">
+            <div *ngIf="!item.item_thumbImage" class="w-full h-full flex items-center justify-center text-lg">🍽️</div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-semibold text-gray-900 truncate">{{ item.item_name }}</p>
+            <p class="text-xs text-gray-500">{{ item.totalQuantity }} sold</p>
+            <p class="text-xs font-bold text-emerald-600">${{ item.totalRevenue | number:'1.0-0' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <a routerLink="/admin/orders" class="bg-white rounded-xl border border-gray-200 p-4 text-center hover:border-orange-300 hover:shadow transition-all group">
+      <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:bg-orange-500 transition-colors">
+        <svg class="w-5 h-5 text-orange-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+      </div>
+      <p class="text-xs font-semibold text-gray-700">View Orders</p>
+    </a>
+    <a routerLink="/kds" class="bg-white rounded-xl border border-gray-200 p-4 text-center hover:border-purple-300 hover:shadow transition-all group">
+      <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:bg-purple-500 transition-colors">
+        <svg class="w-5 h-5 text-purple-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      </div>
+      <p class="text-xs font-semibold text-gray-700">Kitchen Display</p>
+    </a>
+    <a routerLink="/pos" class="bg-white rounded-xl border border-gray-200 p-4 text-center hover:border-blue-300 hover:shadow transition-all group">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-500 transition-colors">
+        <svg class="w-5 h-5 text-blue-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      </div>
+      <p class="text-xs font-semibold text-gray-700">Point of Sale</p>
+    </a>
+    <a routerLink="/admin/reports" class="bg-white rounded-xl border border-gray-200 p-4 text-center hover:border-emerald-300 hover:shadow transition-all group">
+      <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:bg-emerald-500 transition-colors">
+        <svg class="w-5 h-5 text-emerald-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      </div>
+      <p class="text-xs font-semibold text-gray-700">Reports</p>
+    </a>
+  </div>
+</div>

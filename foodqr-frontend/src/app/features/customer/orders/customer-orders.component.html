@@ -1,0 +1,67 @@
+<div class="px-4 py-4">
+  <h1 class="font-bold text-xl text-gray-900 mb-4">My Orders</h1>
+
+  <div *ngIf="loading" class="flex justify-center py-10">
+    <div class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+  </div>
+
+  <div *ngIf="!loading && !orders.length" class="text-center py-16">
+    <div class="text-6xl mb-4">📋</div>
+    <p class="text-gray-500 font-medium">No orders yet</p>
+    <a routerLink="/customer/home" class="btn-primary inline-block mt-4 px-6">Order Now</a>
+  </div>
+
+  <div *ngIf="!loading" class="space-y-3">
+    <div *ngFor="let order of orders" class="bg-white rounded-2xl p-4 shadow-sm">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="font-bold text-gray-900">#{{ order.orderSerialNo }}</p>
+          <p class="text-xs text-gray-400 mt-0.5">{{ order.createdAt | date:'dd MMM yyyy, h:mm a' }}</p>
+        </div>
+        <span [ngClass]="statusClass(order.status)" class="badge text-xs capitalize">{{ order.status }}</span>
+      </div>
+      <div class="mt-3 border-t pt-3">
+        <p class="text-sm text-gray-500">{{ order.orderType | uppercase }} · {{ order.items?.length || 0 }} items</p>
+        <p class="font-bold text-orange-600 mt-1">${{ order.total | number:'1.2-2' }}</p>
+      </div>
+      <button (click)="trackOrder(order)" class="mt-3 w-full text-center text-sm text-orange-500 font-medium border border-orange-200 rounded-xl py-2">
+        Track Order
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div *ngIf="selected" class="fixed inset-0 z-50 flex items-end justify-center bg-black/50" (click)="selected = null">
+  <div class="bg-white rounded-t-3xl w-full max-w-lg p-5 max-h-[80vh] overflow-y-auto" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-lg">Order #{{ selected.orderSerialNo }}</h3>
+      <button (click)="selected = null" class="text-gray-400">✕</button>
+    </div>
+
+    <!-- Status Timeline -->
+    <div class="flex items-center gap-1 mb-4 overflow-x-auto">
+      <ng-container *ngFor="let step of ['pending','accepted','preparing','prepared','delivered']">
+        <div class="flex flex-col items-center flex-shrink-0">
+          <div [ngClass]="['pending','accepted','preparing','prepared','out_for_delivery','delivered'].indexOf(selected.status) >= ['pending','accepted','preparing','prepared','out_for_delivery','delivered'].indexOf(step) ? 'bg-orange-500' : 'bg-gray-200'"
+            class="w-6 h-6 rounded-full flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 capitalize">{{ step }}</p>
+        </div>
+        <div *ngIf="step !== 'delivered'" class="flex-1 h-0.5 bg-gray-200 mb-4"></div>
+      </ng-container>
+    </div>
+
+    <!-- Items -->
+    <div class="space-y-2 mt-4">
+      <div *ngFor="let item of selected.items" class="flex items-center justify-between text-sm">
+        <span class="text-gray-700">{{ item.itemName }} x{{ item.quantity }}</span>
+        <span class="font-medium text-gray-900">${{ item.subtotal | number:'1.2-2' }}</span>
+      </div>
+    </div>
+    <div class="border-t mt-3 pt-3 flex justify-between font-bold">
+      <span>Total</span><span class="text-orange-600">${{ selected.total | number:'1.2-2' }}</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,93 @@
+<div>
+  <h1 class="page-title mb-6">Reports & Analytics</h1>
+
+  <!-- Date Range Filter -->
+  <div class="card mb-6 flex flex-wrap gap-4 items-end">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+      <input [(ngModel)]="startDate" type="date" class="input-field w-auto">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+      <input [(ngModel)]="endDate" type="date" class="input-field w-auto">
+    </div>
+    <button (click)="loadAll()" class="btn-primary">Apply</button>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+    <div class="card text-center">
+      <p class="text-3xl font-bold text-orange-600">${{ getTotalRevenue() | number:'1.0-0' }}</p>
+      <p class="text-gray-500 mt-1">Total Revenue</p>
+    </div>
+    <div class="card text-center">
+      <p class="text-3xl font-bold text-blue-600">{{ getTotalOrders() }}</p>
+      <p class="text-gray-500 mt-1">Total Orders</p>
+    </div>
+    <div class="card text-center">
+      <p class="text-3xl font-bold text-green-600">{{ customerStats?.total || 0 }}</p>
+      <p class="text-gray-500 mt-1">Total Customers</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Top Items -->
+    <div class="card">
+      <h2 class="section-title mb-4">Top Selling Items</h2>
+      <div class="space-y-3">
+        <div *ngFor="let item of topItems; let i = index" class="flex items-center gap-3">
+          <span class="w-7 h-7 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm font-bold">{{ i+1 }}</span>
+          <div class="flex-1">
+            <p class="font-medium text-gray-900 text-sm">{{ item.item_name }}</p>
+            <div class="h-1.5 bg-gray-100 rounded-full mt-1">
+              <div class="h-1.5 bg-orange-400 rounded-full" [style.width]="(item.totalQuantity / topItems[0]?.totalQuantity * 100) + '%'"></div>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-semibold">{{ item.totalQuantity }}</p>
+            <p class="text-xs text-gray-400">sold</p>
+          </div>
+        </div>
+        <p *ngIf="!topItems.length" class="text-gray-400 text-center py-4">No data</p>
+      </div>
+    </div>
+
+    <!-- Revenue by Order Type -->
+    <div class="card">
+      <h2 class="section-title mb-4">Revenue by Order Type</h2>
+      <div class="space-y-3">
+        <div *ngFor="let r of revenueByType" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div>
+            <p class="font-medium text-gray-900 capitalize">{{ r.type?.replace('_', ' ') }}</p>
+            <p class="text-sm text-gray-500">{{ r.count }} orders</p>
+          </div>
+          <p class="text-lg font-bold text-gray-900">${{ r.revenue | number:'1.0-0' }}</p>
+        </div>
+        <p *ngIf="!revenueByType.length" class="text-gray-400 text-center py-4">No data</p>
+      </div>
+    </div>
+
+    <!-- Top Customers -->
+    <div class="card lg:col-span-2">
+      <h2 class="section-title mb-4">Top Customers</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b">
+            <tr>
+              <th class="px-4 py-2 text-left text-gray-600">Customer</th>
+              <th class="px-4 py-2 text-center text-gray-600">Orders</th>
+              <th class="px-4 py-2 text-right text-gray-600">Total Spent</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of customerStats?.topCustomers" class="border-b border-gray-50">
+              <td class="px-4 py-2 font-medium">{{ c.user_name }}<br><span class="text-xs text-gray-400">{{ c.user_email }}</span></td>
+              <td class="px-4 py-2 text-center">{{ c.orderCount }}</td>
+              <td class="px-4 py-2 text-right font-semibold">${{ c.totalSpent | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

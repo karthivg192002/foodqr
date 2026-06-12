@@ -1,0 +1,409 @@
+<div>
+  <!-- Page header -->
+  <div class="mb-6">
+    <h1 class="page-title">Settings</h1>
+    <p class="text-sm text-gray-500 mt-1">Configure your restaurant system preferences</p>
+  </div>
+
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <div *ngIf="!loading" class="flex flex-col lg:flex-row gap-6">
+    <!-- ── Sidebar tabs ── -->
+    <aside class="lg:w-56 flex-shrink-0">
+      <nav class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <ul>
+          <li *ngFor="let tab of tabs; let last = last">
+            <button (click)="activeTab = tab.key"
+              [class]="activeTab === tab.key ? 'bg-orange-50 text-orange-700 border-r-4 border-orange-500 font-semibold' : 'text-gray-600 hover:bg-gray-50'"
+              [class.border-b]="!last"
+              class="w-full flex items-center gap-3 px-4 py-3.5 text-sm transition-all border-gray-100 text-left">
+              <!-- building -->
+              <svg *ngIf="tab.icon === 'building'" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+              <!-- cog -->
+              <svg *ngIf="tab.icon === 'cog'" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <!-- orders -->
+              <svg *ngIf="tab.icon === 'orders'" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+              <!-- bell -->
+              <svg *ngIf="tab.icon === 'bell'" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <!-- mail -->
+              <svg *ngIf="tab.icon === 'mail'" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              <!-- card -->
+              <svg *ngIf="tab.icon === 'card'" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+              </svg>
+              <!-- sms -->
+              <svg *ngIf="tab.icon === 'sms'" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+              {{ tab.label }}
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- ── Content panel ── -->
+    <div class="flex-1 min-w-0">
+
+      <!-- ══ COMPANY ══ -->
+      <div *ngIf="activeTab === 'company'" class="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="section-title">Company Information</h2>
+          <p class="text-sm text-gray-500 mt-0.5">Basic details about your business</p>
+        </div>
+        <div class="px-6 py-5 space-y-4 max-w-2xl">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+            <input [(ngModel)]="companySettings['company_name']" class="input-field" placeholder="Your Restaurant Name">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input [(ngModel)]="companySettings['company_email']" type="email" class="input-field" placeholder="info@restaurant.com">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input [(ngModel)]="companySettings['company_phone']" class="input-field" placeholder="+1 234 567 8900">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <input [(ngModel)]="companySettings['company_address']" class="input-field" placeholder="Street, City, Country">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
+              <input [(ngModel)]="companySettings['company_logo']" class="input-field" placeholder="https://...">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Favicon URL</label>
+              <input [(ngModel)]="companySettings['company_favicon']" class="input-field" placeholder="https://...">
+            </div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
+          <button (click)="save('company')" [disabled]="saving" class="btn-primary">{{ saving ? 'Saving...' : 'Save Company Settings' }}</button>
+        </div>
+      </div>
+
+      <!-- ══ BUSINESS ══ -->
+      <div *ngIf="activeTab === 'business'" class="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="section-title">Business Settings</h2>
+          <p class="text-sm text-gray-500 mt-0.5">Timezone, currency and operational defaults</p>
+        </div>
+        <div class="px-6 py-5 space-y-4 max-w-2xl">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+            <input [(ngModel)]="businessSettings['timezone']" class="input-field" placeholder="UTC">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Default Currency Code</label>
+              <input [(ngModel)]="businessSettings['currency_code']" class="input-field" placeholder="USD">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Default Tax Rate (%)</label>
+              <input [(ngModel)]="businessSettings['default_tax_rate']" type="number" step="0.01" class="input-field" placeholder="0">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Minimum Order Amount</label>
+              <input [(ngModel)]="businessSettings['min_order_amount']" type="number" step="0.01" class="input-field" placeholder="0.00">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Delivery Charge</label>
+              <input [(ngModel)]="businessSettings['delivery_charge']" type="number" step="0.01" class="input-field" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
+          <button (click)="save('business')" [disabled]="saving" class="btn-primary">{{ saving ? 'Saving...' : 'Save Business Settings' }}</button>
+        </div>
+      </div>
+
+      <!-- ══ ORDERS ══ -->
+      <div *ngIf="activeTab === 'orders'" class="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="section-title">Order Configuration</h2>
+          <p class="text-sm text-gray-500 mt-0.5">Enable or disable order types and advance ordering</p>
+        </div>
+        <div class="px-6 py-5 space-y-4 max-w-2xl">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <input type="checkbox" [(ngModel)]="ordersSettings['enable_delivery']" class="w-4 h-4 accent-orange-500">
+              <div>
+                <p class="text-sm font-medium text-gray-900">Delivery</p>
+                <p class="text-xs text-gray-400">Accept delivery orders</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <input type="checkbox" [(ngModel)]="ordersSettings['enable_takeaway']" class="w-4 h-4 accent-orange-500">
+              <div>
+                <p class="text-sm font-medium text-gray-900">Takeaway</p>
+                <p class="text-xs text-gray-400">Accept takeaway orders</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <input type="checkbox" [(ngModel)]="ordersSettings['enable_dining_table']" class="w-4 h-4 accent-orange-500">
+              <div>
+                <p class="text-sm font-medium text-gray-900">Dine In</p>
+                <p class="text-xs text-gray-400">Dining table orders</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <input type="checkbox" [(ngModel)]="ordersSettings['enable_pos']" class="w-4 h-4 accent-orange-500">
+              <div>
+                <p class="text-sm font-medium text-gray-900">POS</p>
+                <p class="text-xs text-gray-400">Point of sale terminal</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <input type="checkbox" [(ngModel)]="ordersSettings['enable_advance_orders']" class="w-4 h-4 accent-orange-500">
+              <div>
+                <p class="text-sm font-medium text-gray-900">Advance Orders</p>
+                <p class="text-xs text-gray-400">Allow future scheduling</p>
+              </div>
+            </label>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Advance Order Days (max)</label>
+            <input [(ngModel)]="ordersSettings['advance_order_days']" type="number" min="1" class="input-field w-40" placeholder="7">
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
+          <button (click)="save('orders')" [disabled]="saving" class="btn-primary">{{ saving ? 'Saving...' : 'Save Order Settings' }}</button>
+        </div>
+      </div>
+
+      <!-- ══ NOTIFICATIONS ══ -->
+      <div *ngIf="activeTab === 'notifications'" class="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="section-title">Notification Settings</h2>
+          <p class="text-sm text-gray-500 mt-0.5">Control how alerts and notifications are sent</p>
+        </div>
+        <div class="px-6 py-5 space-y-4 max-w-2xl">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <input type="checkbox" [(ngModel)]="notificationsSettings['enable_push']" class="w-4 h-4 accent-orange-500">
+              <div>
+                <p class="text-sm font-medium text-gray-900">Push Notifications</p>
+                <p class="text-xs text-gray-400">Browser push alerts</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <input type="checkbox" [(ngModel)]="notificationsSettings['enable_email']" class="w-4 h-4 accent-orange-500">
+              <div>
+                <p class="text-sm font-medium text-gray-900">Email Notifications</p>
+                <p class="text-xs text-gray-400">Order and system emails</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+              <input type="checkbox" [(ngModel)]="notificationsSettings['enable_sms']" class="w-4 h-4 accent-orange-500">
+              <div>
+                <p class="text-sm font-medium text-gray-900">SMS Notifications</p>
+                <p class="text-xs text-gray-400">Text message alerts</p>
+              </div>
+            </label>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Admin Notification Email</label>
+            <input [(ngModel)]="notificationsSettings['admin_email']" type="email" class="input-field" placeholder="admin@restaurant.com">
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
+          <button (click)="save('notifications')" [disabled]="saving" class="btn-primary">{{ saving ? 'Saving...' : 'Save Notification Settings' }}</button>
+        </div>
+      </div>
+
+      <!-- ══ MAIL ══ -->
+      <div *ngIf="activeTab === 'mail'" class="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="section-title">Email / SMTP Configuration</h2>
+          <p class="text-sm text-gray-500 mt-0.5">Configure outgoing email delivery settings</p>
+        </div>
+        <div class="px-6 py-5 space-y-4 max-w-2xl">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Host</label>
+              <input [(ngModel)]="mailSettings['mail_host']" class="input-field" placeholder="smtp.mailgun.org">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">SMTP Port</label>
+              <input [(ngModel)]="mailSettings['mail_port']" class="input-field" placeholder="587">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <input [(ngModel)]="mailSettings['mail_user']" class="input-field">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input [(ngModel)]="mailSettings['mail_pass']" type="password" class="input-field">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">From Email</label>
+              <input [(ngModel)]="mailSettings['mail_from_email']" type="email" class="input-field" placeholder="no-reply@restaurant.com">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">From Name</label>
+              <input [(ngModel)]="mailSettings['mail_from_name']" class="input-field" placeholder="FoodQR Restaurant">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Encryption</label>
+            <select [(ngModel)]="mailSettings['mail_encryption']" class="input-field">
+              <option value="">None</option>
+              <option value="tls">TLS</option>
+              <option value="ssl">SSL</option>
+            </select>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
+          <button (click)="save('mail')" [disabled]="saving" class="btn-primary">{{ saving ? 'Saving...' : 'Save Mail Settings' }}</button>
+        </div>
+      </div>
+
+      <!-- ══ PAYMENT ══ -->
+      <div *ngIf="activeTab === 'payment'" class="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="section-title">Payment Gateway Configuration</h2>
+          <p class="text-sm text-gray-500 mt-0.5">Enter API keys for your payment providers</p>
+        </div>
+        <div class="px-6 py-5 space-y-6 max-w-2xl">
+          <!-- Stripe -->
+          <div>
+            <p class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-violet-100 text-violet-700 rounded text-xs font-bold flex items-center justify-center">S</span>
+              Stripe
+            </p>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Publishable Key</label>
+                <input [(ngModel)]="paymentSettings['stripe_key']" class="input-field" placeholder="pk_live_...">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Secret Key</label>
+                <input [(ngModel)]="paymentSettings['stripe_secret']" type="password" class="input-field" placeholder="sk_live_...">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Webhook Secret</label>
+                <input [(ngModel)]="paymentSettings['stripe_webhook']" type="password" class="input-field" placeholder="whsec_...">
+              </div>
+            </div>
+          </div>
+          <div class="border-t border-gray-100"></div>
+          <!-- PayPal -->
+          <div>
+            <p class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-blue-100 text-blue-700 rounded text-xs font-bold flex items-center justify-center">P</span>
+              PayPal
+            </p>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Client ID</label>
+                <input [(ngModel)]="paymentSettings['paypal_client_id']" class="input-field">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Secret</label>
+                <input [(ngModel)]="paymentSettings['paypal_secret']" type="password" class="input-field">
+              </div>
+            </div>
+          </div>
+          <div class="border-t border-gray-100"></div>
+          <!-- Razorpay -->
+          <div>
+            <p class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-teal-100 text-teal-700 rounded text-xs font-bold flex items-center justify-center">R</span>
+              Razorpay
+            </p>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Key ID</label>
+                <input [(ngModel)]="paymentSettings['razorpay_key']" class="input-field">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Key Secret</label>
+                <input [(ngModel)]="paymentSettings['razorpay_secret']" type="password" class="input-field">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
+          <button (click)="save('payment')" [disabled]="saving" class="btn-primary">{{ saving ? 'Saving...' : 'Save Payment Settings' }}</button>
+        </div>
+      </div>
+
+      <!-- ══ SMS ══ -->
+      <div *ngIf="activeTab === 'sms'" class="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div class="px-6 py-5 border-b border-gray-100">
+          <h2 class="section-title">SMS Configuration</h2>
+          <p class="text-sm text-gray-500 mt-0.5">Configure SMS providers for order notifications</p>
+        </div>
+        <div class="px-6 py-5 space-y-6 max-w-2xl">
+          <!-- Twilio -->
+          <div>
+            <p class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-red-100 text-red-700 rounded text-xs font-bold flex items-center justify-center">T</span>
+              Twilio
+            </p>
+            <div class="space-y-3">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Account SID</label>
+                  <input [(ngModel)]="smsSettings['twilio_sid']" class="input-field">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Auth Token</label>
+                  <input [(ngModel)]="smsSettings['twilio_token']" type="password" class="input-field">
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">From Number</label>
+                <input [(ngModel)]="smsSettings['twilio_from']" class="input-field" placeholder="+1 234 567 8900">
+              </div>
+            </div>
+          </div>
+          <div class="border-t border-gray-100"></div>
+          <!-- Nexmo / Vonage -->
+          <div>
+            <p class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span class="w-6 h-6 bg-yellow-100 text-yellow-700 rounded text-xs font-bold flex items-center justify-center">N</span>
+              Nexmo / Vonage
+            </p>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                <input [(ngModel)]="smsSettings['nexmo_key']" class="input-field">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">API Secret</label>
+                <input [(ngModel)]="smsSettings['nexmo_secret']" type="password" class="input-field">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
+          <button (click)="save('sms')" [disabled]="saving" class="btn-primary">{{ saving ? 'Saving...' : 'Save SMS Settings' }}</button>
+        </div>
+      </div>
+
+    </div><!-- end content panel -->
+  </div><!-- end flex -->
+</div>
