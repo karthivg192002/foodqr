@@ -10,6 +10,13 @@ export class Tax {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  code: string;
+
+  // 'included' = tax included in price | 'excluded' = tax added on top
+  @Column({ default: 'excluded' })
+  type: string;
+
   @Column({ type: 'decimal', precision: 5, scale: 2 })
   rate: number;
 

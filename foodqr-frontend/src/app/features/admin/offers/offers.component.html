@@ -25,7 +25,10 @@
       </div>
       <div class="flex items-center justify-between mt-3">
         <span [class]="offer.status ? 'badge-success' : 'badge-gray'">{{ offer.status ? 'Active' : 'Inactive' }}</span>
-        <button (click)="deleteOffer(offer.id)" class="text-red-500 hover:text-red-600 text-xs">Delete</button>
+        <div class="flex gap-2">
+          <button (click)="openOfferItems(offer)" class="text-blue-500 hover:text-blue-600 text-xs font-medium">Items</button>
+          <button (click)="deleteOffer(offer.id)" class="text-red-500 hover:text-red-600 text-xs">Delete</button>
+        </div>
       </div>
     </div>
     <p *ngIf="!offers.length" class="col-span-full text-center text-gray-400 py-12">No offers yet</p>
@@ -46,6 +49,32 @@
       </div>
     </div>
     <p *ngIf="!banners.length" class="text-center text-gray-400 py-12">No banners yet</p>
+  </div>
+
+  <!-- Offer Items Modal -->
+  <div *ngIf="showItemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
+      <div class="flex items-center justify-between p-6 border-b">
+        <h2 class="font-bold text-gray-900">Items for "{{ selectedOffer?.title }}"</h2>
+        <button (click)="showItemModal = false" class="text-gray-400 hover:text-gray-600">✕</button>
+      </div>
+      <div class="p-6 space-y-4 overflow-y-auto flex-1">
+        <!-- Add item -->
+        <div class="flex gap-2">
+          <select [(ngModel)]="addItemId" class="input-field flex-1">
+            <option value="">— Select item —</option>
+            <option *ngFor="let item of allItems" [value]="item.id">{{ item.name }}</option>
+          </select>
+          <button (click)="addItemToOffer()" [disabled]="!addItemId" class="btn-primary px-4">Add</button>
+        </div>
+        <!-- Current items -->
+        <div *ngIf="offerItems.length === 0" class="text-center text-gray-400 py-4">No items scoped — offer applies to all items</div>
+        <div *ngFor="let oi of offerItems" class="flex items-center justify-between py-2 border-b last:border-0">
+          <span class="text-sm text-gray-800">{{ oi.item?.name || oi.itemId }}</span>
+          <button (click)="removeItemFromOffer(oi.id)" class="text-red-500 hover:text-red-600 text-xs">Remove</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Form Modal -->

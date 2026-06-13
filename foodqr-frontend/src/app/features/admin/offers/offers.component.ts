@@ -14,14 +14,25 @@ export class OffersComponent implements OnInit {
   saving = false;
   formData: any = {};
 
+  // Offer items management
+  selectedOffer: any = null;
+  offerItems: any[] = [];
+  allItems: any[] = [];
+  showItemModal = false;
+  addItemId = '';
+
   constructor(private api: ApiService, private toastr: ToastrService) {}
 
-  ngOnInit(): void { this.loadOffers(); this.loadBanners(); }
+  ngOnInit(): void {
+    this.loadOffers();
+    this.loadBanners();
+    this.api.get<any>('frontend/items', { limit: 500 }).subscribe({ next: (r) => this.allItems = r.data || [] });
+  }
 
   loadOffers(): void { this.api.get<Offer[]>('admin/offers').subscribe({ next: (d) => this.offers = d }); }
   loadBanners(): void { this.api.get<Banner[]>('admin/banners').subscribe({ next: (d) => this.banners = d }); }
 
-  openNewOffer(): void { this.formType = 'offer'; this.formData = { status: true }; this.showForm = true; }
+  openNewOffer(): void { this.formType = 'offer'; this.formData = { status: true, discountType: 'fixed', discountAmount: 0 }; this.showForm = true; }
   openNewBanner(): void { this.formType = 'banner'; this.formData = { status: true }; this.showForm = true; }
 
   save(): void {
@@ -44,5 +55,30 @@ export class OffersComponent implements OnInit {
   deleteBanner(id: string): void {
     if (!confirm('Delete?')) return;
     this.api.delete(`admin/banners/${id}`).subscribe({ next: () => { this.toastr.success('Deleted'); this.loadBanners(); } });
+  }
+
+  openOfferItems(offer: any): void {
+    this.selectedOffer = offer;
+    this.showItemModal = true;
+    this.loadOfferItems();
+  }
+
+  loadOfferItems(): void {
+    this.api.get<any[]>(`admin/offers/${this.selectedOffer.id}/items`).subscribe({
+      next: (d) => { this.offerItems = d; },
+    });
+  }
+
+  addItemToOffer(): void {
+    if (!this.addItemId) return;
+    this.api.post(`admin/offers/${this.selectedOffer.id}/items`, { itemId: this.addItemId }).subscribe({
+      next: () => { this.toastr.success('Item added'); this.addItemId = ''; this.loadOfferItems(); },
+    });
+  }
+
+  removeItemFromOffer(offerItemId: string): void {
+    this.api.delete(`admin/offers/items/${offerItemId}`).subscribe({
+      next: () => { this.toastr.success('Item removed'); this.loadOfferItems(); },
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Patch, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
@@ -29,8 +29,15 @@ export class AuthController {
   }
 
   @Public()
+  @Post('guest')
+  @ApiOperation({ summary: 'Create a guest user for checkout without registration' })
+  guestSignup(@Body() dto: { name: string; phone?: string }) {
+    return this.authService.guestSignup(dto);
+  }
+
+  @Public()
   @Post('otp/send')
-  @ApiOperation({ summary: 'Send OTP to email' })
+  @ApiOperation({ summary: 'Send OTP to email (also creates inactive placeholder if new email)' })
   sendOtp(@Body() dto: OtpRequestDto) {
     return this.authService.sendOtp(dto);
   }
@@ -44,7 +51,7 @@ export class AuthController {
 
   @Public()
   @Post('forgot-password')
-  @ApiOperation({ summary: 'Request password reset link' })
+  @ApiOperation({ summary: 'Request password reset link via email' })
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto);
   }
@@ -70,5 +77,21 @@ export class AuthController {
   @ApiOperation({ summary: 'Change password' })
   changePassword(@CurrentUser() user: User, @Body() dto: ChangePasswordDto) {
     return this.authService.changePassword(user.id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Delete('account')
+  @ApiOperation({ summary: 'Deactivate / soft-delete own account' })
+  deleteAccount(@CurrentUser() user: User) {
+    return this.authService.deleteAccount(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('pos/customer')
+  @ApiOperation({ summary: 'Quick-create a customer at POS without full registration' })
+  createPosCustomer(@Body() dto: { name: string; phone?: string; email?: string }) {
+    return this.authService.createPosCustomer(dto);
   }
 }

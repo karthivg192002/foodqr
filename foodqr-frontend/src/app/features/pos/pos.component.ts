@@ -21,6 +21,18 @@ export class PosComponent implements OnInit {
   orderType = OrderType.POS;
   lastOrder: any = null;
 
+  // POS cash change calculator
+  receivedAmount = 0;
+  get orderTotal(): number { return this.cartService.total; }
+  get changeAmount(): number { return Math.max(0, this.receivedAmount - this.orderTotal); }
+  get isSufficient(): boolean { return this.receivedAmount >= this.orderTotal; }
+
+  // Quick customer creation
+  showCustomerForm = false;
+  posCustomer: any = null;
+  customerSaving = false;
+  customerForm = { name: '', phone: '', email: '' };
+
   constructor(
     public cartService: CartService,
     private api: ApiService,
@@ -55,18 +67,41 @@ export class PosComponent implements OnInit {
 
   getItemPrice(cartItem: CartItem): number { return this.cartService.getItemPrice(cartItem); }
 
+  createPosCustomer(): void {
+    if (!this.customerForm.name.trim()) { this.toastr.warning('Customer name is required'); return; }
+    this.customerSaving = true;
+    this.api.post<any>('auth/pos/customer', this.customerForm).subscribe({
+      next: (customer) => {
+        this.posCustomer = customer;
+        this.customerSaving = false;
+        this.showCustomerForm = false;
+        this.customerForm = { name: '', phone: '', email: '' };
+        this.toastr.success(`Customer "${customer.name}" added`);
+      },
+      error: () => { this.customerSaving = false; },
+    });
+  }
+
   placeOrder(): void {
     if (this.cartService.isEmpty) return;
+    if (this.paymentMethod === PaymentMethod.CASH_ON_DELIVERY && !this.isSufficient) {
+      this.toastr.warning('Received amount is less than order total');
+      return;
+    }
     this.placing = true;
-    const order = {
+    const order: any = {
       orderType: this.orderType,
       paymentMethod: this.paymentMethod,
       items: this.cartService.toOrderItems(),
+      posReceivedAmount: this.receivedAmount,
     };
+    if (this.posCustomer) order.customerId = this.posCustomer.id;
     this.api.post<any>('orders', order).subscribe({
       next: (created) => {
         this.lastOrder = created;
         this.cartService.clear();
+        this.receivedAmount = 0;
+        this.posCustomer = null;
         this.toastr.success(`Order #${created.orderSerialNo} placed!`);
         this.placing = false;
       },

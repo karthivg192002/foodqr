@@ -1,0 +1,29 @@
+import { SettingsService } from './settings.service';
+export declare class SettingsController {
+    private readonly settingsService;
+    constructor(settingsService: SettingsService);
+    getAll(group?: string): Promise<{}>;
+    getCompany(): Promise<{}>;
+    setCompany(settings: Record<string, string>): Promise<{}>;
+    getSite(): Promise<{}>;
+    setSite(settings: Record<string, string>): Promise<{}>;
+    getMail(): Promise<{}>;
+    setMail(settings: Record<string, string>): Promise<{}>;
+    getPayment(): Promise<{}>;
+    setPayment(settings: Record<string, string>): Promise<{}>;
+    getSms(): Promise<{}>;
+    setSms(settings: Record<string, string>): Promise<{}>;
+    getBusiness(): Promise<{}>;
+    setBusiness(settings: Record<string, string>): Promise<{}>;
+    getOrder(): Promise<{}>;
+    setOrder(settings: Record<string, string>): Promise<{}>;
+    getNotification(): Promise<{}>;
+    setNotification(settings: Record<string, string>): Promise<{}>;
+    getOrderSetup(): Promise<{}>;
+    setOrderSetup(settings: Record<string, string>): Promise<{}>;
+    getSocialMedia(): Promise<{}>;
+    setSocialMedia(settings: Record<string, string>): Promise<{}>;
+    getTheme(): Promise<{}>;
+    setTheme(settings: Record<string, string>): Promise<{}>;
+    getPublic(): Promise<{}>;
+}

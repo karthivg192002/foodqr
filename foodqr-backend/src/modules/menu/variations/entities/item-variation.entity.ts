@@ -28,6 +28,16 @@ export class ItemVariation {
   @Column({ nullable: true })
   attributeName: string;
 
+  @Column({ nullable: true })
+  attributeId: string;
+
+  // 'addon' adds to base price; 'replace' replaces base price
+  @Column({ default: 'addon' })
+  priceType: string;
+
+  @Column({ nullable: true })
+  caution: string;
+
   @Column({ default: true })
   status: boolean;
 

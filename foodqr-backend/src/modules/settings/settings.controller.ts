@@ -97,6 +97,36 @@ export class SettingsController {
     return this.settingsService.setMany(settings, 'notification');
   }
 
+  @Get('order_setup')
+  @Roles(UserRole.ADMIN)
+  getOrderSetup() { return this.settingsService.getAll('order_setup'); }
+
+  @Post('order_setup')
+  @Roles(UserRole.ADMIN)
+  setOrderSetup(@Body() settings: Record<string, string>) {
+    return this.settingsService.setMany(settings, 'order_setup');
+  }
+
+  @Get('social_media')
+  @Roles(UserRole.ADMIN)
+  getSocialMedia() { return this.settingsService.getAll('social_media'); }
+
+  @Post('social_media')
+  @Roles(UserRole.ADMIN)
+  setSocialMedia(@Body() settings: Record<string, string>) {
+    return this.settingsService.setMany(settings, 'social_media');
+  }
+
+  @Get('theme')
+  @Roles(UserRole.ADMIN)
+  getTheme() { return this.settingsService.getAll('theme'); }
+
+  @Post('theme')
+  @Roles(UserRole.ADMIN)
+  setTheme(@Body() settings: Record<string, string>) {
+    return this.settingsService.setMany(settings, 'theme');
+  }
+
   @Public()
   @Get('public')
   getPublic() { return this.settingsService.getPublicSettings(); }

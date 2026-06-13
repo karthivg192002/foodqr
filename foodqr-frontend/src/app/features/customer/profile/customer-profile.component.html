@@ -1,38 +1,112 @@
 <div class="px-4 py-4">
-  <h1 class="font-bold text-xl text-gray-900 mb-5">My Profile</h1>
+  <h1 class="font-bold text-xl text-gray-900 mb-4">My Account</h1>
 
-  <div class="bg-white rounded-2xl p-5 shadow-sm">
-    <div class="flex items-center gap-4 mb-5">
-      <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-3xl">
-        👤
-      </div>
-      <div>
-        <h2 class="font-bold text-gray-900">{{ user.name }}</h2>
-        <p class="text-sm text-gray-500">{{ user.email }}</p>
-      </div>
-    </div>
-
-    <div class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-        <input [(ngModel)]="user.name" type="text" class="input-field w-full">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input [(ngModel)]="user.email" type="email" class="input-field w-full">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-        <input [(ngModel)]="user.phone" type="tel" class="input-field w-full">
-      </div>
-
-      <button (click)="save()" [disabled]="saving" class="btn-primary w-full py-3">
-        {{ saving ? 'Saving...' : 'Save Changes' }}
-      </button>
-    </div>
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-4">
+    <button (click)="activeTab = 'profile'"
+      [class.bg-primary-500]="activeTab === 'profile'"
+      [class.text-white]="activeTab === 'profile'"
+      [class.bg-gray-100]="activeTab !== 'profile'"
+      [class.text-gray-700]="activeTab !== 'profile'"
+      class="flex-1 py-2 rounded-xl text-sm font-medium">Profile</button>
+    <button (click)="activeTab = 'addresses'"
+      [class.bg-primary-500]="activeTab === 'addresses'"
+      [class.text-white]="activeTab === 'addresses'"
+      [class.bg-gray-100]="activeTab !== 'addresses'"
+      [class.text-gray-700]="activeTab !== 'addresses'"
+      class="flex-1 py-2 rounded-xl text-sm font-medium">Addresses</button>
   </div>
 
-  <button (click)="logout()" class="mt-4 w-full py-3 bg-red-50 text-red-600 rounded-2xl font-semibold">
-    Logout
-  </button>
+  <!-- Profile Tab -->
+  <div *ngIf="activeTab === 'profile'">
+    <div class="bg-white rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center gap-4 mb-5">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-3xl">👤</div>
+        <div>
+          <h2 class="font-bold text-gray-900">{{ user.name }}</h2>
+          <p class="text-sm text-gray-500">{{ user.email }}</p>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <input [(ngModel)]="user.name" type="text" class="input w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input [(ngModel)]="user.email" type="email" class="input w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <input [(ngModel)]="user.phone" type="tel" class="input w-full" />
+        </div>
+        <button (click)="save()" [disabled]="saving" class="btn btn-primary w-full py-3">
+          {{ saving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </div>
+    <button (click)="logout()" class="mt-4 w-full py-3 bg-red-50 text-red-600 rounded-2xl font-semibold">Logout</button>
+  </div>
+
+  <!-- Addresses Tab -->
+  <div *ngIf="activeTab === 'addresses'">
+    <div class="flex justify-between items-center mb-3">
+      <p class="text-sm text-gray-500">{{ addresses.length }} saved address{{ addresses.length !== 1 ? 'es' : '' }}</p>
+      <button (click)="openNewAddress()" class="btn btn-primary btn-sm">+ Add Address</button>
+    </div>
+
+    <div class="space-y-3">
+      <div *ngFor="let addr of addresses" class="bg-white rounded-2xl p-4 shadow-sm">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-sm font-semibold">{{ addr.label }}</span>
+              <span *ngIf="addr.isDefault" class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Default</span>
+            </div>
+            <p class="text-sm text-gray-600">{{ addr.address }}</p>
+            <p *ngIf="addr.apartment" class="text-xs text-gray-400">{{ addr.apartment }}</p>
+          </div>
+          <div class="flex flex-col gap-1 ml-3">
+            <button (click)="openEditAddress(addr)" class="text-xs text-blue-500 hover:underline">Edit</button>
+            <button *ngIf="!addr.isDefault" (click)="setDefault(addr.id)" class="text-xs text-green-600 hover:underline">Set Default</button>
+            <button (click)="deleteAddress(addr.id)" class="text-xs text-red-400 hover:underline">Delete</button>
+          </div>
+        </div>
+      </div>
+      <p *ngIf="addresses.length === 0" class="text-center text-gray-400 py-6 text-sm">No saved addresses</p>
+    </div>
+
+    <!-- Address Form Modal -->
+    <div *ngIf="showAddressForm" class="fixed inset-0 bg-black/50 flex items-end z-50">
+      <div class="bg-white rounded-t-2xl w-full p-5">
+        <h2 class="font-semibold text-lg mb-4">{{ editingAddress ? 'Edit' : 'New' }} Address</h2>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">Label</label>
+            <select [(ngModel)]="addressForm.label" class="input w-full">
+              <option>Home</option><option>Work</option><option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Address *</label>
+            <input [(ngModel)]="addressForm.address" class="input w-full" placeholder="Street address" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Apt / Unit</label>
+            <input [(ngModel)]="addressForm.apartment" class="input w-full" placeholder="Apartment, suite, etc." />
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" [(ngModel)]="addressForm.isDefault" id="isDefault" />
+            <label for="isDefault" class="text-sm">Set as default address</label>
+          </div>
+          <div class="flex gap-2 pt-2">
+            <button (click)="saveAddress()" [disabled]="savingAddress" class="btn btn-primary flex-1">
+              {{ savingAddress ? 'Saving...' : 'Save Address' }}
+            </button>
+            <button (click)="showAddressForm = false" class="btn btn-outline flex-1">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

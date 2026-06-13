@@ -1,0 +1,46 @@
+import { OrdersService } from './orders.service';
+import { CreateOrderDto, UpdateOrderStatusDto } from './dto/order.dto';
+import { User } from '../users/entities/user.entity';
+export declare class OrdersController {
+    private readonly ordersService;
+    constructor(ordersService: OrdersService);
+    create(user: User, dto: CreateOrderDto): Promise<import("./entities/order.entity").Order>;
+    findAll(status?: string, orderType?: string, search?: string, page?: number, limit?: number): Promise<{
+        data: import("./entities/order.entity").Order[];
+        total: number;
+        page: number;
+        limit: number;
+        pages: number;
+    }>;
+    getMyOrders(user: User, page?: number, limit?: number): Promise<{
+        data: import("./entities/order.entity").Order[];
+        total: number;
+        page: number;
+        limit: number;
+        pages: number;
+    }>;
+    findOne(id: string): Promise<import("./entities/order.entity").Order>;
+    trackByToken(token: string): Promise<import("./entities/order.entity").Order>;
+    updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<import("./entities/order.entity").Order>;
+    getKdsOrders(branchId?: string): Promise<import("./entities/order.entity").Order[]>;
+    getDashboardStats(): Promise<{
+        totalOrders: number;
+        todayOrders: number;
+        totalRevenue: any;
+        pendingOrders: number;
+    }>;
+    assignDeliveryBoy(id: string, body: {
+        deliveryBoyId: string;
+    }): Promise<import("./entities/order.entity").Order>;
+    getDeliveryBoyOrders(deliveryBoyId: string, page?: number, limit?: number): Promise<{
+        data: import("./entities/order.entity").Order[];
+        total: number;
+        page: number;
+        limit: number;
+        pages: number;
+    }>;
+    getPosChange(id: string, received: number): Promise<{
+        change: number;
+        sufficient: boolean;
+    }>;
+}

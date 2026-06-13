@@ -1,0 +1,28 @@
+import { UserRole, UserStatus } from '../../../common/enums';
+import { Branch } from '../../branches/entities/branch.entity';
+export declare class User {
+    id: string;
+    name: string;
+    username: string;
+    email: string;
+    phone: string;
+    countryCode: string;
+    password: string;
+    role: UserRole;
+    status: UserStatus;
+    profileImage: string;
+    branchId: string;
+    branch: Branch;
+    balance: number;
+    isGuest: boolean;
+    emailVerifiedAt: Date;
+    deviceToken: string;
+    webToken: string;
+    otpCode: string;
+    otpExpiry: Date;
+    resetPasswordToken: string;
+    resetPasswordExpiry: Date;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt: Date;
+}

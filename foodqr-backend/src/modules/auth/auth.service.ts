@@ -12,12 +12,14 @@ import {
   LoginDto, RegisterDto, OtpRequestDto, OtpVerifyDto,
   ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto,
 } from './dto/auth.dto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private userRepo: Repository<User>,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async login(dto: LoginDto) {
@@ -53,6 +55,19 @@ export class AuthService {
     return { token, user: userWithoutPassword };
   }
 
+  async guestSignup(dto: { name: string; phone?: string }) {
+    const guest = this.userRepo.create({
+      name: dto.name,
+      phone: dto.phone,
+      password: await bcrypt.hash(uuidv4(), 12),
+      role: UserRole.CUSTOMER,
+      isGuest: true,
+    });
+    await this.userRepo.save(guest);
+    const token = this.generateToken(guest);
+    return { token, user: guest };
+  }
+
   async sendOtp(dto: OtpRequestDto) {
     const user = await this.userRepo.findOne({ where: { email: dto.email } });
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -60,8 +75,16 @@ export class AuthService {
 
     if (user) {
       await this.userRepo.update(user.id, { otpCode: otp, otpExpiry: expiry });
+    } else {
+      // Store OTP temporarily — will be verified at register step
+      const temp = this.userRepo.create({ email: dto.email, name: dto.email, password: 'temp', otpCode: otp, otpExpiry: expiry, status: UserStatus.INACTIVE });
+      await this.userRepo.save(temp);
     }
-    return { message: 'OTP sent successfully', otp };
+
+    // Send OTP via email (non-blocking)
+    this.mailService.sendOtp(dto.email, otp).catch(() => null);
+
+    return { message: 'OTP sent to your email' };
   }
 
   async verifyOtp(dto: OtpVerifyDto) {
@@ -75,7 +98,7 @@ export class AuthService {
       otpExpiry: null,
       emailVerifiedAt: new Date(),
     });
-    return { message: 'OTP verified successfully' };
+    return { message: 'OTP verified successfully', verified: true };
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
@@ -88,7 +111,12 @@ export class AuthService {
       resetPasswordToken: token,
       resetPasswordExpiry: expiry,
     });
-    return { message: 'Password reset link sent', token };
+
+    // Send reset link via email
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+    this.mailService.sendPasswordReset(dto.email, token, frontendUrl).catch(() => null);
+
+    return { message: 'Password reset link sent to your email' };
   }
 
   async resetPassword(dto: ResetPasswordDto) {
@@ -120,8 +148,29 @@ export class AuthService {
     return { message: 'Password changed successfully' };
   }
 
+  async deleteAccount(userId: string) {
+    await this.userRepo.softDelete(userId);
+    return { message: 'Account deactivated successfully' };
+  }
+
   async getProfile(userId: string) {
     return this.userRepo.findOne({ where: { id: userId }, relations: ['branch'] });
+  }
+
+  /** Create minimal customer at POS without full registration */
+  async createPosCustomer(dto: { name: string; phone?: string; email?: string }) {
+    const tempPassword = await bcrypt.hash(uuidv4(), 12);
+    const existing = dto.email ? await this.userRepo.findOne({ where: { email: dto.email } }) : null;
+    if (existing) return existing;
+
+    const user = this.userRepo.create({
+      name: dto.name,
+      phone: dto.phone,
+      email: dto.email,
+      password: tempPassword,
+      role: UserRole.CUSTOMER,
+    });
+    return this.userRepo.save(user);
   }
 
   private generateToken(user: User) {

@@ -130,6 +130,12 @@ export enum OrderType {
   DINING_TABLE = 'dining_table',
 }
 
+export enum PaymentMethod {
+  CASH_ON_DELIVERY = 'cash_on_delivery',
+  E_WALLET = 'e_wallet',
+  STRIPE = 'stripe',
+}
+
 export enum OrderStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',

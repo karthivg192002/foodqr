@@ -103,6 +103,76 @@ export class ReportsService {
     return qb.getRawMany();
   }
 
+  async getCreditBalanceReport(startDate?: string, endDate?: string) {
+    const qb = this.transactionRepo.createQueryBuilder('tx')
+      .leftJoinAndSelect('tx.user', 'user')
+      .select([
+        'user.id as userId',
+        'user.name as name',
+        'user.email as email',
+        `SUM(CASE WHEN tx.sign = '+' THEN tx.amount ELSE 0 END) as totalCredit`,
+        `SUM(CASE WHEN tx.sign = '-' THEN tx.amount ELSE 0 END) as totalDebit`,
+        `SUM(CASE WHEN tx.sign = '+' THEN tx.amount ELSE -tx.amount END) as balance`,
+        'COUNT(tx.id) as transactionCount',
+      ])
+      .groupBy('user.id, user.name, user.email')
+      .orderBy('balance', 'DESC');
+
+    if (startDate) qb.andWhere('tx.createdAt >= :start', { start: new Date(startDate) });
+    if (endDate) qb.andWhere('tx.createdAt <= :end', { end: new Date(endDate) });
+
+    return qb.getRawMany();
+  }
+
+  async getItemsReport(startDate?: string, endDate?: string, categoryId?: string) {
+    const qb = this.orderItemRepo.createQueryBuilder('oi')
+      .leftJoin('oi.item', 'item')
+      .leftJoin('oi.order', 'order')
+      .leftJoin('item.category', 'category')
+      .select([
+        'item.id as itemId',
+        'item.name as itemName',
+        'item.thumbImage as itemImage',
+        'category.name as categoryName',
+        'SUM(oi.quantity) as totalQuantity',
+        'SUM(oi.subtotal) as totalRevenue',
+        'COUNT(DISTINCT order.id) as orderCount',
+        'AVG(oi.unitPrice) as avgPrice',
+      ])
+      .where('order.status != :status', { status: OrderStatus.CANCELED })
+      .groupBy('item.id, item.name, item.thumbImage, category.name')
+      .orderBy('totalQuantity', 'DESC');
+
+    if (startDate) qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+    if (endDate) qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+    if (categoryId) qb.andWhere('item.categoryId = :categoryId', { categoryId });
+
+    return qb.getRawMany();
+  }
+
+  async getAnalyticsSummary(startDate?: string, endDate?: string) {
+    const start = startDate ? new Date(startDate) : new Date(new Date().setDate(1));
+    const end = endDate ? new Date(endDate) : new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const [salesByDay, revenueByType, topItems, newCustomers] = await Promise.all([
+      this.orderRepo.createQueryBuilder('o')
+        .where('o.createdAt BETWEEN :start AND :end', { start, end })
+        .andWhere('o.paymentStatus = :ps', { ps: PaymentStatus.PAID })
+        .select(["DATE_TRUNC('day', o.createdAt) as day", 'COUNT(o.id) as orders', 'SUM(o.total) as revenue'])
+        .groupBy("DATE_TRUNC('day', o.createdAt)")
+        .orderBy('day', 'ASC')
+        .getRawMany(),
+      this.getRevenueByOrderType(startDate, endDate),
+      this.getTopItems(5, startDate, endDate),
+      this.userRepo.count({
+        where: { role: UserRole.CUSTOMER, createdAt: Between(start, end) as any },
+      }),
+    ]);
+
+    return { salesByDay, revenueByType, topItems, newCustomers };
+  }
+
   async getCustomerStats() {
     const [total, newThisMonth, topCustomers] = await Promise.all([
       this.userRepo.count({ where: { role: UserRole.CUSTOMER } }),

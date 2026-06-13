@@ -26,6 +26,9 @@ export class Branch {
   country: string;
 
   @Column({ nullable: true })
+  zipCode: string;
+
+  @Column({ nullable: true })
   phone: string;
 
   @Column({ nullable: true })

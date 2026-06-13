@@ -1,14 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Offer } from './entities/offer.entity';
 import { Banner } from './entities/banner.entity';
+import { OfferItem } from './entities/offer-item.entity';
 
 @Injectable()
 export class OffersService {
   constructor(
     @InjectRepository(Offer) private offerRepo: Repository<Offer>,
     @InjectRepository(Banner) private bannerRepo: Repository<Banner>,
+    @InjectRepository(OfferItem) private offerItemRepo: Repository<OfferItem>,
   ) {}
 
   getActiveOffers() {
@@ -61,5 +63,20 @@ export class OffersService {
   async deleteBanner(id: string) {
     await this.bannerRepo.delete(id);
     return { message: 'Banner deleted' };
+  }
+
+  async getOfferItems(offerId: string) {
+    return this.offerItemRepo.find({ where: { offerId }, relations: ['item'] });
+  }
+
+  async addOfferItem(offerId: string, itemId: string) {
+    const existing = await this.offerItemRepo.findOne({ where: { offerId, itemId } });
+    if (existing) return existing;
+    return this.offerItemRepo.save(this.offerItemRepo.create({ offerId, itemId }));
+  }
+
+  async removeOfferItem(offerItemId: string) {
+    await this.offerItemRepo.delete(offerItemId);
+    return { message: 'Item removed from offer' };
   }
 }

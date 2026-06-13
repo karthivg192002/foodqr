@@ -19,6 +19,7 @@
       <div *ngFor="let item of cartService.items" class="bg-white rounded-2xl p-3 flex gap-3 shadow-sm">
         <div class="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
           <img *ngIf="item.item.thumbImage" [src]="item.item.thumbImage" class="w-full h-full object-cover">
+          <div *ngIf="!item.item.thumbImage" class="w-full h-full flex items-center justify-center text-2xl">🍽️</div>
         </div>
         <div class="flex-1 min-w-0">
           <p class="font-semibold text-gray-900 truncate">{{ item.item.name }}</p>
@@ -27,18 +28,16 @@
         </div>
         <div class="flex flex-col items-center justify-center gap-2">
           <div class="flex items-center gap-2 bg-orange-50 rounded-full px-2 py-1">
-            <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity - 1)"
-              class="text-orange-500 font-bold w-5 h-5 flex items-center justify-center text-lg">−</button>
+            <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity - 1)" class="text-orange-500 font-bold w-5 h-5 flex items-center justify-center text-lg">−</button>
             <span class="text-orange-600 font-semibold text-sm w-5 text-center">{{ item.quantity }}</span>
-            <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity + 1)"
-              class="text-orange-500 font-bold w-5 h-5 flex items-center justify-center text-lg">+</button>
+            <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity + 1)" class="text-orange-500 font-bold w-5 h-5 flex items-center justify-center text-lg">+</button>
           </div>
           <p class="text-sm font-bold text-gray-900">${{ getItemPrice(item) * item.quantity | number:'1.2-2' }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Order Options -->
+    <!-- Order Type -->
     <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
       <h3 class="font-semibold text-gray-900 mb-3">Order Type</h3>
       <div class="grid grid-cols-2 gap-2">
@@ -51,18 +50,54 @@
       </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
-      <h3 class="font-semibold text-gray-900 mb-3">Payment</h3>
-      <div class="space-y-2">
-        <label *ngFor="let method of [PaymentMethod.CASH_ON_DELIVERY, PaymentMethod.E_WALLET]"
-          class="flex items-center gap-3 p-2 rounded-lg cursor-pointer"
-          [class]="paymentMethod === method ? 'bg-orange-50' : ''">
-          <input type="radio" [value]="method" [(ngModel)]="paymentMethod" class="text-orange-500">
-          <span class="text-sm font-medium capitalize">{{ method.replace('_', ' ') }}</span>
+    <!-- Delivery Address (only for delivery) -->
+    <div *ngIf="orderType === OrderType.DELIVERY" class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-semibold text-gray-900">Delivery Address</h3>
+        <a routerLink="/customer/profile" class="text-xs text-orange-500 font-medium">Manage</a>
+      </div>
+      <div *ngIf="savedAddresses.length === 0" class="text-sm text-gray-400">
+        No saved addresses.
+        <a routerLink="/customer/profile" class="text-orange-500 underline">Add one →</a>
+      </div>
+      <div *ngIf="savedAddresses.length > 0" class="space-y-2">
+        <label *ngFor="let addr of savedAddresses"
+          class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition"
+          [class]="selectedAddressId === addr.id ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
+          <input type="radio" [value]="addr.id" [(ngModel)]="selectedAddressId" class="mt-0.5 text-orange-500">
+          <div>
+            <p class="font-medium text-sm text-gray-900">{{ addr.label || 'Address' }}
+              <span *ngIf="addr.isDefault" class="ml-2 text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded">Default</span>
+            </p>
+            <p class="text-xs text-gray-500">{{ addr.address }}, {{ addr.city }}</p>
+            <p *ngIf="addr.phone" class="text-xs text-gray-400">{{ addr.phone }}</p>
+          </div>
         </label>
       </div>
     </div>
 
+    <!-- Payment Method -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+      <h3 class="font-semibold text-gray-900 mb-3">Payment Method</h3>
+      <div class="space-y-2">
+        <label *ngFor="let gw of enabledGateways"
+          class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition"
+          [class]="paymentMethod === gw.slug ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
+          <input type="radio" [value]="gw.slug" [(ngModel)]="paymentMethod" class="text-orange-500">
+          <span class="text-sm font-medium text-gray-800">{{ gw.name }}</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Coupon Code -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+      <h3 class="font-semibold text-gray-900 mb-2">Coupon Code</h3>
+      <div class="flex gap-2">
+        <input [(ngModel)]="couponCode" placeholder="Enter coupon code" class="input-field flex-1 text-sm">
+      </div>
+    </div>
+
+    <!-- Note -->
     <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
       <textarea [(ngModel)]="orderNote" placeholder="Add order note (optional)..."
         class="w-full text-sm text-gray-700 resize-none focus:outline-none" rows="2"></textarea>
@@ -72,12 +107,12 @@
     <div class="bg-white rounded-2xl p-4 shadow-sm mb-5">
       <div class="space-y-2 text-sm">
         <div class="flex justify-between text-gray-600"><span>Subtotal</span><span>${{ cartService.total | number:'1.2-2' }}</span></div>
-        <div class="flex justify-between text-gray-600"><span>Tax</span><span>Calculated at checkout</span></div>
+        <div class="flex justify-between text-gray-600"><span>Delivery</span><span>Calculated at checkout</span></div>
         <div class="flex justify-between font-bold text-gray-900 text-base pt-2 border-t"><span>Total</span><span>${{ cartService.total | number:'1.2-2' }}</span></div>
       </div>
     </div>
 
-    <button (click)="placeOrder()" [disabled]="placing" class="btn-primary w-full py-4 text-base font-bold">
+    <button (click)="placeOrder()" [disabled]="placing" class="btn-primary w-full py-4 text-base font-bold rounded-2xl">
       {{ placing ? 'Placing Order...' : 'Place Order · $' + (cartService.total | number:'1.2-2') }}
     </button>
   </div>

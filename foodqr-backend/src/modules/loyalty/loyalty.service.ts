@@ -114,4 +114,40 @@ export class LoyaltyService {
   async getCustomerStamps(userId: string) {
     return this.stampRepo.find({ where: { userId }, order: { earnedAt: 'DESC' }, take: 50 });
   }
+
+  async getCustomerSegments() {
+    const program = await this.getActiveProgram();
+    const required = program?.requiredStamps || 10;
+
+    const rows = await this.stampRepo
+      .createQueryBuilder('stamp')
+      .leftJoinAndSelect('stamp.user', 'user')
+      .select(['user.id as userId', 'user.name as name', 'user.email as email', 'SUM(stamp.stampCount) as totalStamps'])
+      .groupBy('user.id, user.name, user.email')
+      .orderBy('totalStamps', 'DESC')
+      .getRawMany();
+
+    const segments = { new: [] as any[], bronze: [] as any[], silver: [] as any[], gold: [] as any[] };
+    for (const r of rows) {
+      const s = parseInt(r.totalstamps || '0');
+      r.totalStamps = s;
+      r.progressPercent = Math.min(100, Math.round((s / required) * 100));
+      if (s === 0) segments.new.push(r);
+      else if (s < required * 0.33) segments.bronze.push(r);
+      else if (s < required * 0.66) segments.silver.push(r);
+      else segments.gold.push(r);
+    }
+    return { segments, summary: { total: rows.length, new: segments.new.length, bronze: segments.bronze.length, silver: segments.silver.length, gold: segments.gold.length }, requiredStamps: required };
+  }
+
+  async getLeaderboard() {
+    return this.stampRepo
+      .createQueryBuilder('stamp')
+      .leftJoinAndSelect('stamp.user', 'user')
+      .select(['user.id as userId', 'user.name as name', 'user.email as email', 'SUM(stamp.stampCount) as totalStamps'])
+      .groupBy('user.id, user.name, user.email')
+      .orderBy('totalStamps', 'DESC')
+      .take(20)
+      .getRawMany();
+  }
 }

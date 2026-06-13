@@ -37,4 +37,14 @@ export class OffersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
   @Delete('admin/banners/:id') deleteBanner(@Param('id', ParseUUIDPipe) id: string) { return this.offersService.deleteBanner(id); }
+
+  // Offer Items
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
+  @Get('admin/offers/:id/items') getOfferItems(@Param('id', ParseUUIDPipe) id: string) { return this.offersService.getOfferItems(id); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
+  @Post('admin/offers/:id/items') addOfferItem(@Param('id', ParseUUIDPipe) id: string, @Body() body: { itemId: string }) { return this.offersService.addOfferItem(id, body.itemId); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
+  @Delete('admin/offers/items/:offerItemId') removeOfferItem(@Param('offerItemId', ParseUUIDPipe) offerItemId: string) { return this.offersService.removeOfferItem(offerItemId); }
 }

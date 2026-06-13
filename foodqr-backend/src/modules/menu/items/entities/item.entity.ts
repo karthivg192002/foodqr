@@ -36,6 +36,9 @@ export class Item {
   @JoinColumn({ name: 'categoryId' })
   category: ItemCategory;
 
+  @Column({ nullable: true })
+  subCategoryId: string;
+
   @Column({ type: 'enum', enum: ItemType, default: ItemType.VEG })
   itemType: ItemType;
 

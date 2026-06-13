@@ -1,92 +1,193 @@
-<div>
-  <h1 class="page-title mb-6">Reports & Analytics</h1>
+<div class="p-6">
+  <h1 class="text-2xl font-bold text-gray-800 mb-6">Reports & Analytics</h1>
 
   <!-- Date Range Filter -->
-  <div class="card mb-6 flex flex-wrap gap-4 items-end">
+  <div class="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-wrap gap-4 items-end">
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-      <input [(ngModel)]="startDate" type="date" class="input-field w-auto">
+      <input [(ngModel)]="startDate" type="date" class="input" />
     </div>
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-      <input [(ngModel)]="endDate" type="date" class="input-field w-auto">
+      <input [(ngModel)]="endDate" type="date" class="input" />
     </div>
-    <button (click)="loadAll()" class="btn-primary">Apply</button>
+    <button (click)="loadAll()" class="btn btn-primary">Apply Filter</button>
   </div>
 
-  <!-- Summary cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
-    <div class="card text-center">
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-xl shadow-sm p-4 text-center">
       <p class="text-3xl font-bold text-orange-600">${{ getTotalRevenue() | number:'1.0-0' }}</p>
-      <p class="text-gray-500 mt-1">Total Revenue</p>
+      <p class="text-gray-500 text-sm mt-1">Sales Revenue</p>
     </div>
-    <div class="card text-center">
+    <div class="bg-white rounded-xl shadow-sm p-4 text-center">
       <p class="text-3xl font-bold text-blue-600">{{ getTotalOrders() }}</p>
-      <p class="text-gray-500 mt-1">Total Orders</p>
+      <p class="text-gray-500 text-sm mt-1">Total Orders</p>
     </div>
-    <div class="card text-center">
-      <p class="text-3xl font-bold text-green-600">{{ customerStats?.total || 0 }}</p>
-      <p class="text-gray-500 mt-1">Total Customers</p>
+    <div class="bg-white rounded-xl shadow-sm p-4 text-center">
+      <p class="text-3xl font-bold text-green-600">{{ getTotalItemsSold() }}</p>
+      <p class="text-gray-500 text-sm mt-1">Items Sold</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-4 text-center">
+      <p class="text-3xl font-bold text-purple-600">{{ customerStats?.total || 0 }}</p>
+      <p class="text-gray-500 text-sm mt-1">Total Customers</p>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Top Items -->
-    <div class="card">
-      <h2 class="section-title mb-4">Top Selling Items</h2>
-      <div class="space-y-3">
-        <div *ngFor="let item of topItems; let i = index" class="flex items-center gap-3">
-          <span class="w-7 h-7 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-sm font-bold">{{ i+1 }}</span>
-          <div class="flex-1">
-            <p class="font-medium text-gray-900 text-sm">{{ item.item_name }}</p>
-            <div class="h-1.5 bg-gray-100 rounded-full mt-1">
-              <div class="h-1.5 bg-orange-400 rounded-full" [style.width]="(item.totalQuantity / topItems[0]?.totalQuantity * 100) + '%'"></div>
+  <!-- Tabs -->
+  <div class="flex gap-1 border-b mb-6">
+    <button *ngFor="let tab of [
+      {key:'sales', label:'Sales Report'},
+      {key:'items', label:'Items Report'},
+      {key:'credit', label:'Credit Balance'},
+      {key:'analytics', label:'Analytics'}
+    ]" (click)="activeTab = tab.key"
+    [class.border-b-2]="activeTab === tab.key"
+    [class.border-primary-500]="activeTab === tab.key"
+    [class.text-primary-600]="activeTab === tab.key"
+    class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-primary-600">
+      {{ tab.label }}
+    </button>
+  </div>
+
+  <!-- Sales Report Tab -->
+  <div *ngIf="activeTab === 'sales'">
+    <div class="flex justify-end mb-3">
+      <button (click)="exportCsv('sales')" class="flex items-center gap-2 text-sm font-medium text-green-600 hover:text-green-700 border border-green-300 rounded-lg px-3 py-1.5 hover:bg-green-50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Export CSV
+      </button>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl shadow-sm p-4">
+        <h2 class="font-semibold text-gray-800 mb-3">Daily Sales</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-xs text-gray-600 uppercase">
+              <tr>
+                <th class="px-3 py-2 text-left">Date</th>
+                <th class="px-3 py-2 text-right">Orders</th>
+                <th class="px-3 py-2 text-right">Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let d of salesData" class="border-t">
+                <td class="px-3 py-2">{{ d.date | date:'mediumDate' }}</td>
+                <td class="px-3 py-2 text-right">{{ d.orderCount }}</td>
+                <td class="px-3 py-2 text-right font-semibold">${{ d.revenue | number:'1.2-2' }}</td>
+              </tr>
+              <tr *ngIf="salesData.length === 0"><td colspan="3" class="px-3 py-6 text-center text-gray-400">No sales data</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-4">
+        <h2 class="font-semibold text-gray-800 mb-3">Revenue by Order Type</h2>
+        <div class="space-y-2">
+          <div *ngFor="let r of revenueByType" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div>
+              <p class="font-medium capitalize">{{ r.type?.replace('_', ' ') }}</p>
+              <p class="text-xs text-gray-400">{{ r.count }} orders</p>
             </div>
+            <p class="font-bold">${{ r.revenue | number:'1.2-2' }}</p>
           </div>
-          <div class="text-right">
-            <p class="text-sm font-semibold">{{ item.totalQuantity }}</p>
-            <p class="text-xs text-gray-400">sold</p>
-          </div>
+          <p *ngIf="!revenueByType.length" class="text-gray-400 text-center py-4">No data</p>
         </div>
-        <p *ngIf="!topItems.length" class="text-gray-400 text-center py-4">No data</p>
       </div>
     </div>
+  </div>
 
-    <!-- Revenue by Order Type -->
-    <div class="card">
-      <h2 class="section-title mb-4">Revenue by Order Type</h2>
-      <div class="space-y-3">
-        <div *ngFor="let r of revenueByType" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-          <div>
-            <p class="font-medium text-gray-900 capitalize">{{ r.type?.replace('_', ' ') }}</p>
-            <p class="text-sm text-gray-500">{{ r.count }} orders</p>
-          </div>
-          <p class="text-lg font-bold text-gray-900">${{ r.revenue | number:'1.0-0' }}</p>
-        </div>
-        <p *ngIf="!revenueByType.length" class="text-gray-400 text-center py-4">No data</p>
-      </div>
+  <!-- Items Report Tab -->
+  <div *ngIf="activeTab === 'items'">
+    <div class="flex justify-end mb-3">
+      <button (click)="exportCsv('items')" class="flex items-center gap-2 text-sm font-medium text-green-600 hover:text-green-700 border border-green-300 rounded-lg px-3 py-1.5 hover:bg-green-50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Export CSV
+      </button>
     </div>
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs text-gray-600 uppercase">
+          <tr>
+            <th class="px-4 py-3 text-left">Item</th>
+            <th class="px-4 py-3 text-left">Category</th>
+            <th class="px-4 py-3 text-right">Qty Sold</th>
+            <th class="px-4 py-3 text-right">Orders</th>
+            <th class="px-4 py-3 text-right">Revenue</th>
+            <th class="px-4 py-3 text-right">Avg Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of itemsReport" class="border-t hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium">{{ item.itemName }}</td>
+            <td class="px-4 py-3 text-gray-500">{{ item.categoryName || '—' }}</td>
+            <td class="px-4 py-3 text-right font-semibold">{{ item.totalQuantity }}</td>
+            <td class="px-4 py-3 text-right">{{ item.orderCount }}</td>
+            <td class="px-4 py-3 text-right font-semibold">${{ item.totalRevenue | number:'1.2-2' }}</td>
+            <td class="px-4 py-3 text-right">${{ item.avgPrice | number:'1.2-2' }}</td>
+          </tr>
+          <tr *ngIf="itemsReport.length === 0"><td colspan="6" class="px-4 py-6 text-center text-gray-400">No items data</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    <!-- Top Customers -->
-    <div class="card lg:col-span-2">
-      <h2 class="section-title mb-4">Top Customers</h2>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b">
-            <tr>
-              <th class="px-4 py-2 text-left text-gray-600">Customer</th>
-              <th class="px-4 py-2 text-center text-gray-600">Orders</th>
-              <th class="px-4 py-2 text-right text-gray-600">Total Spent</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let c of customerStats?.topCustomers" class="border-b border-gray-50">
-              <td class="px-4 py-2 font-medium">{{ c.user_name }}<br><span class="text-xs text-gray-400">{{ c.user_email }}</span></td>
-              <td class="px-4 py-2 text-center">{{ c.orderCount }}</td>
-              <td class="px-4 py-2 text-right font-semibold">${{ c.totalSpent | number:'1.2-2' }}</td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- Credit Balance Tab -->
+  <div *ngIf="activeTab === 'credit'">
+    <div class="flex justify-end mb-3">
+      <button (click)="exportCsv('credit-balance')" class="flex items-center gap-2 text-sm font-medium text-green-600 hover:text-green-700 border border-green-300 rounded-lg px-3 py-1.5 hover:bg-green-50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Export CSV
+      </button>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs text-gray-600 uppercase">
+          <tr>
+            <th class="px-4 py-3 text-left">Customer</th>
+            <th class="px-4 py-3 text-right">Total Credit</th>
+            <th class="px-4 py-3 text-right">Total Debit</th>
+            <th class="px-4 py-3 text-right">Balance</th>
+            <th class="px-4 py-3 text-right">Transactions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of creditReport" class="border-t hover:bg-gray-50">
+            <td class="px-4 py-3">
+              <p class="font-medium">{{ c.name }}</p>
+              <p class="text-xs text-gray-400">{{ c.email }}</p>
+            </td>
+            <td class="px-4 py-3 text-right text-green-600">${{ c.totalCredit | number:'1.2-2' }}</td>
+            <td class="px-4 py-3 text-right text-red-500">${{ c.totalDebit | number:'1.2-2' }}</td>
+            <td class="px-4 py-3 text-right font-bold" [class.text-green-600]="c.balance >= 0" [class.text-red-500]="c.balance < 0">
+              ${{ c.balance | number:'1.2-2' }}
+            </td>
+            <td class="px-4 py-3 text-right">{{ c.transactionCount }}</td>
+          </tr>
+          <tr *ngIf="creditReport.length === 0"><td colspan="5" class="px-4 py-6 text-center text-gray-400">No credit data</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Analytics Tab -->
+  <div *ngIf="activeTab === 'analytics'">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl shadow-sm p-4">
+        <h2 class="font-semibold text-gray-800 mb-3">Top 5 Items</h2>
+        <div class="space-y-2">
+          <div *ngFor="let item of analyticsData?.topItems; let i = index" class="flex items-center gap-3">
+            <span class="w-6 h-6 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs font-bold">{{ i+1 }}</span>
+            <span class="flex-1 text-sm">{{ item.item_name }}</span>
+            <span class="text-sm font-semibold">{{ item.totalQuantity }} sold</span>
+          </div>
+          <p *ngIf="!analyticsData?.topItems?.length" class="text-gray-400 text-center py-4">No data</p>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-4">
+        <h2 class="font-semibold text-gray-800 mb-3">New Customers</h2>
+        <p class="text-4xl font-bold text-primary-600">{{ analyticsData?.newCustomers || 0 }}</p>
+        <p class="text-gray-400 text-sm mt-1">new customers in the selected period</p>
       </div>
     </div>
   </div>

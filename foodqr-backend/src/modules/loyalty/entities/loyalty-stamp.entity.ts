@@ -32,6 +32,15 @@ export class LoyaltyStamp {
   @Column({ nullable: true })
   sourceType: string;
 
+  @Column({ nullable: true })
+  sourceId: string;
+
+  @Column({ nullable: true })
+  configurationId: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  metadata: object;
+
   @CreateDateColumn()
   earnedAt: Date;
 }

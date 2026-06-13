@@ -12,7 +12,16 @@ export class Offer {
   title: string;
 
   @Column({ nullable: true })
+  slug: string;
+
+  @Column({ nullable: true })
   description: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  discountAmount: number;
+
+  @Column({ default: 'fixed' })
+  discountType: string;
 
   @Column({ nullable: true })
   image: string;
@@ -22,6 +31,9 @@ export class Offer {
 
   @Column({ nullable: true })
   badgeColor: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  maxDiscount: number;
 
   @Column({ nullable: true })
   startDate: Date;

@@ -52,4 +52,14 @@ export class LoyaltyController {
   addConfiguration(@Param('id', ParseUUIDPipe) id: string, @Body() data: any) {
     return this.loyaltyService.addConfiguration(id, data);
   }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('admin/loyalty/segments')
+  getSegments() { return this.loyaltyService.getCustomerSegments(); }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('admin/loyalty/leaderboard')
+  getLeaderboard() { return this.loyaltyService.getLeaderboard(); }
 }

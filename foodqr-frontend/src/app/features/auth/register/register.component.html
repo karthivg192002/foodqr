@@ -7,33 +7,86 @@
         </svg>
       </div>
       <h1 class="text-3xl font-bold text-gray-900">Create Account</h1>
-      <p class="text-gray-500 mt-1">Join FoodQR today</p>
+      <!-- Step indicator -->
+      <div class="flex items-center justify-center gap-2 mt-3">
+        <div class="flex items-center gap-1">
+          <div [class]="step >= 1 ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'" class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold">1</div>
+          <span class="text-xs text-gray-400">Email</span>
+        </div>
+        <div class="w-6 h-px bg-gray-300"></div>
+        <div class="flex items-center gap-1">
+          <div [class]="step >= 2 ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'" class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold">2</div>
+          <span class="text-xs text-gray-400">Verify</span>
+        </div>
+        <div class="w-6 h-px bg-gray-300"></div>
+        <div class="flex items-center gap-1">
+          <div [class]="step >= 3 ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-500'" class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold">3</div>
+          <span class="text-xs text-gray-400">Profile</span>
+        </div>
+      </div>
     </div>
 
     <div class="bg-white rounded-2xl shadow-xl p-8">
-      <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <!-- Step 1: Email -->
+      <div *ngIf="step === 1">
+        <h2 class="text-lg font-semibold text-gray-800 mb-1">Enter your email</h2>
+        <p class="text-sm text-gray-500 mb-5">We'll send you a verification code</p>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
-            <input formControlName="name" type="text" class="input-field" placeholder="John Doe">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+            <input [(ngModel)]="email" type="email" class="input-field" placeholder="you@example.com"
+              (keyup.enter)="sendOtp()">
           </div>
+          <button (click)="sendOtp()" [disabled]="loading" class="btn-primary w-full py-3">
+            {{ loading ? 'Sending...' : 'Send OTP' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: OTP -->
+      <div *ngIf="step === 2">
+        <h2 class="text-lg font-semibold text-gray-800 mb-1">Verify your email</h2>
+        <p class="text-sm text-gray-500 mb-5">Enter the 6-digit code sent to <strong>{{ email }}</strong></p>
+        <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-            <input formControlName="email" type="email" class="input-field" placeholder="you@example.com">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Verification Code</label>
+            <input [(ngModel)]="otp" type="text" maxlength="6" class="input-field text-center tracking-widest text-xl font-bold"
+              placeholder="000000" (keyup.enter)="verifyOtp()">
+          </div>
+          <button (click)="verifyOtp()" [disabled]="loading" class="btn-primary w-full py-3">
+            {{ loading ? 'Verifying...' : 'Verify OTP' }}
+          </button>
+          <div class="text-center">
+            <button (click)="step = 1" class="text-sm text-gray-400 hover:text-gray-600 mr-4">← Change email</button>
+            <button (click)="resendOtp()" [disabled]="loading" class="text-sm text-orange-500 hover:text-orange-600">Resend OTP</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Profile -->
+      <div *ngIf="step === 3">
+        <h2 class="text-lg font-semibold text-gray-800 mb-1">Complete your profile</h2>
+        <p class="text-sm text-gray-500 mb-5">Almost done! Set your name and password</p>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Full Name *</label>
+            <input [(ngModel)]="name" type="text" class="input-field" placeholder="John Doe">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1.5">Phone (Optional)</label>
-            <input formControlName="phone" type="tel" class="input-field" placeholder="+1 234 567 8900">
+            <input [(ngModel)]="phone" type="tel" class="input-field" placeholder="+1 234 567 8900">
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
-            <input formControlName="password" type="password" class="input-field" placeholder="Min. 6 characters">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Password *</label>
+            <input [(ngModel)]="password" type="password" class="input-field" placeholder="Min. 6 characters">
           </div>
-          <button type="submit" [disabled]="loading" class="btn-primary w-full py-3 mt-2">
+          <button (click)="completeRegistration()" [disabled]="loading" class="btn-primary w-full py-3 mt-2">
             {{ loading ? 'Creating account...' : 'Create Account' }}
           </button>
         </div>
-      </form>
+      </div>
+
       <p class="text-center text-sm text-gray-500 mt-6">
         Already have an account? <a routerLink="/auth/login" class="text-orange-600 font-medium">Sign in</a>
       </p>

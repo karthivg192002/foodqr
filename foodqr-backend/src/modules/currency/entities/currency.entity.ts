@@ -20,6 +20,9 @@ export class Currency {
   exchangeRate: number;
 
   @Column({ default: false })
+  isCryptocurrency: boolean;
+
+  @Column({ default: false })
   isDefault: boolean;
 
   @Column({ default: true })

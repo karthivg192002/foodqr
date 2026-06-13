@@ -62,6 +62,10 @@ export class CreateOrderDto {
   diningTableId?: string;
 
   @ApiPropertyOptional()
+  @IsOptional() @IsUUID()
+  branchId?: string;
+
+  @ApiPropertyOptional()
   @IsOptional() @IsObject()
   deliveryAddress?: object;
 
@@ -80,6 +84,18 @@ export class CreateOrderDto {
   @ApiPropertyOptional()
   @IsOptional() @IsNumber()
   discount?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional() @IsString()
+  couponCode?: string;
+
+  @ApiPropertyOptional({ description: 'Delivery distance in km for charge calculation' })
+  @IsOptional() @IsNumber()
+  deliveryDistanceKm?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional() @IsObject()
+  deliveryAddressSnapshot?: object;
 }
 
 export class UpdateOrderStatusDto {

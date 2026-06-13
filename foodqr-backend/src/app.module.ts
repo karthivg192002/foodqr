@@ -18,23 +18,41 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { CurrencyModule } from './modules/currency/currency.module';
 import { TaxModule } from './modules/tax/tax.module';
+import { ItemAttributesModule } from './modules/item-attributes/item-attributes.module';
+import { ItemAddonsModule } from './modules/item-addons/item-addons.module';
+import { AddressesModule } from './modules/addresses/addresses.module';
+import { TimeSlotsModule } from './modules/time-slots/time-slots.module';
+import { NotificationAlertsModule } from './modules/notification-alerts/notification-alerts.module';
+import { LoyaltySettingsModule } from './modules/loyalty-settings/loyalty-settings.module';
+import { PaymentGatewaysModule } from './modules/payment-gateways/payment-gateways.module';
+import { SmsGatewaysModule } from './modules/sms-gateways/sms-gateways.module';
+import { PagesModule } from './modules/pages/pages.module';
+import { MessagingModule } from './modules/messaging/messaging.module';
+import { PushNotificationsModule } from './modules/push-notifications/push-notifications.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
-        username: config.get('DB_USERNAME', 'postgres'),
-        password: config.get('DB_PASSWORD', 'password'),
-        database: config.get('DB_DATABASE', 'foodqr_db'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: config.get('NODE_ENV') !== 'production',
-        logging: config.get('NODE_ENV') === 'development',
-      }),
+      useFactory: (config: ConfigService) => {
+        const isProduction = config.get('NODE_ENV') === 'production';
+        return {
+          type: 'postgres',
+          host: config.get('DB_HOST', 'localhost'),
+          port: config.get<number>('DB_PORT', 5432),
+          username: config.get('DB_USERNAME', 'postgres'),
+          password: config.get('DB_PASSWORD', 'password'),
+          database: config.get('DB_DATABASE', 'foodqr_db'),
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          migrations: [__dirname + '/migrations/*{.ts,.js}'],
+          autoLoadEntities: true,
+          synchronize: !isProduction,
+          migrationsRun: isProduction,
+          logging: !isProduction,
+        };
+      },
       inject: [ConfigService],
     }),
     AuthModule,
@@ -54,6 +72,18 @@ import { TaxModule } from './modules/tax/tax.module';
     UploadModule,
     CurrencyModule,
     TaxModule,
+    ItemAttributesModule,
+    ItemAddonsModule,
+    AddressesModule,
+    TimeSlotsModule,
+    NotificationAlertsModule,
+    LoyaltySettingsModule,
+    PaymentGatewaysModule,
+    SmsGatewaysModule,
+    PagesModule,
+    MessagingModule,
+    PushNotificationsModule,
+    MailModule,
   ],
 })
 export class AppModule {}

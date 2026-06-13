@@ -1,0 +1,51 @@
+<div class="p-6 h-full">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-bold text-gray-800">Customer Messaging</h1>
+    <select [(ngModel)]="selectedBranchId" (change)="onBranchChange()" class="input">
+      <option *ngFor="let b of branches" [value]="b.id">{{ b.name }}</option>
+    </select>
+  </div>
+
+  <div class="flex gap-4 bg-white rounded-xl shadow-sm overflow-hidden" style="height: 600px;">
+    <!-- Thread list -->
+    <div class="w-72 border-r flex flex-col">
+      <div class="p-3 bg-gray-50 border-b text-sm font-semibold text-gray-600">Conversations</div>
+      <div *ngIf="loading" class="p-4 text-gray-400 text-sm">Loading...</div>
+      <div class="flex-1 overflow-y-auto">
+        <div *ngFor="let t of threads"
+             (click)="openThread(t)"
+             [class.bg-primary-50]="selectedThread?.id === t.id"
+             class="p-3 border-b hover:bg-gray-50 cursor-pointer">
+          <p class="font-medium text-sm">{{ t.user?.name || 'Customer' }}</p>
+          <p class="text-xs text-gray-400">{{ t.user?.email }}</p>
+        </div>
+        <div *ngIf="threads.length === 0 && !loading" class="p-4 text-gray-400 text-sm text-center">No conversations</div>
+      </div>
+    </div>
+
+    <!-- Chat area -->
+    <div class="flex-1 flex flex-col">
+      <div *ngIf="!selectedThread" class="flex-1 flex items-center justify-center text-gray-400">
+        Select a conversation to view messages
+      </div>
+      <ng-container *ngIf="selectedThread">
+        <div class="p-3 bg-gray-50 border-b text-sm font-semibold">
+          {{ selectedThread.user?.name || 'Customer' }}
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+          <div *ngFor="let msg of history"
+               [class.self-end]="msg.userId !== selectedThread.userId"
+               class="max-w-xs px-3 py-2 rounded-lg text-sm"
+               [ngClass]="msg.userId !== selectedThread.userId ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-800'">
+            {{ msg.text }}
+            <span class="block text-xs opacity-60 mt-1">{{ msg.createdAt | date:'HH:mm' }}</span>
+          </div>
+        </div>
+        <div class="p-3 border-t flex gap-2">
+          <input [(ngModel)]="newMessage" (keyup.enter)="send()" class="input flex-1" placeholder="Type a message..." />
+          <button (click)="send()" [disabled]="sending" class="btn btn-primary">Send</button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

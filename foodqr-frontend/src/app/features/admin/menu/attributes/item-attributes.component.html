@@ -1,0 +1,88 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Item Attributes</h1>
+    <div class="flex gap-2">
+      <button (click)="showAssignForm = true" class="btn btn-outline">Assign to Category</button>
+      <button (click)="openCreate()" class="btn btn-primary">+ Add Attribute</button>
+    </div>
+  </div>
+
+  <!-- Attribute Form Modal -->
+  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+      <h2 class="text-lg font-semibold mb-4">{{ editingId ? 'Edit' : 'New' }} Attribute</h2>
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Name *</label>
+          <input formControlName="name" class="input w-full" placeholder="e.g. Size, Flavor, Color" />
+        </div>
+        <div class="mb-4 flex items-center gap-2">
+          <input type="checkbox" formControlName="status" id="attrStatus" class="rounded" />
+          <label for="attrStatus" class="text-sm">Active</label>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" (click)="showForm = false" class="btn btn-outline">Cancel</button>
+          <button type="submit" [disabled]="saving" class="btn btn-primary">
+            {{ saving ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Assign to Category Modal -->
+  <div *ngIf="showAssignForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+      <h2 class="text-lg font-semibold mb-4">Assign Attribute to Category</h2>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Attribute</label>
+        <select [(ngModel)]="assignData.attributeId" class="input w-full">
+          <option value="">Select attribute</option>
+          <option *ngFor="let a of attributes" [value]="a.id">{{ a.name }}</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Category</label>
+        <select [(ngModel)]="assignData.categoryId" class="input w-full">
+          <option value="">Select category</option>
+          <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+        </select>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button (click)="showAssignForm = false" class="btn btn-outline">Cancel</button>
+        <button (click)="assignToCategory()" class="btn btn-primary">Assign</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div *ngIf="loading" class="p-8 text-center text-gray-400">Loading...</div>
+    <table *ngIf="!loading" class="w-full text-sm">
+      <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+        <tr>
+          <th class="px-4 py-3 text-left">Name</th>
+          <th class="px-4 py-3 text-left">Status</th>
+          <th class="px-4 py-3 text-left">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of attributes" class="border-t hover:bg-gray-50">
+          <td class="px-4 py-3 font-medium">{{ a.name }}</td>
+          <td class="px-4 py-3">
+            <span [class]="a.status ? 'badge badge-success' : 'badge badge-gray'">
+              {{ a.status ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <button (click)="openEdit(a)" class="text-blue-600 hover:underline mr-3">Edit</button>
+            <button (click)="delete(a.id)" class="text-red-500 hover:underline">Delete</button>
+          </td>
+        </tr>
+        <tr *ngIf="attributes.length === 0">
+          <td colspan="3" class="px-4 py-8 text-center text-gray-400">No attributes found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

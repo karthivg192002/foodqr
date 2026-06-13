@@ -42,16 +42,37 @@ export class OrderItem {
   unitPrice: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  discount: number;
+
+  @Column({ nullable: true })
+  taxName: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   taxRate: number;
+
+  @Column({ nullable: true })
+  taxType: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   taxAmount: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  subtotal: number;
+  @Column({ nullable: true, type: 'jsonb' })
+  itemVariations: object[];
 
   @Column({ nullable: true, type: 'jsonb' })
   extras: object[];
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  itemVariationTotal: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  itemExtraTotal: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  subtotal: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  totalPrice: number;
 
   @Column({ nullable: true })
   specialNote: string;

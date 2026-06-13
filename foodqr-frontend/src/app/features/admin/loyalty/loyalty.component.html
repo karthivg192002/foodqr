@@ -1,68 +1,243 @@
-<div>
+<div class="p-6">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="page-title">Loyalty Programs</h1>
-    <button (click)="showForm = true; form.reset({requiredStamps: 10, isActive: true, autoResetStamps: true})" class="btn-primary flex items-center gap-2">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-      New Program
-    </button>
+    <h1 class="text-2xl font-bold text-gray-800">Loyalty</h1>
+    <button *ngIf="activeTab === 'programs'"
+      (click)="showForm = true; form.reset({requiredStamps: 10, isActive: true, autoResetStamps: true})"
+      class="btn btn-primary">+ New Program</button>
   </div>
 
-  <div *ngIf="loading" class="flex justify-center py-12">
-    <div class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+  <!-- Tabs -->
+  <div class="flex gap-1 border-b mb-6 overflow-x-auto">
+    <button (click)="onTabChange('programs')" [class.border-b-2]="activeTab === 'programs'" [class.border-orange-500]="activeTab === 'programs'" [class.text-orange-600]="activeTab === 'programs'" class="px-4 py-2 text-sm font-medium text-gray-600 whitespace-nowrap">Programs</button>
+    <button (click)="onTabChange('configs')" [class.border-b-2]="activeTab === 'configs'" [class.border-orange-500]="activeTab === 'configs'" [class.text-orange-600]="activeTab === 'configs'" class="px-4 py-2 text-sm font-medium text-gray-600 whitespace-nowrap">Configurations</button>
+    <button (click)="onTabChange('segments')" [class.border-b-2]="activeTab === 'segments'" [class.border-orange-500]="activeTab === 'segments'" [class.text-orange-600]="activeTab === 'segments'" class="px-4 py-2 text-sm font-medium text-gray-600 whitespace-nowrap">Segments</button>
+    <button (click)="onTabChange('settings')" [class.border-b-2]="activeTab === 'settings'" [class.border-orange-500]="activeTab === 'settings'" [class.text-orange-600]="activeTab === 'settings'" class="px-4 py-2 text-sm font-medium text-gray-600 whitespace-nowrap">Settings</button>
   </div>
 
-  <div *ngIf="!loading" class="space-y-4">
-    <div *ngFor="let p of programs" class="card">
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <div class="flex items-center gap-3 mb-2">
-            <h3 class="font-semibold text-lg text-gray-900">{{ p.name }}</h3>
-            <span [class]="p.isActive ? 'badge-success' : 'badge-gray'">{{ p.isActive ? 'Active' : 'Inactive' }}</span>
+  <!-- Programs Tab -->
+  <div *ngIf="activeTab === 'programs'">
+    <div *ngIf="loading" class="text-center py-12 text-gray-400">Loading...</div>
+    <div *ngIf="!loading" class="space-y-4">
+      <div *ngFor="let p of programs" class="bg-white rounded-xl shadow-sm p-4">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="font-semibold text-lg">{{ p.name }}</h3>
+              <span [class]="p.isActive ? 'badge-success' : 'badge-gray'">{{ p.isActive ? 'Active' : 'Inactive' }}</span>
+            </div>
+            <p class="text-gray-500 text-sm mb-3">{{ p.description || 'No description' }}</p>
+            <div class="grid grid-cols-3 gap-3 text-sm">
+              <div class="bg-orange-50 rounded-lg p-3 text-center">
+                <p class="text-2xl font-bold text-orange-600">{{ p.requiredStamps }}</p>
+                <p class="text-gray-500 text-xs">Stamps for reward</p>
+              </div>
+              <div class="bg-blue-50 rounded-lg p-3 text-center">
+                <p class="text-2xl font-bold text-blue-600">{{ p.configurations?.length || 0 }}</p>
+                <p class="text-gray-500 text-xs">Configurations</p>
+              </div>
+              <div class="bg-green-50 rounded-lg p-3 text-center">
+                <p class="text-lg font-bold text-green-600">{{ p.autoResetStamps ? '✓' : '✗' }}</p>
+                <p class="text-gray-500 text-xs">Auto reset</p>
+              </div>
+            </div>
+            <button (click)="openConfigForm(p.id)" class="mt-3 text-xs text-orange-500 hover:text-orange-600 font-medium">+ Add Configuration</button>
           </div>
-          <p class="text-gray-500 text-sm mb-3">{{ p.description || 'No description' }}</p>
-          <div class="grid grid-cols-3 gap-4 text-sm">
-            <div class="bg-orange-50 rounded-lg p-3 text-center">
-              <p class="text-2xl font-bold text-orange-600">{{ p.requiredStamps }}</p>
-              <p class="text-gray-500 text-xs">Stamps for reward</p>
+          <button (click)="toggleActive(p)"
+            [class.bg-green-500]="p.isActive" [class.bg-gray-300]="!p.isActive"
+            class="w-12 h-6 rounded-full relative ml-4 transition-colors">
+            <span [class.translate-x-6]="p.isActive" [class.translate-x-0]="!p.isActive"
+              class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform inline-block"></span>
+          </button>
+        </div>
+      </div>
+      <p *ngIf="!programs.length" class="text-center text-gray-400 py-12">No loyalty programs yet</p>
+    </div>
+  </div>
+
+  <!-- Configurations Tab -->
+  <div *ngIf="activeTab === 'configs'">
+    <div class="space-y-4">
+      <div *ngFor="let p of programs">
+        <h3 class="font-semibold text-gray-700 mb-2">{{ p.name }}</h3>
+        <div *ngIf="!p.configurations?.length" class="text-sm text-gray-400 mb-3">No configurations yet. Go to Programs tab to add one.</div>
+        <div *ngFor="let c of p.configurations" class="bg-white rounded-xl shadow-sm p-4 mb-2">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-sm font-medium text-gray-800 capitalize">{{ c.calculationType?.replace('_', ' ') }}</span>
+              <div class="text-xs text-gray-500 mt-1">Stamps per threshold: <strong>{{ c.stampsPerThreshold }}</strong> · Threshold: <strong>{{ c.thresholdValue || 'N/A' }}</strong></div>
             </div>
-            <div class="bg-blue-50 rounded-lg p-3 text-center">
-              <p class="text-2xl font-bold text-blue-600">{{ p.configurations?.length || 0 }}</p>
-              <p class="text-gray-500 text-xs">Configurations</p>
-            </div>
-            <div class="bg-green-50 rounded-lg p-3 text-center">
-              <p class="text-lg font-bold text-green-600">{{ p.autoResetStamps ? '✓' : '✗' }}</p>
-              <p class="text-gray-500 text-xs">Auto reset</p>
-            </div>
+            <span class="badge-info text-xs">{{ c.periodType || 'lifetime' }}</span>
           </div>
         </div>
-        <button (click)="toggleActive(p)" [class]="p.isActive ? 'bg-green-500' : 'bg-gray-300'" class="w-12 h-6 rounded-full relative ml-4 transition-colors">
-          <span [class]="p.isActive ? 'translate-x-6' : 'translate-x-0'" class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform inline-block"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Segments Tab -->
+  <div *ngIf="activeTab === 'segments'">
+    <div *ngIf="segmentsLoading" class="text-center py-12 text-gray-400">Loading segments...</div>
+    <div *ngIf="segments && !segmentsLoading">
+      <!-- Summary cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="card text-center">
+          <p class="text-2xl font-bold text-gray-700">{{ segments.summary?.total || 0 }}</p>
+          <p class="text-xs text-gray-500 mt-1">Total Participants</p>
+        </div>
+        <div class="card text-center">
+          <p class="text-2xl font-bold text-yellow-600">{{ segments.summary?.bronze || 0 }}</p>
+          <p class="text-xs text-gray-500 mt-1">Bronze</p>
+        </div>
+        <div class="card text-center">
+          <p class="text-2xl font-bold text-gray-500">{{ segments.summary?.silver || 0 }}</p>
+          <p class="text-xs text-gray-500 mt-1">Silver</p>
+        </div>
+        <div class="card text-center">
+          <p class="text-2xl font-bold text-green-600">{{ segments.summary?.gold || 0 }}</p>
+          <p class="text-xs text-gray-500 mt-1">Gold</p>
+        </div>
+      </div>
+      <!-- Leaderboard -->
+      <div class="card overflow-hidden p-0">
+        <div class="px-5 py-3 border-b font-semibold text-gray-700">Top Customers by Stamps</div>
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50"><tr>
+            <th class="px-5 py-3 text-left text-gray-600">#</th>
+            <th class="px-5 py-3 text-left text-gray-600">Customer</th>
+            <th class="px-5 py-3 text-right text-gray-600">Stamps</th>
+            <th class="px-5 py-3 text-right text-gray-600">Progress</th>
+          </tr></thead>
+          <tbody>
+            <tr *ngFor="let c of leaderboard; let i = index" class="border-t border-gray-50">
+              <td class="px-5 py-3 text-gray-500">{{ i + 1 }}</td>
+              <td class="px-5 py-3">
+                <p class="font-medium text-gray-900">{{ c.name }}</p>
+                <p class="text-xs text-gray-400">{{ c.email }}</p>
+              </td>
+              <td class="px-5 py-3 text-right font-semibold">{{ c.totalstamps }}</td>
+              <td class="px-5 py-3 text-right">
+                <div class="w-24 bg-gray-100 rounded-full h-2 ml-auto">
+                  <div class="bg-orange-500 h-2 rounded-full" [style.width.%]="[100, (+c.totalstamps / segments.requiredStamps * 100)] | min"></div>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!leaderboard.length"><td colspan="4" class="px-5 py-8 text-center text-gray-400">No loyalty activity yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Tab -->
+  <div *ngIf="activeTab === 'settings'">
+    <div class="bg-white rounded-xl shadow-sm p-6 max-w-xl">
+      <h2 class="font-semibold text-gray-800 mb-4">Loyalty Threshold Settings</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Minimum Order Amount to Earn Stamps</label>
+          <input type="number" [(ngModel)]="loyaltySettings.loyalty_min_order_amount" class="input w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Stamps Per Order (fixed)</label>
+          <input type="number" [(ngModel)]="loyaltySettings.loyalty_stamps_per_order" class="input w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Extra Stamps per Amount Threshold</label>
+          <input type="number" [(ngModel)]="loyaltySettings.loyalty_stamps_per_amount" class="input w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Amount Threshold for Extra Stamps ($)</label>
+          <input type="number" [(ngModel)]="loyaltySettings.loyalty_amount_threshold" class="input w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Required Stamps for Reward</label>
+          <input type="number" [(ngModel)]="loyaltySettings.loyalty_required_stamps" class="input w-full" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Reward Value ($)</label>
+          <input type="number" [(ngModel)]="loyaltySettings.loyalty_reward_value" class="input w-full" />
+        </div>
+        <button (click)="saveSettings()" [disabled]="settingsSaving" class="btn btn-primary w-full">
+          {{ settingsSaving ? 'Saving...' : 'Save Settings' }}
         </button>
       </div>
     </div>
-    <p *ngIf="!programs.length" class="text-center text-gray-400 py-12">No loyalty programs yet</p>
   </div>
 
-  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <!-- Config Modal -->
+  <div *ngIf="showConfigForm" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
       <div class="flex items-center justify-between p-6 border-b">
-        <h2 class="font-bold">New Loyalty Program</h2>
-        <button (click)="showForm = false">✕</button>
+        <h2 class="font-bold text-gray-900">Add Stamp Configuration</h2>
+        <button (click)="showConfigForm = false" class="text-gray-400 hover:text-gray-600">✕</button>
       </div>
-      <form [formGroup]="form" (ngSubmit)="save()" class="p-6 space-y-4">
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Program Name *</label>
-          <input formControlName="name" class="input-field" placeholder="e.g. Stamp Card"></div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea formControlName="description" class="input-field" rows="2"></textarea></div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Required Stamps for Reward *</label>
-          <input formControlName="requiredStamps" type="number" class="input-field"></div>
-        <div class="flex gap-6">
-          <label class="flex items-center gap-2 text-sm"><input formControlName="isActive" type="checkbox"> Active</label>
-          <label class="flex items-center gap-2 text-sm"><input formControlName="autoResetStamps" type="checkbox"> Auto reset after reward</label>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Calculation Type *</label>
+          <select [formControl]="configForm.get('calculationType')!" class="input-field w-full">
+            <option *ngFor="let t of calculationTypes" [value]="t">{{ t | titlecase | slice:0:25 }}</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Threshold Value</label>
+            <input [formControl]="configForm.get('thresholdValue')!" type="number" class="input-field w-full" placeholder="e.g. 10">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Stamps per Threshold *</label>
+            <input [formControl]="configForm.get('stampsPerThreshold')!" type="number" min="1" class="input-field w-full">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Max Stamps/Period</label>
+            <input [formControl]="configForm.get('maxStampsPerPeriod')!" type="number" class="input-field w-full" placeholder="unlimited">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Period Type</label>
+            <select [formControl]="configForm.get('periodType')!" class="input-field w-full">
+              <option value="lifetime">Lifetime</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
         </div>
         <div class="flex gap-3 pt-2">
-          <button type="submit" [disabled]="saving" class="btn-primary flex-1">{{ saving ? 'Creating...' : 'Create' }}</button>
-          <button type="button" (click)="showForm = false" class="btn-secondary flex-1">Cancel</button>
+          <button (click)="saveConfig()" [disabled]="configSaving || configForm.invalid" class="btn-primary flex-1">{{ configSaving ? 'Saving...' : 'Add Config' }}</button>
+          <button (click)="showConfigForm = false" class="btn-secondary flex-1">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Program Modal -->
+  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+      <h2 class="font-bold text-lg mb-4">New Loyalty Program</h2>
+      <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Program Name *</label>
+          <input formControlName="name" class="input w-full" placeholder="e.g. Stamp Card" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Description</label>
+          <textarea formControlName="description" class="input w-full" rows="2"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Required Stamps for Reward *</label>
+          <input formControlName="requiredStamps" type="number" class="input w-full" />
+        </div>
+        <div class="flex gap-6">
+          <label class="flex items-center gap-2 text-sm">
+            <input formControlName="isActive" type="checkbox" /> Active
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input formControlName="autoResetStamps" type="checkbox" /> Auto reset after reward
+          </label>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="submit" [disabled]="saving" class="btn btn-primary flex-1">{{ saving ? 'Creating...' : 'Create' }}</button>
+          <button type="button" (click)="showForm = false" class="btn btn-outline flex-1">Cancel</button>
         </div>
       </form>
     </div>

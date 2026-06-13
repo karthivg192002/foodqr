@@ -24,11 +24,20 @@ export class Transaction {
   @JoinColumn({ name: 'orderId' })
   order: Order;
 
+  @Column({ default: '+' })
+  sign: string;
+
+  @Column({ nullable: true })
+  transactionNo: string;
+
   @Column({ type: 'enum', enum: PaymentMethod })
   paymentMethod: PaymentMethod;
 
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.UNPAID })
   status: PaymentStatus;
+
+  @Column({ default: 'payment' })
+  type: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;

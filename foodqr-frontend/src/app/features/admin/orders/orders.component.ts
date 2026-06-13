@@ -20,9 +20,24 @@ export class OrdersComponent implements OnInit {
   statuses = Object.values(OrderStatus);
   orderTypes = ['delivery', 'takeaway', 'pos', 'dining_table'];
 
+  // Delivery boy assignment
+  deliveryBoys: any[] = [];
+  showAssignModal = false;
+  assignOrderId = '';
+  selectedDeliveryBoyId = '';
+
   constructor(private api: ApiService, private toastr: ToastrService) {}
 
-  ngOnInit(): void { this.loadOrders(); }
+  ngOnInit(): void {
+    this.loadOrders();
+    this.loadDeliveryBoys();
+  }
+
+  loadDeliveryBoys(): void {
+    this.api.get<any>('admin/staff', { role: 'delivery_boy' }).subscribe({
+      next: (res) => { this.deliveryBoys = res.data || res || []; },
+    });
+  }
 
   loadOrders(): void {
     this.loading = true;
@@ -40,6 +55,19 @@ export class OrdersComponent implements OnInit {
   updateStatus(order: Order, status: string): void {
     this.api.patch(`admin/orders/${order.id}/status`, { status }).subscribe({
       next: () => { this.toastr.success('Order status updated'); this.loadOrders(); this.selectedOrder = null; },
+    });
+  }
+
+  openAssignModal(order: Order): void {
+    this.assignOrderId = order.id;
+    this.selectedDeliveryBoyId = (order as any).deliveryBoyId || '';
+    this.showAssignModal = true;
+  }
+
+  assignDeliveryBoy(): void {
+    if (!this.selectedDeliveryBoyId) return;
+    this.api.patch(`admin/orders/${this.assignOrderId}/assign-delivery-boy`, { deliveryBoyId: this.selectedDeliveryBoyId }).subscribe({
+      next: () => { this.toastr.success('Delivery boy assigned'); this.showAssignModal = false; this.loadOrders(); },
     });
   }
 

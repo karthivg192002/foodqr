@@ -1,0 +1,32 @@
+import { ItemType } from '../../../../common/enums';
+import { ItemCategory } from '../../categories/entities/item-category.entity';
+import { ItemVariation } from '../../variations/entities/item-variation.entity';
+export declare class Item {
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    caution: string;
+    ingredients: string;
+    price: number;
+    categoryId: string;
+    category: ItemCategory;
+    subCategoryId: string;
+    itemType: ItemType;
+    thumbImage: string;
+    coverImage: string;
+    videoUrl: string;
+    gallery: string[];
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    taxId: string;
+    taxRate: number;
+    isFeatured: boolean;
+    status: boolean;
+    sortOrder: number;
+    variations: ItemVariation[];
+    createdAt: Date;
+    updatedAt: Date;
+}

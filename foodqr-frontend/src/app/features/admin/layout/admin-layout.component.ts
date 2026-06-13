@@ -61,6 +61,7 @@ export class AdminLayoutComponent implements OnInit {
         { label: 'Categories', icon: 'tag', route: '/admin/menu/categories', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
         { label: 'Menu Items', icon: 'menu', route: '/admin/menu/items', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
         { label: 'Item Extras', icon: 'plus-circle', route: '/admin/menu/extras', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
+        { label: 'Item Attributes', icon: 'tag', route: '/admin/menu/attributes', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
       ],
     },
     {
@@ -68,6 +69,7 @@ export class AdminLayoutComponent implements OnInit {
       items: [
         { label: 'Customers', icon: 'users', route: '/admin/customers', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
         { label: 'Staff & Employees', icon: 'user-check', route: '/admin/staff', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
+        { label: 'Messaging', icon: 'chat', route: '/admin/messaging', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
       ],
     },
     {
@@ -75,6 +77,7 @@ export class AdminLayoutComponent implements OnInit {
       items: [
         { label: 'Dining Tables', icon: 'table', route: '/admin/dining-tables', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.WAITER] },
         { label: 'Branches', icon: 'building', route: '/admin/branches', roles: [UserRole.ADMIN] },
+        { label: 'Time Slots', icon: 'clock', route: '/admin/time-slots', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
       ],
     },
     {
@@ -96,6 +99,7 @@ export class AdminLayoutComponent implements OnInit {
       heading: 'Configuration',
       items: [
         { label: 'Settings', icon: 'settings', route: '/admin/settings', roles: [UserRole.ADMIN] },
+        { label: 'Payment Gateways', icon: 'card', route: '/admin/payment-gateways', roles: [UserRole.ADMIN] },
       ],
     },
   ];

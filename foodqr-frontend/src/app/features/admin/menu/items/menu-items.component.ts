@@ -8,6 +8,7 @@ import { Item, ItemCategory, PaginatedResponse } from '../../../../core/models';
 export class MenuItemsComponent implements OnInit {
   items: Item[] = [];
   categories: ItemCategory[] = [];
+  subCategories: ItemCategory[] = [];
   total = 0;
   page = 1;
   limit = 20;
@@ -26,6 +27,7 @@ export class MenuItemsComponent implements OnInit {
       description: [''],
       price: [0, [Validators.required, Validators.min(0)]],
       categoryId: [''],
+      subCategoryId: [''],
       itemType: ['veg'],
       taxRate: [0],
       isFeatured: [false],
@@ -37,6 +39,12 @@ export class MenuItemsComponent implements OnInit {
   ngOnInit(): void {
     this.loadItems();
     this.api.get<ItemCategory[]>('frontend/categories').subscribe({ next: (c) => this.categories = c });
+  }
+
+  onCategoryChange(categoryId: string): void {
+    const selected = this.categories.find((c) => c.id === categoryId);
+    this.subCategories = selected?.children || [];
+    this.form.patchValue({ subCategoryId: '' });
   }
 
   loadItems(): void {

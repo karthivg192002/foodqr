@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Patch, Body, Param, Query,
-  UseGuards, ParseUUIDPipe, DefaultValuePipe, ParseIntPipe,
+  UseGuards, ParseUUIDPipe, DefaultValuePipe, ParseIntPipe, ParseFloatPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
@@ -83,5 +83,41 @@ export class OrdersController {
   @Get('admin/dashboard/stats')
   getDashboardStats() {
     return this.ordersService.getDashboardStats();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  @ApiBearerAuth()
+  @Patch('admin/orders/:id/assign-delivery-boy')
+  assignDeliveryBoy(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { deliveryBoyId: string },
+  ) {
+    return this.ordersService.assignDeliveryBoy(id, body.deliveryBoyId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.STAFF)
+  @ApiBearerAuth()
+  @Get('admin/delivery-boy/:deliveryBoyId/orders')
+  getDeliveryBoyOrders(
+    @Param('deliveryBoyId', ParseUUIDPipe) deliveryBoyId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
+  ) {
+    return this.ordersService.getOrdersByDeliveryBoy(deliveryBoyId, page, limit);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.POS_OPERATOR, UserRole.STAFF)
+  @ApiBearerAuth()
+  @Get('admin/orders/:id/pos-change')
+  getPosChange(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('received', ParseFloatPipe) received: number,
+  ) {
+    return this.ordersService.findOne(id).then((order) =>
+      this.ordersService.posChangeCalc(Number(order.total), received),
+    );
   }
 }

@@ -1,0 +1,49 @@
+<div class="p-6">
+  <h1 class="text-2xl font-bold text-gray-800 mb-6">Payment Gateways</h1>
+
+  <div *ngIf="loading" class="text-center py-8 text-gray-400">Loading...</div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div *ngFor="let gw of gateways" class="bg-white rounded-xl shadow-sm p-4 flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">{{ getGatewayIcon(gw.slug) }}</span>
+          <div>
+            <p class="font-semibold text-gray-800">{{ gw.name }}</p>
+            <p class="text-xs text-gray-400">{{ gw.mode || 'sandbox' }} mode</p>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" [checked]="gw.isActive" (change)="toggle(gw)" class="sr-only peer" />
+          <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-primary-600 after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition peer-checked:after:translate-x-5"></div>
+        </label>
+      </div>
+      <button (click)="openConfig(gw)" class="btn btn-outline btn-sm w-full">Configure</button>
+    </div>
+  </div>
+
+  <!-- Config Modal -->
+  <div *ngIf="selectedGateway" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+      <h2 class="text-lg font-semibold mb-4">Configure {{ selectedGateway.name }}</h2>
+      <div class="mb-3">
+        <label class="block text-sm font-medium mb-1">Mode</label>
+        <select [(ngModel)]="selectedGateway.mode" class="input w-full">
+          <option value="sandbox">Sandbox / Test</option>
+          <option value="live">Live</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">Configuration (JSON)</label>
+        <textarea [(ngModel)]="configJson" rows="8" class="input w-full font-mono text-sm" placeholder='{ "api_key": "", "secret_key": "" }'></textarea>
+        <p class="text-xs text-gray-400 mt-1">Enter gateway credentials as JSON key-value pairs.</p>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button (click)="selectedGateway = null" class="btn btn-outline">Cancel</button>
+        <button (click)="saveConfig()" [disabled]="saving" class="btn btn-primary">
+          {{ saving ? 'Saving...' : 'Save Configuration' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

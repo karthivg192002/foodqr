@@ -99,6 +99,22 @@ export class Order {
   preparationTime: number;
 
   @Column({ nullable: true })
+  deliveryTime: string;
+
+  @Column({ nullable: true })
+  deliveryBoyId: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'deliveryBoyId' })
+  deliveryBoy: User;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  posReceivedAmount: number;
+
+  @Column({ nullable: true })
+  posPaymentNote: string;
+
+  @Column({ nullable: true })
   source: string;
 
   @CreateDateColumn()
