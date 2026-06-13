@@ -67,9 +67,28 @@ export class CustomerCartComponent implements OnInit {
 
   getItemPrice(cartItem: CartItem): number { return this.cartService.getItemPrice(cartItem); }
 
+  guestCheckout(): void {
+    if (this.cartService.isEmpty) return;
+    const name = prompt('Enter your name to continue as guest:');
+    if (!name?.trim()) return;
+    this.placing = true;
+    this.api.post<any>('auth/guest', { name: name.trim() }).subscribe({
+      next: (res) => {
+        this.authService.setToken(res.token);
+        this.toastr.success('Continuing as guest');
+        this.placing = false;
+        this.placeOrder();
+      },
+      error: () => { this.placing = false; },
+    });
+  }
+
   placeOrder(): void {
     if (this.cartService.isEmpty) return;
-    if (!this.authService.isAuthenticated) { this.router.navigate(['/auth/login']); return; }
+    if (!this.authService.isAuthenticated) {
+      this.router.navigate(['/auth/login'], { queryParams: { returnUrl: '/customer/cart' } });
+      return;
+    }
 
     if (this.orderType === OrderType.DELIVERY && !this.selectedAddressId && this.savedAddresses.length) {
       this.toastr.warning('Please select a delivery address');

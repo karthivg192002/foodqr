@@ -14,9 +14,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @InjectRepository(User) private userRepo: Repository<User>,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // Accept token from Authorization header OR ?token= query param (needed for SSE EventSource)
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        (req) => req?.query?.token as string || null,
+      ]),
       ignoreExpiration: false,
       secretOrKey: config.get('JWT_SECRET', 'secret'),
+      passReqToCallback: false,
     });
   }
 

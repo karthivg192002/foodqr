@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
+import { RealtimeService } from '../../core/services/realtime.service';
 import { Order } from '../../core/models';
 
 @Component({
@@ -8,22 +10,39 @@ import { Order } from '../../core/models';
 })
 export class OssComponent implements OnInit, OnDestroy {
   orders: Order[] = [];
+  realtimeConnected = false;
   private interval: any;
+  private sseSub?: Subscription;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private realtime: RealtimeService) {}
 
   ngOnInit(): void {
     this.load();
-    this.interval = setInterval(() => this.load(), 8000);
+    // SSE: reload instantly when any order changes
+    this.sseSub = this.realtime.listen('admin/oss/stream').subscribe({
+      next: () => { this.realtimeConnected = true; this.load(); },
+      error: () => { this.realtimeConnected = false; },
+    });
+    // Keep a lighter fallback poll (30s instead of 8s)
+    this.interval = setInterval(() => this.load(), 30000);
   }
 
-  ngOnDestroy(): void { clearInterval(this.interval); }
+  ngOnDestroy(): void { clearInterval(this.interval); this.sseSub?.unsubscribe(); }
 
   load(): void {
     this.api.get<Order[]>('admin/oss/orders').subscribe({
-      next: (orders) => this.orders = orders,
+      next: (orders) => {
+        // Sort: pending first, then accepted, preparing, prepared, out_for_delivery
+        const priority: Record<string, number> = { pending: 0, accepted: 1, preparing: 2, prepared: 3, out_for_delivery: 4 };
+        this.orders = [...orders].sort((a, b) => (priority[a.status] ?? 99) - (priority[b.status] ?? 99));
+      },
+      error: () => {},
     });
   }
+
+  get pendingCount(): number { return this.orders.filter((o) => o.status === 'pending').length; }
+  get preparingCount(): number { return this.orders.filter((o) => ['accepted', 'preparing'].includes(o.status)).length; }
+  get readyCount(): number { return this.orders.filter((o) => o.status === 'prepared').length; }
 
   statusStyle(status: string): { bg: string; text: string; label: string } {
     const map: any = {

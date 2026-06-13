@@ -1,10 +1,28 @@
 <div class="min-h-screen bg-gray-950 p-6">
   <!-- Header -->
-  <div class="text-center mb-8">
-    <h1 class="text-white text-4xl font-bold">Order Status</h1>
-    <div class="flex items-center justify-center gap-2 mt-2 text-green-400">
-      <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-      <span class="text-sm">Live Updates</span>
+  <div class="text-center mb-6">
+    <h1 class="text-white text-4xl font-bold">Order Status Board</h1>
+    <div class="flex items-center justify-center gap-2 mt-2">
+      <div [class]="realtimeConnected ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'"
+        class="w-2 h-2 rounded-full"></div>
+      <span class="text-sm" [class]="realtimeConnected ? 'text-green-400' : 'text-yellow-400'">
+        {{ realtimeConnected ? 'Live · real-time updates' : 'Polling every 30s' }}
+      </span>
+    </div>
+    <!-- Summary counters -->
+    <div class="flex justify-center gap-6 mt-4">
+      <div class="text-center">
+        <p class="text-yellow-400 text-2xl font-bold">{{ pendingCount }}</p>
+        <p class="text-gray-500 text-xs uppercase">Pending</p>
+      </div>
+      <div class="text-center">
+        <p class="text-orange-400 text-2xl font-bold">{{ preparingCount }}</p>
+        <p class="text-gray-500 text-xs uppercase">Preparing</p>
+      </div>
+      <div class="text-center">
+        <p class="text-green-400 text-2xl font-bold">{{ readyCount }}</p>
+        <p class="text-gray-500 text-xs uppercase">Ready</p>
+      </div>
     </div>
   </div>
 
@@ -19,7 +37,10 @@
       <!-- Order number header -->
       <div class="bg-gray-800 px-4 py-3">
         <p class="text-white font-bold text-xl">#{{ order.orderSerialNo }}</p>
-        <p class="text-gray-400 text-xs">{{ order.orderType | uppercase }}</p>
+        <p class="text-gray-400 text-xs">{{ order.orderType | uppercase }}
+          <span *ngIf="order.diningTable"> · {{ order.diningTable.name }}</span>
+        </p>
+        <p class="text-gray-500 text-xs mt-0.5">{{ order.createdAt | date:'h:mm a' }}</p>
       </div>
 
       <!-- Status banner -->

@@ -65,6 +65,14 @@ export class AuthService {
     );
   }
 
+  setToken(token: string, user?: User): void {
+    localStorage.setItem('token', token);
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+      this.currentUserSubject.next(user);
+    }
+  }
+
   private setSession(auth: AuthResponse): void {
     localStorage.setItem('token', auth.token);
     localStorage.setItem('user', JSON.stringify(auth.user));

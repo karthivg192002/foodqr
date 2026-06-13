@@ -3,9 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SettingsController } from './settings.controller';
 import { SettingsService } from './settings.service';
 import { AppSetting } from './entities/app-setting.entity';
+import { UploadModule } from '../upload/upload.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AppSetting])],
+  imports: [TypeOrmModule.forFeature([AppSetting]), UploadModule],
   controllers: [SettingsController],
   providers: [SettingsService],
   exports: [SettingsService],

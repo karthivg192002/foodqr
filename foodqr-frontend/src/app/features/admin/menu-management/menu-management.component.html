@@ -1,0 +1,92 @@
+<div class="p-6">
+  <h1 class="text-2xl font-bold text-gray-900 mb-6">Menu Management</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Left: Menus list -->
+    <div class="md:col-span-1">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="font-semibold text-gray-700">Menus</h2>
+        <button (click)="openCreateMenu()" class="btn-primary text-xs px-3 py-1.5">+ New</button>
+      </div>
+      <div *ngIf="loading" class="text-gray-400 text-sm">Loading...</div>
+      <div class="space-y-2">
+        <div *ngFor="let m of menus"
+          (click)="selectMenu(m)"
+          [class]="selectedMenu?.id === m.id ? 'bg-orange-50 border-orange-400' : 'bg-white border-gray-200'"
+          class="p-3 rounded-xl border cursor-pointer hover:border-orange-300 transition-colors">
+          <div class="flex items-center justify-between">
+            <span class="font-medium text-gray-900 text-sm">{{ m.name }}</span>
+            <div class="flex gap-1">
+              <button (click)="$event.stopPropagation(); openEditMenu(m)" class="text-blue-500 text-xs">Edit</button>
+              <button (click)="$event.stopPropagation(); deleteMenu(m.id)" class="text-red-500 text-xs ml-1">Del</button>
+            </div>
+          </div>
+          <p *ngIf="m.description" class="text-xs text-gray-400 mt-0.5 truncate">{{ m.description }}</p>
+        </div>
+        <div *ngIf="!loading && !menus.length" class="text-center text-gray-400 text-sm py-6">No menus yet</div>
+      </div>
+    </div>
+
+    <!-- Right: Sections for selected menu -->
+    <div class="md:col-span-2">
+      <div *ngIf="!selectedMenu" class="flex items-center justify-center h-40 text-gray-400 text-sm">
+        Select a menu to manage sections
+      </div>
+      <ng-container *ngIf="selectedMenu">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="font-semibold text-gray-700">Sections – <span class="text-orange-600">{{ selectedMenu.name }}</span></h2>
+          <button (click)="openCreateSection()" class="btn-primary text-xs px-3 py-1.5">+ Add Section</button>
+        </div>
+        <div *ngIf="sectionsLoading" class="text-gray-400 text-sm">Loading...</div>
+        <div class="space-y-2">
+          <div *ngFor="let s of sections" class="bg-white rounded-xl border border-gray-200 p-3 flex items-center justify-between">
+            <div>
+              <p class="font-medium text-gray-900 text-sm">{{ s.name }}</p>
+              <p *ngIf="s.description" class="text-xs text-gray-400">{{ s.description }}</p>
+            </div>
+            <div class="flex gap-2">
+              <button (click)="openEditSection(s)" class="text-blue-500 text-sm">Edit</button>
+              <button (click)="deleteSection(s.id)" class="text-red-500 text-sm">Del</button>
+            </div>
+          </div>
+          <div *ngIf="!sectionsLoading && !sections.length" class="text-center text-gray-400 text-sm py-6">No sections yet</div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Menu form modal -->
+  <div *ngIf="showMenuForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6">
+      <h2 class="font-bold text-gray-900 mb-4">{{ editingMenuId ? 'Edit Menu' : 'New Menu' }}</h2>
+      <form [formGroup]="menuForm" (ngSubmit)="saveMenu()" class="space-y-3">
+        <input formControlName="name" class="input w-full" placeholder="Menu name *">
+        <textarea formControlName="description" class="input w-full" rows="2" placeholder="Description"></textarea>
+        <div class="flex gap-3">
+          <input formControlName="sortOrder" type="number" class="input w-24" min="0" placeholder="Order">
+          <label class="flex items-center gap-2 text-sm"><input formControlName="status" type="checkbox"> Active</label>
+        </div>
+        <div class="flex gap-3">
+          <button type="submit" [disabled]="saving" class="btn-primary flex-1 py-2 text-sm">{{ saving ? 'Saving...' : 'Save' }}</button>
+          <button type="button" (click)="showMenuForm=false" class="btn-secondary flex-1 py-2 text-sm">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Section form modal -->
+  <div *ngIf="showSectionForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6">
+      <h2 class="font-bold text-gray-900 mb-4">{{ editingSectionId ? 'Edit Section' : 'New Section' }}</h2>
+      <form [formGroup]="sectionForm" (ngSubmit)="saveSection()" class="space-y-3">
+        <input formControlName="name" class="input w-full" placeholder="Section name *">
+        <textarea formControlName="description" class="input w-full" rows="2" placeholder="Description"></textarea>
+        <input formControlName="sortOrder" type="number" class="input w-full" min="0" placeholder="Sort order">
+        <div class="flex gap-3">
+          <button type="submit" [disabled]="saving" class="btn-primary flex-1 py-2 text-sm">{{ saving ? 'Saving...' : 'Save' }}</button>
+          <button type="button" (click)="showSectionForm=false" class="btn-secondary flex-1 py-2 text-sm">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -73,6 +73,14 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @Get('customer/dashboard')
+  @ApiOperation({ summary: 'Customer dashboard summary (wallet, name, profile)' })
+  getCustomerDashboard(@CurrentUser() user: User) {
+    return this.authService.getCustomerDashboard(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Patch('change-password')
   @ApiOperation({ summary: 'Change password' })
   changePassword(@CurrentUser() user: User, @Body() dto: ChangePasswordDto) {
@@ -93,5 +101,16 @@ export class AuthController {
   @ApiOperation({ summary: 'Quick-create a customer at POS without full registration' })
   createPosCustomer(@Body() dto: { name: string; phone?: string; email?: string }) {
     return this.authService.createPosCustomer(dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('device-token')
+  @ApiOperation({ summary: 'Store FCM/web-push device token for the current user' })
+  storeDeviceToken(
+    @CurrentUser() user: User,
+    @Body() dto: { type: 'web' | 'mobile'; token: string },
+  ) {
+    return this.authService.storeDeviceToken(user.id, dto.type, dto.token);
   }
 }

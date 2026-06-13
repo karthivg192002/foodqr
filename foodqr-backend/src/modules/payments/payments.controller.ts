@@ -40,6 +40,18 @@ export class PaymentsController {
     return this.paymentsService.handleStripeWebhook(req.rawBody, sig);
   }
 
+  @Public()
+  @Post('payments/webhook/myfatoorah')
+  myfatoorahWebhook(@Body() body: any) {
+    return this.paymentsService.handleMyfatoorahWebhook(body);
+  }
+
+  @Public()
+  @Post('payments/webhook/mollie')
+  mollieWebhook(@Body() body: any) {
+    return this.paymentsService.handleMollieWebhook(body);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
   @ApiBearerAuth()

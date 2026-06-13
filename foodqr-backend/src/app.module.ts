@@ -30,6 +30,13 @@ import { PagesModule } from './modules/pages/pages.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
 import { PushNotificationsModule } from './modules/push-notifications/push-notifications.module';
 import { MailModule } from './modules/mail/mail.module';
+import { MenuSectionsModule } from './modules/menu-sections/menu-sections.module';
+import { AnalyticsSectionsModule } from './modules/analytics-sections/analytics-sections.module';
+import { EventsModule } from './modules/events/events.module';
+import { DeliveryZonesModule } from './modules/delivery-zones/delivery-zones.module';
+import { LanguagesModule } from './modules/languages/languages.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { NewsletterModule } from './modules/newsletter/newsletter.module';
 
 @Module({
   imports: [
@@ -84,6 +91,13 @@ import { MailModule } from './modules/mail/mail.module';
     MessagingModule,
     PushNotificationsModule,
     MailModule,
+    MenuSectionsModule,
+    AnalyticsSectionsModule,
+    EventsModule,
+    DeliveryZonesModule,
+    LanguagesModule,
+    SubscriptionsModule,
+    NewsletterModule,
   ],
 })
 export class AppModule {}

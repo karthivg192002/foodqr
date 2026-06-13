@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,6 +13,9 @@ import { OfferItem } from '../offers/entities/offer-item.entity';
 import { AppSetting } from '../settings/entities/app-setting.entity';
 import { LoyaltyStamp } from '../loyalty/entities/loyalty-stamp.entity';
 import { TimeSlotsService } from '../time-slots/time-slots.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { EventsService } from '../events/events.service';
+import { DeliveryZonesService } from '../delivery-zones/delivery-zones.service';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto/order.dto';
 import { OrderStatus, OrderType, PaymentStatus } from '../../common/enums';
 
@@ -30,6 +33,9 @@ export class OrdersService {
     @InjectRepository(AppSetting) private settingRepo: Repository<AppSetting>,
     @InjectRepository(LoyaltyStamp) private stampRepo: Repository<LoyaltyStamp>,
     private timeSlotsService: TimeSlotsService,
+    private notificationsService: NotificationsService,
+    private eventsService: EventsService,
+    @Optional() private deliveryZonesService: DeliveryZonesService,
   ) {}
 
   private async getSetting(key: string, defaultValue = '0'): Promise<string> {
@@ -37,7 +43,22 @@ export class OrdersService {
     return s?.value ?? defaultValue;
   }
 
-  private async calculateDeliveryCharge(distanceKm?: number): Promise<number> {
+  private async calculateDeliveryCharge(
+    distanceKm?: number,
+    destLat?: number,
+    destLng?: number,
+    branchId?: string,
+  ): Promise<number> {
+    // Zone-based pricing takes priority when coordinates are available
+    if (this.deliveryZonesService && destLat != null && destLng != null) {
+      const zone = await this.deliveryZonesService.findZoneForPoint(destLat, destLng, branchId);
+      if (zone) {
+        const km = distanceKm ?? 0;
+        return Number(zone.baseCharge) + km * Number(zone.perKmCharge);
+      }
+    }
+
+    // Fall back to flat settings-based rate
     const [freeKm, basicCharge, perKmCharge] = await Promise.all([
       this.getSetting('delivery_free_km', '0'),
       this.getSetting('delivery_basic_charge', '0'),
@@ -63,6 +84,7 @@ export class OrdersService {
     const now = new Date();
     if (offer.startDate && offer.startDate > now) return { discount: 0, offerId: null };
     if (offer.endDate && offer.endDate < now) return { discount: 0, offerId: null };
+    if (offer.minOrderAmount && subtotal < Number(offer.minOrderAmount)) return { discount: 0, offerId: null };
 
     // Item-scoped offer: at least one ordered item must qualify
     const offerItems = await this.offerItemRepo.find({ where: { offerId: offer.id } });
@@ -112,7 +134,8 @@ export class OrdersService {
     }
   }
 
-  async create(userId: string, dto: CreateOrderDto) {
+  async create(userId: string | null, dto: CreateOrderDto) {
+    const resolvedUserId = (userId === 'guest' || !userId) ? null : userId;
     const orderItems: Partial<OrderItem>[] = [];
     let subtotal = 0;
     let totalTax = 0;
@@ -192,7 +215,10 @@ export class OrdersService {
 
     let deliveryCharge = 0;
     if (dto.orderType === OrderType.DELIVERY) {
-      deliveryCharge = await this.calculateDeliveryCharge(dto.deliveryDistanceKm);
+      const snap = dto.deliveryAddressSnapshot as any;
+      const destLat = snap?.latitude ? Number(snap.latitude) : undefined;
+      const destLng = snap?.longitude ? Number(snap.longitude) : undefined;
+      deliveryCharge = await this.calculateDeliveryCharge(dto.deliveryDistanceKm, destLat, destLng, dto.branchId);
     }
 
     let discount = dto.discount || 0;
@@ -206,7 +232,7 @@ export class OrdersService {
     const order = this.orderRepo.create({
       orderSerialNo: 'ORD-' + Date.now().toString().slice(-8),
       token: uuidv4().split('-')[0].toUpperCase(),
-      userId,
+      userId: resolvedUserId,
       orderType: dto.orderType,
       paymentMethod: dto.paymentMethod,
       diningTableId: dto.diningTableId,
@@ -224,7 +250,7 @@ export class OrdersService {
     const savedOrder = await this.orderRepo.save(order);
 
     await this.orderItemRepo.save(
-      orderItems.map((oi) => this.orderItemRepo.create({ ...oi, orderId: savedOrder.id })),
+      orderItems.map((oi) => this.orderItemRepo.create({ ...oi, orderId: savedOrder.id, branchId: dto.branchId })),
     );
 
     if (dto.orderType === OrderType.DELIVERY && dto.deliveryAddressSnapshot) {
@@ -242,14 +268,22 @@ export class OrdersService {
       );
     }
 
-    await this.awardLoyaltyStamps(userId, savedOrder.id, total);
+    if (resolvedUserId) await this.awardLoyaltyStamps(resolvedUserId, savedOrder.id, total);
+
+    // Notify admins and branch managers of the new order (non-blocking)
+    this.notificationsService
+      .broadcastToAll('New Order', `Order #${savedOrder.orderSerialNo} has been placed`)
+      .catch(() => null);
+
+    // Emit real-time event so KDS/OSS SSE streams update instantly
+    this.eventsService.emit({ type: 'order:created', orderId: savedOrder.id, status: OrderStatus.PENDING, branchId: savedOrder.branchId });
 
     return this.findOne(savedOrder.id);
   }
 
   async findAll(filters: {
     status?: string; orderType?: string; userId?: string;
-    branchId?: string; search?: string; page?: number; limit?: number;
+    branchId?: string; diningTableId?: string; search?: string; page?: number; limit?: number;
   } = {}) {
     const { page = 1, limit = 20, ...rest } = filters;
     const qb = this.orderRepo.createQueryBuilder('order')
@@ -265,6 +299,7 @@ export class OrdersService {
     if (rest.status) qb.andWhere('order.status = :status', { status: rest.status });
     if (rest.orderType) qb.andWhere('order.orderType = :orderType', { orderType: rest.orderType });
     if (rest.userId) qb.andWhere('order.userId = :userId', { userId: rest.userId });
+    if (rest.diningTableId) qb.andWhere('order.diningTableId = :diningTableId', { diningTableId: rest.diningTableId });
     if (rest.search) qb.andWhere('order.orderSerialNo ILIKE :search', { search: `%${rest.search}%` });
 
     const [data, total] = await qb.getManyAndCount();
@@ -290,12 +325,20 @@ export class OrdersService {
   }
 
   async updateStatus(id: string, dto: UpdateOrderStatusDto) {
-    await this.findOne(id);
+    const order = await this.findOne(id);
     await this.orderRepo.update(id, {
       status: dto.status as OrderStatus,
       cancellationReason: dto.cancellationReason,
       staffId: dto.staffId,
     });
+    // Send push + email + SMS notification to customer (non-blocking)
+    if (order.userId) {
+      this.notificationsService
+        .sendOrderNotification(order.userId, order.orderSerialNo, dto.status)
+        .catch(() => null);
+    }
+    // Emit real-time event for KDS/OSS SSE streams
+    this.eventsService.emit({ type: 'order:updated', orderId: id, status: dto.status, branchId: order.branchId });
     return this.findOne(id);
   }
 
@@ -325,27 +368,108 @@ export class OrdersService {
     return qb.getMany();
   }
 
-  async getDashboardStats() {
+  async getDashboardStats(startDate?: string, endDate?: string) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const [totalOrders, todayOrders, totalRevenue, pendingOrders] = await Promise.all([
-      this.orderRepo.count(),
-      this.orderRepo.count({ where: { createdAt: today } as any }),
-      this.orderRepo
-        .createQueryBuilder('order')
-        .where('order.paymentStatus = :status', { status: PaymentStatus.PAID })
-        .select('SUM(order.total)', 'total')
-        .getRawOne(),
-      this.orderRepo.count({ where: { status: OrderStatus.PENDING } }),
-    ]);
+    const rangeQb = () => {
+      const qb = this.orderRepo.createQueryBuilder('order');
+      if (startDate) qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+      if (endDate) qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+      return qb;
+    };
+
+    const [totalOrders, todayOrders, totalRevenue, pendingOrders, statusBreakdown, totalDiscount, totalStamps,
+      totalCustomers, recentOrders, topItems] =
+      await Promise.all([
+        this.orderRepo.count(),
+        this.orderRepo.count({ where: { createdAt: today } as any }),
+        this.orderRepo
+          .createQueryBuilder('order')
+          .where('order.paymentStatus = :status', { status: PaymentStatus.PAID })
+          .select('SUM(order.total)', 'total')
+          .getRawOne(),
+        this.orderRepo.count({ where: { status: OrderStatus.PENDING } }),
+        // A4.1: orders by status
+        rangeQb()
+          .select('order.status', 'status')
+          .addSelect('COUNT(*)', 'count')
+          .groupBy('order.status')
+          .getRawMany(),
+        // A4.2: total discount given
+        rangeQb()
+          .select('SUM(order.discount)', 'total')
+          .getRawOne(),
+        // A4.3: loyalty stamps issued
+        this.stampRepo
+          .createQueryBuilder('stamp')
+          .select('SUM(stamp.stampCount)', 'total')
+          .getRawOne(),
+        // Distinct customer count
+        this.orderRepo
+          .createQueryBuilder('order')
+          .select('COUNT(DISTINCT order.userId)', 'count')
+          .getRawOne(),
+        // Recent 5 orders
+        this.orderRepo.find({
+          relations: ['user'],
+          order: { createdAt: 'DESC' },
+          take: 5,
+        }),
+        // Top 5 selling items
+        this.orderItemRepo
+          .createQueryBuilder('oi')
+          .select('oi.itemId', 'itemId')
+          .addSelect('oi.itemName', 'itemName')
+          .addSelect('SUM(oi.quantity)', 'totalQty')
+          .addSelect('SUM(oi.totalPrice)', 'totalRevenue')
+          .groupBy('oi.itemId')
+          .addGroupBy('oi.itemName')
+          .orderBy('SUM(oi.quantity)', 'DESC')
+          .limit(5)
+          .getRawMany(),
+      ]);
+
+    const byStatus: Record<string, number> = {};
+    for (const row of statusBreakdown) byStatus[row.status] = parseInt(row.count, 10);
 
     return {
       totalOrders,
       todayOrders,
       totalRevenue: totalRevenue?.total || 0,
       pendingOrders,
+      totalCustomers: parseInt(totalCustomers?.count || '0', 10),
+      ordersByStatus: byStatus,
+      totalDiscount: totalDiscount?.total || 0,
+      loyaltyStampsIssued: totalStamps?.total || 0,
+      recentOrders,
+      topSellingItems: topItems,
     };
+  }
+
+  async cancelOrder(userId: string, orderId: string, reason?: string) {
+    const order = await this.findOne(orderId);
+
+    if (order.userId && userId !== 'guest' && order.userId !== userId) {
+      throw new BadRequestException('You can only cancel your own orders');
+    }
+    const cancellableStatuses = [OrderStatus.PENDING, OrderStatus.ACCEPTED];
+    if (!cancellableStatuses.includes(order.status as OrderStatus)) {
+      throw new BadRequestException(`Cannot cancel order in status: ${order.status}`);
+    }
+
+    await this.orderRepo.update(orderId, {
+      status: OrderStatus.CANCELED,
+      cancellationReason: reason,
+    });
+
+    // Refund to wallet if the order was already paid
+    if (order.paymentStatus === PaymentStatus.PAID) {
+      await this.userRepo.increment({ id: userId }, 'balance', Number(order.total));
+    }
+
+    this.eventsService.emit({ type: 'order:updated', orderId, status: OrderStatus.CANCELED, branchId: order.branchId });
+    return this.findOne(orderId);
   }
 
   async assignDeliveryBoy(orderId: string, deliveryBoyId: string) {
@@ -368,6 +492,42 @@ export class OrdersService {
       take: limit,
     });
     return { data, total, page, limit, pages: Math.ceil(total / limit) };
+  }
+
+  async getOssPopularItems(branchId?: string, limit = 6) {
+    const qb = this.orderItemRepo
+      .createQueryBuilder('oi')
+      .innerJoin('oi.order', 'order')
+      .select('oi.itemId', 'itemId')
+      .addSelect('oi.itemName', 'itemName')
+      .addSelect('oi.itemImage', 'itemImage')
+      .addSelect('SUM(oi.quantity)', 'totalQty')
+      .groupBy('oi.itemId')
+      .addGroupBy('oi.itemName')
+      .addGroupBy('oi.itemImage')
+      .orderBy('SUM(oi.quantity)', 'DESC')
+      .limit(limit);
+
+    if (branchId) qb.andWhere('order.branchId = :branchId', { branchId });
+    return qb.getRawMany();
+  }
+
+  async getStaffDashboard(staffId: string) {
+    const [assignedOrders, totalHandled] = await Promise.all([
+      this.orderRepo.find({
+        where: { staffId } as any,
+        relations: ['items', 'diningTable'],
+        order: { createdAt: 'DESC' },
+        take: 20,
+      }),
+      this.orderRepo.count({ where: { staffId } as any }),
+    ]);
+
+    const pendingCount = assignedOrders.filter((o) => o.status === OrderStatus.PENDING).length;
+    const preparingCount = assignedOrders.filter((o) => o.status === OrderStatus.PREPARING).length;
+    const preparedCount = assignedOrders.filter((o) => o.status === OrderStatus.PREPARED).length;
+
+    return { assignedOrders, totalHandled, pendingCount, preparingCount, preparedCount };
   }
 
   posChangeCalc(total: number, received: number): { change: number; sufficient: boolean } {

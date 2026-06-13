@@ -10,12 +10,14 @@ import { Item, ItemCategory, Banner, Offer } from '../../../core/models';
 })
 export class CustomerHomeComponent implements OnInit {
   categories: ItemCategory[] = [];
+  subCategories: ItemCategory[] = [];
   featuredItems: Item[] = [];
   popularItems: Item[] = [];
   allItems: Item[] = [];
   banners: Banner[] = [];
   offers: Offer[] = [];
   selectedCategory = '';
+  selectedSubCategory = '';
   search = '';
   loading = false;
 
@@ -58,7 +60,9 @@ export class CustomerHomeComponent implements OnInit {
     this.loading = true;
     const params: any = { limit: 30 };
     if (this.search) params.search = this.search;
-    if (this.selectedCategory) params.categoryId = this.selectedCategory;
+    // Prefer sub-category filter when selected, otherwise use parent
+    const filterCat = this.selectedSubCategory || this.selectedCategory;
+    if (filterCat) params.categoryId = filterCat;
     this.api.get<any>('frontend/items', params).subscribe({
       next: (res) => { this.allItems = res.data || []; this.loading = false; },
       error: () => { this.loading = false; },
@@ -75,7 +79,21 @@ export class CustomerHomeComponent implements OnInit {
   }
 
   selectCategory(catId: string): void {
-    this.selectedCategory = this.selectedCategory === catId ? '' : catId;
+    if (this.selectedCategory === catId) {
+      this.selectedCategory = '';
+      this.subCategories = [];
+      this.selectedSubCategory = '';
+    } else {
+      this.selectedCategory = catId;
+      this.selectedSubCategory = '';
+      const cat = this.categories.find((c) => c.id === catId);
+      this.subCategories = cat?.children || [];
+    }
+    this.loadItems();
+  }
+
+  selectSubCategory(subId: string): void {
+    this.selectedSubCategory = this.selectedSubCategory === subId ? '' : subId;
     this.loadItems();
   }
 }

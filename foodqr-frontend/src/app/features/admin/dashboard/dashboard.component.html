@@ -174,6 +174,80 @@
     </div>
   </div>
 
+  <!-- Extended analytics row: Category sales + Hourly peak -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Category-wise sales -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+      <div class="px-5 py-4 border-b border-gray-100">
+        <h3 class="font-semibold text-gray-900">Sales by Category</h3>
+      </div>
+      <div class="p-5 space-y-3">
+        <div *ngFor="let cat of categorySales" class="flex items-center gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700 truncate">{{ cat.categoryname || 'Uncategorized' }}</span>
+              <span class="text-sm font-semibold text-gray-900">${{ cat.totalrevenue | number:'1.0-0' }}</span>
+            </div>
+            <div class="h-1.5 bg-gray-100 rounded-full">
+              <div class="h-1.5 bg-orange-400 rounded-full transition-all"
+                [style.width]="getCategoryPercent(cat.totalrevenue) + '%'"></div>
+            </div>
+            <p class="text-xs text-gray-400 mt-0.5">{{ cat.totalqty }} items · {{ cat.ordercount }} orders</p>
+          </div>
+        </div>
+        <p *ngIf="!categorySales.length" class="text-sm text-gray-400 text-center py-3">No data yet</p>
+      </div>
+    </div>
+
+    <!-- Hourly peak orders -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+      <div class="px-5 py-4 border-b border-gray-100">
+        <h3 class="font-semibold text-gray-900">Peak Order Hours</h3>
+      </div>
+      <div class="p-5">
+        <div class="flex items-end gap-1 h-28">
+          <div *ngFor="let h of hourlyPeak"
+            class="flex-1 flex flex-col items-center gap-1 group">
+            <div class="w-full bg-orange-100 rounded-t group-hover:bg-orange-400 transition-colors relative"
+              [style.height]="getHourlyPercent(h.ordercount) + '%'"
+              style="min-height: 2px">
+              <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] text-gray-500 hidden group-hover:block whitespace-nowrap">
+                {{ h.ordercount }}
+              </span>
+            </div>
+            <span class="text-[9px] text-gray-400 rotate-45 mt-1 hidden sm:block">{{ formatHour(h.hour) }}</span>
+          </div>
+        </div>
+        <p *ngIf="!hourlyPeak.length" class="text-sm text-gray-400 text-center py-4">No data yet</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staff leaderboard -->
+  <div *ngIf="staffLeaderboard.length" class="bg-white rounded-xl border border-gray-200 shadow-sm">
+    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-900">Staff Leaderboard</h3>
+      <a routerLink="/admin/staff" class="text-xs text-orange-500 hover:underline">View all</a>
+    </div>
+    <div class="divide-y divide-gray-50">
+      <div *ngFor="let s of staffLeaderboard; let i = index"
+        class="flex items-center gap-4 px-5 py-3">
+        <span class="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0"
+          [ngClass]="i === 0 ? 'bg-yellow-100 text-yellow-700' : i === 1 ? 'bg-gray-100 text-gray-600' : 'bg-orange-50 text-orange-600'">
+          {{ i + 1 }}
+        </span>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-gray-900 truncate">{{ s.staffname }}</p>
+          <p class="text-xs text-gray-400 capitalize">{{ s.role }}</p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm font-bold text-gray-900">{{ s.ordershandled }} orders</p>
+          <p class="text-xs text-emerald-600">${{ s.totalrevenue | number:'1.0-0' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Quick actions -->
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
     <a routerLink="/admin/orders" class="bg-white rounded-xl border border-gray-200 p-4 text-center hover:border-orange-300 hover:shadow transition-all group">

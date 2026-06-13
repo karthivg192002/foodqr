@@ -1,0 +1,85 @@
+<div class="p-6 max-w-7xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">My Dashboard</h1>
+      <p class="text-gray-500 text-sm mt-0.5">Your assigned orders · auto-refreshes every 30s</p>
+    </div>
+    <button (click)="load()" class="text-sm text-orange-500 hover:text-orange-700 font-medium">Refresh</button>
+  </div>
+
+  <!-- KPI counters -->
+  <div *ngIf="data" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
+      <p class="text-3xl font-bold text-gray-900">{{ data.totalHandled }}</p>
+      <p class="text-xs text-gray-500 uppercase mt-1">Total Handled</p>
+    </div>
+    <div class="bg-yellow-50 rounded-2xl p-4 shadow-sm border border-yellow-100 text-center">
+      <p class="text-3xl font-bold text-yellow-600">{{ data.pendingCount }}</p>
+      <p class="text-xs text-gray-500 uppercase mt-1">Pending</p>
+    </div>
+    <div class="bg-orange-50 rounded-2xl p-4 shadow-sm border border-orange-100 text-center">
+      <p class="text-3xl font-bold text-orange-600">{{ data.preparingCount }}</p>
+      <p class="text-xs text-gray-500 uppercase mt-1">Preparing</p>
+    </div>
+    <div class="bg-green-50 rounded-2xl p-4 shadow-sm border border-green-100 text-center">
+      <p class="text-3xl font-bold text-green-600">{{ data.preparedCount }}</p>
+      <p class="text-xs text-gray-500 uppercase mt-1">Ready</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-16">
+    <div class="animate-spin w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+  </div>
+
+  <!-- No orders -->
+  <div *ngIf="!loading && data && !data.assignedOrders.length" class="text-center py-16">
+    <p class="text-5xl mb-3">✅</p>
+    <p class="text-gray-500 font-medium">No orders assigned to you right now.</p>
+  </div>
+
+  <!-- Orders grid -->
+  <div *ngIf="!loading && data" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div *ngFor="let order of data.assignedOrders"
+      class="bg-white rounded-2xl border shadow-sm p-4 flex flex-col gap-3"
+      [ngClass]="statusColor(order.status)">
+
+      <div class="flex items-center justify-between">
+        <span class="font-bold text-lg">#{{ order.orderSerialNo }}</span>
+        <span class="text-xs uppercase font-semibold px-2 py-1 rounded-full bg-white/70">
+          {{ statusLabel(order.status) }}
+        </span>
+      </div>
+
+      <p class="text-xs text-gray-500">
+        {{ order.orderType | uppercase }} · {{ order.createdAt | date:'h:mm a' }}
+        <span *ngIf="order.diningTable"> · {{ order.diningTable.name }}</span>
+      </p>
+
+      <!-- Items -->
+      <div class="flex-1 space-y-1">
+        <div *ngFor="let item of order.items" class="flex justify-between text-sm">
+          <span class="font-medium text-gray-800">{{ item.itemName }}</span>
+          <span class="font-bold text-gray-900">x{{ item.quantity }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="order.orderNote" class="text-xs italic text-gray-600 bg-gray-50 rounded-lg p-2">
+        📝 {{ order.orderNote }}
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex gap-2">
+        <button *ngIf="order.status === OrderStatus.PENDING"
+          (click)="updateStatus(order.id, OrderStatus.ACCEPTED)"
+          class="flex-1 bg-blue-500 text-white text-sm font-semibold py-2 rounded-xl">Accept</button>
+        <button *ngIf="order.status === OrderStatus.ACCEPTED"
+          (click)="updateStatus(order.id, OrderStatus.PREPARING)"
+          class="flex-1 bg-orange-500 text-white text-sm font-semibold py-2 rounded-xl">Start Preparing</button>
+        <button *ngIf="order.status === OrderStatus.PREPARING"
+          (click)="updateStatus(order.id, OrderStatus.PREPARED)"
+          class="flex-1 bg-green-500 text-white text-sm font-semibold py-2 rounded-xl">Mark Ready</button>
+      </div>
+    </div>
+  </div>
+</div>

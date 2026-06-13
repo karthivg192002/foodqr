@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Patch, Delete, Body, Param, Query,
+  Controller, Get, Post, Patch, Delete, Body, Param, Query,
   UseGuards, ParseUUIDPipe, ParseIntPipe, DefaultValuePipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
@@ -17,6 +17,21 @@ import { User } from './entities/user.entity';
 @Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post('admin/users')
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  createUser(@Body() body: {
+    name: string; email?: string; phone?: string; password: string;
+    role?: UserRole; branchId?: string; countryCode?: string;
+  }) {
+    return this.usersService.createUser(body);
+  }
+
+  @Patch('admin/users/:id/password')
+  @Roles(UserRole.ADMIN)
+  changePassword(@Param('id', ParseUUIDPipe) id: string, @Body() body: { password: string }) {
+    return this.usersService.changeUserPassword(id, body.password);
+  }
 
   @Get('admin/customers')
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
@@ -66,5 +81,51 @@ export class UsersController {
   @Patch('profile/device-token')
   updateDeviceToken(@CurrentUser() user: User, @Body() dto: UpdateDeviceTokenDto) {
     return this.usersService.updateDeviceToken(user.id, dto);
+  }
+
+  @Get('profile/default-branch')
+  getDefaultBranch(@CurrentUser() user: User) {
+    return this.usersService.getDefaultBranch(user.id);
+  }
+
+  @Patch('profile/default-branch')
+  setDefaultBranch(@CurrentUser() user: User, @Body() body: { branchId: string }) {
+    return this.usersService.setDefaultBranch(user.id, body.branchId);
+  }
+
+  @Patch('admin/users/:id/default-branch')
+  @Roles(UserRole.ADMIN)
+  setUserDefaultBranch(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { branchId: string },
+  ) {
+    return this.usersService.setDefaultBranch(id, body.branchId);
+  }
+
+  /** Returns all defined roles with descriptions */
+  @Get('admin/roles')
+  @Roles(UserRole.ADMIN)
+  getRoles() {
+    return {
+      roles: [
+        { value: UserRole.ADMIN, label: 'Admin', description: 'Full system access — manages all settings, users, and reports' },
+        { value: UserRole.BRANCH_MANAGER, label: 'Branch Manager', description: 'Manages a single branch — orders, staff, and settings' },
+        { value: UserRole.WAITER, label: 'Waiter', description: 'Takes orders at the table, views dining orders' },
+        { value: UserRole.CHEF, label: 'Chef', description: 'Views and updates KDS order status' },
+        { value: UserRole.STAFF, label: 'Staff', description: 'General staff — limited order access' },
+        { value: UserRole.POS_OPERATOR, label: 'POS Operator', description: 'Operates the point-of-sale terminal' },
+        { value: UserRole.CUSTOMER, label: 'Customer', description: 'End-customer account for ordering and loyalty' },
+      ],
+    };
+  }
+
+  /** Assign a role to a specific user */
+  @Patch('admin/users/:id/role')
+  @Roles(UserRole.ADMIN)
+  assignRole(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { role: UserRole },
+  ) {
+    return this.usersService.update(id, { role: body.role } as any);
   }
 }

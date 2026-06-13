@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
+import * as bcrypt from 'bcryptjs';
 import { User } from './entities/user.entity';
-import { UserRole } from '../../common/enums';
+import { UserRole, UserStatus } from '../../common/enums';
 import { UpdateUserDto, UpdateDeviceTokenDto } from './dto/user.dto';
 
 @Injectable()
@@ -64,7 +65,44 @@ export class UsersService {
     return { data, total, page, limit, pages: Math.ceil(total / limit) };
   }
 
+  async createUser(dto: {
+    name: string; email?: string; phone?: string; password: string;
+    role?: UserRole; branchId?: string; countryCode?: string;
+  }) {
+    if (dto.email) {
+      const exists = await this.userRepo.findOne({ where: { email: dto.email } });
+      if (exists) throw new BadRequestException('Email already registered');
+    }
+    const hashed = await bcrypt.hash(dto.password, 12);
+    const user = this.userRepo.create({
+      ...dto,
+      password: hashed,
+      role: dto.role || UserRole.CUSTOMER,
+      status: UserStatus.ACTIVE,
+    });
+    await this.userRepo.save(user);
+    const { password, ...rest } = user as any;
+    return rest;
+  }
+
+  async changeUserPassword(id: string, newPassword: string) {
+    await this.findOne(id);
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await this.userRepo.update(id, { password: hashed });
+    return { message: 'Password updated' };
+  }
+
   async updateBalance(userId: string, amount: number) {
     await this.userRepo.increment({ id: userId }, 'balance', amount);
+  }
+
+  async getDefaultBranch(userId: string) {
+    const user = await this.findOne(userId);
+    return { branchId: user.branchId, branch: user.branch };
+  }
+
+  async setDefaultBranch(userId: string, branchId: string) {
+    await this.userRepo.update(userId, { branchId });
+    return this.findOne(userId);
   }
 }

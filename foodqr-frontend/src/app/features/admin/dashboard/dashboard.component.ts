@@ -8,10 +8,15 @@ export class DashboardComponent implements OnInit {
   topItems: any[] = [];
   recentOrders: any[] = [];
   salesByType: any[] = [];
+  categorySales: any[] = [];
+  hourlyPeak: any[] = [];
+  staffLeaderboard: any[] = [];
   loading = true;
   today = new Date();
 
   private maxRevenue = 0;
+  private maxCategoryRevenue = 0;
+  private maxHourlyCount = 0;
 
   constructor(private api: ApiService) {}
 
@@ -34,6 +39,21 @@ export class DashboardComponent implements OnInit {
         this.maxRevenue = Math.max(...this.salesByType.map((d) => +d.revenue || 0), 1);
       },
     });
+    this.api.get<any[]>('admin/reports/category-wise-sales').subscribe({
+      next: (data) => {
+        this.categorySales = (data || []).slice(0, 6);
+        this.maxCategoryRevenue = Math.max(...this.categorySales.map((d) => +d.totalrevenue || 0), 1);
+      },
+    });
+    this.api.get<any[]>('admin/reports/hourly-peak').subscribe({
+      next: (data) => {
+        this.hourlyPeak = data || [];
+        this.maxHourlyCount = Math.max(...this.hourlyPeak.map((d) => +d.ordercount || 0), 1);
+      },
+    });
+    this.api.get<any[]>('admin/reports/staff-leaderboard').subscribe({
+      next: (data) => { this.staffLeaderboard = (data || []).slice(0, 5); },
+    });
   }
 
   getOrderStatusBadge(status: string): string {
@@ -55,5 +75,19 @@ export class DashboardComponent implements OnInit {
 
   getTypePercent(total: number): number {
     return this.maxRevenue ? Math.round((+total / this.maxRevenue) * 100) : 0;
+  }
+
+  getCategoryPercent(revenue: number): number {
+    return this.maxCategoryRevenue ? Math.round((+revenue / this.maxCategoryRevenue) * 100) : 0;
+  }
+
+  getHourlyPercent(count: number): number {
+    return this.maxHourlyCount ? Math.round((+count / this.maxHourlyCount) * 100) : 0;
+  }
+
+  formatHour(h: number): string {
+    const ampm = +h >= 12 ? 'PM' : 'AM';
+    const hour = +h % 12 || 12;
+    return `${hour}${ampm}`;
   }
 }

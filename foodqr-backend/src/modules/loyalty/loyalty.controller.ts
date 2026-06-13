@@ -53,6 +53,9 @@ export class LoyaltyController {
     return this.loyaltyService.addConfiguration(id, data);
   }
 
+  @Get('loyalty/segments')
+  getSegmentsForCustomers() { return this.loyaltyService.getCustomerSegments(); }
+
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get('admin/loyalty/segments')

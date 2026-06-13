@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Offer } from './entities/offer.entity';
 import { Banner } from './entities/banner.entity';
+import { PromotionBanner } from './entities/promotion-banner.entity';
 import { OfferItem } from './entities/offer-item.entity';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class OffersService {
   constructor(
     @InjectRepository(Offer) private offerRepo: Repository<Offer>,
     @InjectRepository(Banner) private bannerRepo: Repository<Banner>,
+    @InjectRepository(PromotionBanner) private promoRepo: Repository<PromotionBanner>,
     @InjectRepository(OfferItem) private offerItemRepo: Repository<OfferItem>,
   ) {}
 
@@ -78,5 +80,37 @@ export class OffersService {
   async removeOfferItem(offerItemId: string) {
     await this.offerItemRepo.delete(offerItemId);
     return { message: 'Item removed from offer' };
+  }
+
+  // ─── Promotion Banners ────────────────────────────────────────────────────
+
+  getActivePromotionBanners() {
+    const now = new Date();
+    return this.promoRepo.createQueryBuilder('pb')
+      .where('pb.status = true')
+      .andWhere('(pb.startDate IS NULL OR pb.startDate <= :now)', { now })
+      .andWhere('(pb.endDate IS NULL OR pb.endDate >= :now)', { now })
+      .orderBy('pb.sortOrder', 'ASC')
+      .getMany();
+  }
+
+  getAllPromotionBanners() {
+    return this.promoRepo.find({ order: { sortOrder: 'ASC', createdAt: 'DESC' } });
+  }
+
+  async createPromotionBanner(data: Partial<PromotionBanner>) {
+    return this.promoRepo.save(this.promoRepo.create(data));
+  }
+
+  async updatePromotionBanner(id: string, data: Partial<PromotionBanner>) {
+    const promo = await this.promoRepo.findOne({ where: { id } });
+    if (!promo) throw new NotFoundException('Promotion banner not found');
+    await this.promoRepo.update(id, data);
+    return this.promoRepo.findOne({ where: { id } });
+  }
+
+  async deletePromotionBanner(id: string) {
+    await this.promoRepo.delete(id);
+    return { message: 'Promotion banner deleted' };
   }
 }

@@ -1,0 +1,59 @@
+<div class="flex flex-col h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-orange-500 text-white px-4 py-3 flex items-center gap-3 shadow-sm">
+    <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-xl">🤖</div>
+    <div>
+      <p class="font-semibold text-sm">FoodQR Assistant</p>
+      <p class="text-xs opacity-80">Always here to help</p>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div #chatBody class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+    <div *ngFor="let msg of messages" [class]="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
+      <div [class]="msg.role === 'user'
+        ? 'bg-orange-500 text-white rounded-2xl rounded-tr-sm max-w-[75%] px-4 py-2.5 text-sm'
+        : 'bg-white text-gray-800 rounded-2xl rounded-tl-sm max-w-[80%] px-4 py-2.5 text-sm shadow-sm'">
+        <p class="whitespace-pre-line">{{ msg.text }}</p>
+        <p class="text-xs mt-1" [class]="msg.role === 'user' ? 'text-white/60 text-right' : 'text-gray-400'">
+          {{ msg.time | date:'h:mm a' }}
+        </p>
+      </div>
+    </div>
+    <!-- Typing indicator -->
+    <div *ngIf="loading" class="flex justify-start">
+      <div class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+        <div class="flex gap-1">
+          <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0ms"></div>
+          <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:150ms"></div>
+          <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:300ms"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="px-4 pb-2 flex gap-2 overflow-x-auto">
+    <button *ngFor="let q of ['My order', 'Loyalty stamps', 'Recommend', 'Wait time', 'Hours']"
+      (click)="input = q; send()"
+      class="flex-shrink-0 text-xs bg-white border border-gray-200 text-gray-600 px-3 py-1.5 rounded-full shadow-sm">
+      {{ q }}
+    </button>
+  </div>
+
+  <!-- Input -->
+  <div class="px-4 pb-6 pt-2 bg-white border-t border-gray-100">
+    <div class="flex items-center gap-2 bg-gray-100 rounded-2xl px-4 py-2">
+      <input [(ngModel)]="input" (keydown)="onKey($event)"
+        placeholder="Type a message…"
+        class="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
+        [disabled]="loading">
+      <button (click)="send()" [disabled]="!input.trim() || loading"
+        class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white disabled:opacity-40">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

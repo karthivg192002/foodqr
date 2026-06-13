@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { Item } from './entities/item.entity';
 import { ItemVariation } from '../variations/entities/item-variation.entity';
+import { ItemCategory } from '../categories/entities/item-category.entity';
 import { ItemType } from '../../../common/enums';
 
 export class CreateItemDto {
@@ -34,7 +35,14 @@ export class ItemsService {
   constructor(
     @InjectRepository(Item) private itemRepo: Repository<Item>,
     @InjectRepository(ItemVariation) private variationRepo: Repository<ItemVariation>,
+    @InjectRepository(ItemCategory) private catRepo: Repository<ItemCategory>,
   ) {}
+
+  /** Returns the given categoryId plus all direct child category IDs. */
+  private async resolveCategoryIds(categoryId: string): Promise<string[]> {
+    const children = await this.catRepo.find({ where: { parentCategoryId: categoryId } });
+    return [categoryId, ...children.map((c) => c.id)];
+  }
 
   async findAll(search?: string, categoryId?: string, isFeatured?: boolean, page = 1, limit = 20) {
     const qb = this.itemRepo.createQueryBuilder('item')
@@ -46,7 +54,10 @@ export class ItemsService {
       .orderBy('item.sortOrder', 'ASC');
 
     if (search) qb.andWhere('item.name ILIKE :search', { search: `%${search}%` });
-    if (categoryId) qb.andWhere('item.categoryId = :categoryId', { categoryId });
+    if (categoryId) {
+      const categoryIds = await this.resolveCategoryIds(categoryId);
+      qb.andWhere('(item.categoryId IN (:...categoryIds) OR item.subCategoryId IN (:...categoryIds))', { categoryIds });
+    }
     if (isFeatured !== undefined) qb.andWhere('item.isFeatured = :isFeatured', { isFeatured });
 
     const [data, total] = await qb.getManyAndCount();
@@ -62,7 +73,10 @@ export class ItemsService {
       .orderBy('item.sortOrder', 'ASC');
 
     if (search) qb.andWhere('item.name ILIKE :search', { search: `%${search}%` });
-    if (categoryId) qb.andWhere('item.categoryId = :categoryId', { categoryId });
+    if (categoryId) {
+      const categoryIds = await this.resolveCategoryIds(categoryId);
+      qb.andWhere('(item.categoryId IN (:...categoryIds) OR item.subCategoryId IN (:...categoryIds))', { categoryIds });
+    }
 
     const [data, total] = await qb.getManyAndCount();
     return { data, total, page, limit, pages: Math.ceil(total / limit) };

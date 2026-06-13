@@ -54,9 +54,18 @@ export class ReportsComponent implements OnInit {
   exportCsv(type: 'sales' | 'items' | 'credit-balance' | 'customers'): void {
     const params = new URLSearchParams({ startDate: this.startDate, endDate: this.endDate });
     const url = `${environment.apiUrl}/admin/reports/export/${type}?${params.toString()}`;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${type}-report.csv`;
-    a.click();
+    window.open(url, '_blank');
+  }
+
+  exportExcel(type: 'sales' | 'items' | 'customers'): void {
+    const params = new URLSearchParams({ startDate: this.startDate, endDate: this.endDate });
+    const url = `${environment.apiUrl}/admin/reports/export/${type}/excel?${params.toString()}`;
+    window.open(url, '_blank');
+  }
+
+  exportPdf(type: 'sales' | 'items'): void {
+    const params = new URLSearchParams({ startDate: this.startDate, endDate: this.endDate });
+    const url = `${environment.apiUrl}/admin/reports/export/${type}/pdf?${params.toString()}`;
+    window.open(url, '_blank');
   }
 }

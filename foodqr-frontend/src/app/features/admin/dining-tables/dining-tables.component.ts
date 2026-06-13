@@ -7,6 +7,7 @@ import { DiningTable } from '../../../core/models';
 @Component({ selector: 'app-dining-tables', templateUrl: './dining-tables.component.html' })
 export class DiningTablesComponent implements OnInit {
   tables: DiningTable[] = [];
+  waiters: any[] = [];
   loading = false;
   showForm = false;
   editingId: string | null = null;
@@ -18,7 +19,14 @@ export class DiningTablesComponent implements OnInit {
     this.form = this.fb.group({ name: ['', Validators.required], capacity: [4], waiterId: [''] });
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+    this.api.get<any>('admin/staff', { limit: 200 }).subscribe({
+      next: (res) => {
+        this.waiters = (res.data || []).filter((u: any) => u.role === 'waiter');
+      },
+    });
+  }
 
   load(): void {
     this.loading = true;

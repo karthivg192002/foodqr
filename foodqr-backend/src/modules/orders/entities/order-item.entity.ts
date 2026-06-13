@@ -16,6 +16,9 @@ export class OrderItem {
   @JoinColumn({ name: 'orderId' })
   order: Order;
 
+  @Column({ nullable: true })
+  branchId: string;
+
   @Column()
   itemId: string;
 

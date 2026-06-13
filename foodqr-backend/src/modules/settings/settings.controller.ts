@@ -1,6 +1,11 @@
-import { Controller, Get, Post, Body, UseGuards, Query } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller, Get, Post, Body, UseGuards, Query,
+  UploadedFile, UseInterceptors, BadRequestException,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { SettingsService } from './settings.service';
+import { UploadService } from '../upload/upload.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles, Public } from '../../common/decorators';
@@ -11,7 +16,10 @@ import { UserRole } from '../../common/enums';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class SettingsController {
-  constructor(private readonly settingsService: SettingsService) {}
+  constructor(
+    private readonly settingsService: SettingsService,
+    private readonly uploadService: UploadService,
+  ) {}
 
   @Get()
   @Roles(UserRole.ADMIN)
@@ -125,6 +133,28 @@ export class SettingsController {
   @Roles(UserRole.ADMIN)
   setTheme(@Body() settings: Record<string, string>) {
     return this.settingsService.setMany(settings, 'theme');
+  }
+
+  @Post('upload-logo')
+  @Roles(UserRole.ADMIN)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadLogo(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const url = this.uploadService.getFileUrl(file.filename);
+    await this.settingsService.setMany({ logo: url }, 'theme');
+    return { url };
+  }
+
+  @Post('upload-favicon')
+  @Roles(UserRole.ADMIN)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFavicon(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const url = this.uploadService.getFileUrl(file.filename);
+    await this.settingsService.setMany({ favicon: url }, 'theme');
+    return { url };
   }
 
   @Public()

@@ -2,13 +2,17 @@ import { Controller, Get, Post, Param, Body, UseGuards, Request } from '@nestjs/
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { MessagingService } from './messaging.service';
+import { ChatbotService } from './chatbot.service';
 
 @ApiTags('Messaging')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('messaging')
 export class MessagingController {
-  constructor(private readonly service: MessagingService) {}
+  constructor(
+    private readonly service: MessagingService,
+    private readonly chatbot: ChatbotService,
+  ) {}
 
   @Get('branch/:branchId/threads')
   getThreadsForBranch(@Param('branchId') branchId: string) {
@@ -30,4 +34,9 @@ export class MessagingController {
 
   @Post('thread/:id/read')
   markRead(@Param('id') id: string) { return this.service.markRead(id); }
+
+  @Post('chatbot')
+  chatbot(@Request() req, @Body() body: { message: string }) {
+    return this.chatbot.respond(req.user.sub, body.message);
+  }
 }

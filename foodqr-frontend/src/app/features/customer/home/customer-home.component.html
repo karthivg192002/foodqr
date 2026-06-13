@@ -1,13 +1,14 @@
 <div class="pb-4">
-  <!-- Search bar -->
-  <div class="px-4 pt-4 pb-2">
-    <div class="relative">
+  <!-- Search bar + currency selector -->
+  <div class="px-4 pt-4 pb-2 flex items-center gap-2">
+    <div class="relative flex-1">
       <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
       </svg>
       <input [(ngModel)]="search" (ngModelChange)="loadItems()" type="text" placeholder="Search menu..."
         class="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
     </div>
+    <app-currency-selector></app-currency-selector>
   </div>
 
   <!-- Banners -->
@@ -35,6 +36,17 @@
         {{ cat.icon }} {{ cat.name }}
       </button>
     </div>
+    <!-- Sub-category chips shown when a parent with children is selected -->
+    <div *ngIf="subCategories.length" class="flex gap-2 overflow-x-auto pb-1 scrollbar-none mt-2">
+      <button (click)="selectSubCategory('')"
+        [class]="!selectedSubCategory ? 'bg-orange-200 text-orange-800' : 'bg-gray-50 text-gray-500'"
+        class="flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium border border-orange-200">All</button>
+      <button *ngFor="let sub of subCategories" (click)="selectSubCategory(sub.id)"
+        [class]="selectedSubCategory === sub.id ? 'bg-orange-200 text-orange-800' : 'bg-gray-50 text-gray-500'"
+        class="flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium border border-gray-200">
+        {{ sub.name }}
+      </button>
+    </div>
   </div>
 
   <!-- Featured items -->
@@ -49,7 +61,7 @@
         <div class="p-2">
           <p class="font-medium text-gray-900 text-sm truncate">{{ item.name }}</p>
           <div class="flex items-center justify-between mt-1">
-            <span class="text-orange-600 font-bold text-sm">${{ item.price | number:'1.2-2' }}</span>
+            <span class="text-orange-600 font-bold text-sm">{{ item.price | fqrCurrency }}</span>
             <button (click)="addToCart(item)" class="w-6 h-6 bg-orange-500 rounded-full text-white text-lg flex items-center justify-center leading-none">+</button>
           </div>
         </div>
@@ -82,7 +94,7 @@
             </span>
           </div>
           <div class="flex items-center justify-between mt-2">
-            <span class="text-orange-600 font-bold">${{ item.price | number:'1.2-2' }}</span>
+            <span class="text-orange-600 font-bold">{{ item.price | fqrCurrency }}</span>
             <div class="flex items-center gap-2">
               <ng-container *ngIf="getCartQty(item.id) > 0; else addBtn">
                 <div class="flex items-center gap-2 bg-orange-50 rounded-full px-2 py-1">

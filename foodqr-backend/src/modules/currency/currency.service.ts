@@ -58,4 +58,33 @@ export class CurrencyService {
     await this.currencyRepo.delete(id);
     return { message: 'Currency deleted' };
   }
+
+  async getDefault(): Promise<Currency | null> {
+    return this.currencyRepo.findOne({ where: { isDefault: true, status: true } });
+  }
+
+  async convertAmount(amount: number, toCurrencyCode: string): Promise<{
+    amount: number; converted: number; rate: number; symbol: string; code: string;
+  }> {
+    const target = await this.currencyRepo.findOne({ where: { code: toCurrencyCode.toUpperCase(), status: true } });
+    if (!target) throw new NotFoundException(`Currency ${toCurrencyCode} not found`);
+    const defaultCurrency = await this.getDefault();
+    // Amounts stored in default currency (rate=1). Convert to target.
+    const baseRate = defaultCurrency?.exchangeRate || 1;
+    const converted = (amount / Number(baseRate)) * Number(target.exchangeRate);
+    return {
+      amount,
+      converted: Math.round(converted * 100) / 100,
+      rate: Number(target.exchangeRate),
+      symbol: target.symbol,
+      code: target.code,
+    };
+  }
+
+  async convertBulk(amounts: number[], toCurrencyCode: string) {
+    const target = await this.currencyRepo.findOne({ where: { code: toCurrencyCode.toUpperCase(), status: true } });
+    if (!target) throw new NotFoundException(`Currency ${toCurrencyCode} not found`);
+    const rate = Number(target.exchangeRate);
+    return { rate, symbol: target.symbol, code: target.code, amounts: amounts.map((a) => Math.round(a * rate * 100) / 100) };
+  }
 }

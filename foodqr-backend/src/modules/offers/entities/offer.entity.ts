@@ -35,6 +35,9 @@ export class Offer {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   maxDiscount: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  minOrderAmount: number;
+
   @Column({ nullable: true })
   startDate: Date;
 

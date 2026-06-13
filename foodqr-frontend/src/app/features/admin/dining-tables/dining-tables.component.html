@@ -17,6 +17,7 @@
         <div>
           <h3 class="font-semibold text-gray-900 text-lg">{{ table.name }}</h3>
           <p class="text-sm text-gray-500">Capacity: {{ table.capacity }} seats</p>
+          <p *ngIf="table.waiter" class="text-xs text-blue-500">Waiter: {{ table.waiter.name }}</p>
         </div>
         <span [class]="getStatusBadge(table.status)">{{ table.status }}</span>
       </div>
@@ -58,6 +59,12 @@
           <input formControlName="name" class="input-field" placeholder="e.g. Table 1, Table A"></div>
         <div><label class="block text-sm font-medium text-gray-700 mb-1">Capacity (seats)</label>
           <input formControlName="capacity" type="number" class="input-field"></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Assigned Waiter</label>
+          <select formControlName="waiterId" class="input-field">
+            <option value="">— No waiter —</option>
+            <option *ngFor="let w of waiters" [value]="w.id">{{ w.name }}</option>
+          </select>
+        </div>
         <div class="flex gap-3 pt-2">
           <button type="submit" [disabled]="saving" class="btn-primary flex-1">{{ saving ? 'Saving...' : 'Save' }}</button>
           <button type="button" (click)="showForm = false" class="btn-secondary flex-1">Cancel</button>

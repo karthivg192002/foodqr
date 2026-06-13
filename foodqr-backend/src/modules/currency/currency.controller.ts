@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param,
+  Controller, Get, Post, Patch, Delete, Body, Param, Query,
   UseGuards, ParseUUIDPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -17,6 +17,12 @@ export class CurrencyController {
   @Public()
   @Get('frontend/currencies')
   findActive() { return this.currencyService.findActive(); }
+
+  @Public()
+  @Get('frontend/currencies/convert')
+  convert(@Query('amount') amount: string, @Query('to') to: string) {
+    return this.currencyService.convertAmount(parseFloat(amount) || 0, to);
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)

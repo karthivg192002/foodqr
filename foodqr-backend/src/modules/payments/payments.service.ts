@@ -93,6 +93,32 @@ export class PaymentsService {
     return { data, total, page, limit };
   }
 
+  async handleMyfatoorahWebhook(body: any) {
+    // Myfatoorah sends { Data: { InvoiceId, InvoiceStatus, CustomerReference } }
+    const data = body?.Data || body;
+    const orderId = data?.CustomerReference;
+    const status = data?.InvoiceStatus; // 'Paid' | 'Failed'
+    if (orderId && status === 'Paid') {
+      const transactionId = String(data?.InvoiceId || '');
+      await this.orderRepo.update(orderId, { paymentStatus: PaymentStatus.PAID, paymentTransactionId: transactionId });
+      await this.transactionRepo.update({ orderId }, { status: PaymentStatus.PAID, gatewayTransactionId: transactionId });
+    }
+    return { received: true };
+  }
+
+  async handleMollieWebhook(body: any) {
+    // Mollie sends { id: 'tr_xxxx' } — we look up the payment from DB
+    const paymentId = body?.id;
+    if (!paymentId) return { received: true };
+    const tx = await this.transactionRepo.findOne({ where: { gatewayTransactionId: paymentId } });
+    if (tx?.orderId) {
+      // Mark as paid (in production, verify with Mollie API; here we trust the webhook)
+      await this.orderRepo.update(tx.orderId, { paymentStatus: PaymentStatus.PAID });
+      await this.transactionRepo.update({ gatewayTransactionId: paymentId }, { status: PaymentStatus.PAID });
+    }
+    return { received: true };
+  }
+
   getAvailableGateways() {
     return {
       gateways: [

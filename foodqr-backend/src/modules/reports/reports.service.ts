@@ -173,6 +173,74 @@ export class ReportsService {
     return { salesByDay, revenueByType, topItems, newCustomers };
   }
 
+  async getCategoryWiseSales(startDate?: string, endDate?: string) {
+    const qb = this.orderItemRepo.createQueryBuilder('oi')
+      .leftJoin('oi.item', 'item')
+      .leftJoin('oi.order', 'order')
+      .leftJoin('item.category', 'category')
+      .select('category.name', 'categoryName')
+      .addSelect('category.id', 'categoryId')
+      .addSelect('SUM(oi.quantity)', 'totalQty')
+      .addSelect('SUM(oi.totalPrice)', 'totalRevenue')
+      .addSelect('COUNT(DISTINCT order.id)', 'orderCount')
+      .where('order.paymentStatus = :ps', { ps: PaymentStatus.PAID })
+      .groupBy('category.id')
+      .addGroupBy('category.name')
+      .orderBy('SUM(oi.totalPrice)', 'DESC');
+
+    if (startDate) qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+    if (endDate) qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+    return qb.getRawMany();
+  }
+
+  async getHourlyPeakOrders(startDate?: string, endDate?: string) {
+    const qb = this.orderRepo.createQueryBuilder('order')
+      .select('EXTRACT(HOUR FROM order.createdAt)', 'hour')
+      .addSelect('COUNT(order.id)', 'orderCount')
+      .addSelect('SUM(order.total)', 'revenue')
+      .groupBy('EXTRACT(HOUR FROM order.createdAt)')
+      .orderBy('EXTRACT(HOUR FROM order.createdAt)', 'ASC');
+
+    if (startDate) qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+    if (endDate) qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+    return qb.getRawMany();
+  }
+
+  async getStaffLeaderboard(startDate?: string, endDate?: string) {
+    const qb = this.orderRepo.createQueryBuilder('order')
+      .leftJoin('order.staff', 'staff')
+      .where('order.staffId IS NOT NULL')
+      .andWhere('order.status = :s', { s: OrderStatus.DELIVERED })
+      .select('staff.id', 'staffId')
+      .addSelect('staff.name', 'staffName')
+      .addSelect('staff.role', 'role')
+      .addSelect('COUNT(order.id)', 'ordersHandled')
+      .addSelect('SUM(order.total)', 'totalRevenue')
+      .groupBy('staff.id')
+      .addGroupBy('staff.name')
+      .addGroupBy('staff.role')
+      .orderBy('COUNT(order.id)', 'DESC')
+      .limit(10);
+
+    if (startDate) qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+    if (endDate) qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+    return qb.getRawMany();
+  }
+
+  async getQrRevenueSummary(startDate?: string, endDate?: string) {
+    const qb = this.orderRepo.createQueryBuilder('order')
+      .where('order.paymentStatus = :ps', { ps: PaymentStatus.PAID })
+      .select('order.orderType', 'orderType')
+      .addSelect('COUNT(order.id)', 'orderCount')
+      .addSelect('SUM(order.total)', 'revenue')
+      .addSelect('AVG(order.total)', 'avgOrderValue')
+      .groupBy('order.orderType');
+
+    if (startDate) qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+    if (endDate) qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+    return qb.getRawMany();
+  }
+
   async getCustomerStats() {
     const [total, newThisMonth, topCustomers] = await Promise.all([
       this.userRepo.count({ where: { role: UserRole.CUSTOMER } }),

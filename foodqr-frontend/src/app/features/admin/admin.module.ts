@@ -23,6 +23,11 @@ import { TransactionsComponent } from './transactions/transactions.component';
 import { TimeSlotsComponent } from './time-slots/time-slots.component';
 import { PaymentGatewaysComponent } from './payment-gateways/payment-gateways.component';
 import { MessagingComponent } from './messaging/messaging.component';
+import { PromotionBannersComponent } from './promotion-banners/promotion-banners.component';
+import { MenuManagementComponent } from './menu-management/menu-management.component';
+import { RolesPermissionsComponent } from './roles-permissions/roles-permissions.component';
+import { AnalyticsSectionsComponent } from './analytics-sections/analytics-sections.component';
+import { StaffDashboardComponent } from './staff-dashboard/staff-dashboard.component';
 
 const routes: Routes = [
   {
@@ -49,6 +54,11 @@ const routes: Routes = [
       { path: 'time-slots',           component: TimeSlotsComponent },
       { path: 'payment-gateways',     component: PaymentGatewaysComponent },
       { path: 'messaging',            component: MessagingComponent },
+      { path: 'promotion-banners',    component: PromotionBannersComponent },
+      { path: 'menu-management',      component: MenuManagementComponent },
+      { path: 'roles-permissions',    component: RolesPermissionsComponent },
+      { path: 'analytics-sections',   component: AnalyticsSectionsComponent },
+      { path: 'staff-dashboard',       component: StaffDashboardComponent },
     ],
   },
 ];
@@ -75,6 +85,11 @@ const routes: Routes = [
     TimeSlotsComponent,
     PaymentGatewaysComponent,
     MessagingComponent,
+    PromotionBannersComponent,
+    MenuManagementComponent,
+    RolesPermissionsComponent,
+    AnalyticsSectionsComponent,
+    StaffDashboardComponent,
   ],
   imports: [
     CommonModule,

@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Patch, Body, Param, Query,
-  UseGuards, ParseUUIDPipe, DefaultValuePipe, ParseIntPipe, ParseFloatPipe,
+  UseGuards, ParseUUIDPipe, DefaultValuePipe, ParseIntPipe, ParseFloatPipe, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
@@ -81,8 +81,22 @@ export class OrdersController {
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
   @ApiBearerAuth()
   @Get('admin/dashboard/stats')
-  getDashboardStats() {
-    return this.ordersService.getDashboardStats();
+  getDashboardStats(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.ordersService.getDashboardStats(startDate, endDate);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('orders/:id/cancel')
+  cancelOrder(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: User,
+    @Body() body: { reason?: string },
+  ) {
+    return this.ordersService.cancelOrder(user.id, id, body.reason);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -106,6 +120,14 @@ export class OrdersController {
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
   ) {
     return this.ordersService.getOrdersByDeliveryBoy(deliveryBoyId, page, limit);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.WAITER, UserRole.CHEF, UserRole.STAFF, UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  @ApiBearerAuth()
+  @Get('staff/dashboard')
+  getStaffDashboard(@CurrentUser() user: User) {
+    return this.ordersService.getStaffDashboard(user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

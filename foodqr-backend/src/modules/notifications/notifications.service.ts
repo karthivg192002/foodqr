@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import * as admin from 'firebase-admin';
 import * as nodemailer from 'nodemailer';
 import { User } from '../users/entities/user.entity';
+import { SmsGatewaysService } from '../sms-gateways/sms-gateways.service';
 
 @Injectable()
 export class NotificationsService {
@@ -15,6 +16,7 @@ export class NotificationsService {
   constructor(
     @InjectRepository(User) private userRepo: Repository<User>,
     private configService: ConfigService,
+    private smsService: SmsGatewaysService,
   ) {
     this.initFirebase();
     this.initEmail();
@@ -72,6 +74,10 @@ export class NotificationsService {
     }
     if (user.email) {
       await this.sendEmail(user.email, title, `<p>${body}</p>`);
+    }
+    // SMS notification (non-blocking)
+    if (user.phone) {
+      this.smsService.send(user.phone, `FoodQR: Your order #${orderSerial} is now ${status}.`).catch(() => null);
     }
   }
 

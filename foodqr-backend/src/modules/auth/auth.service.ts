@@ -7,19 +7,25 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../users/entities/user.entity';
-import { UserRole, UserStatus } from '../../common/enums';
+import { Order } from '../orders/entities/order.entity';
+import { OrderItem } from '../orders/entities/order-item.entity';
+import { UserRole, UserStatus, PaymentStatus } from '../../common/enums';
 import {
   LoginDto, RegisterDto, OtpRequestDto, OtpVerifyDto,
   ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto,
 } from './dto/auth.dto';
 import { MailService } from '../mail/mail.service';
+import { SmsGatewaysService } from '../sms-gateways/sms-gateways.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Order) private orderRepo: Repository<Order>,
+    @InjectRepository(OrderItem) private orderItemRepo: Repository<OrderItem>,
     private jwtService: JwtService,
     private mailService: MailService,
+    private smsService: SmsGatewaysService,
   ) {}
 
   async login(dto: LoginDto) {
@@ -81,10 +87,13 @@ export class AuthService {
       await this.userRepo.save(temp);
     }
 
-    // Send OTP via email (non-blocking)
+    // Send OTP via email and SMS (both non-blocking)
     this.mailService.sendOtp(dto.email, otp).catch(() => null);
+    if (user?.phone) {
+      this.smsService.send(user.phone, `Your FoodQR OTP is: ${otp}`).catch(() => null);
+    }
 
-    return { message: 'OTP sent to your email' };
+    return { message: 'OTP sent' };
   }
 
   async verifyOtp(dto: OtpVerifyDto) {
@@ -148,6 +157,12 @@ export class AuthService {
     return { message: 'Password changed successfully' };
   }
 
+  async storeDeviceToken(userId: string, type: 'web' | 'mobile', token: string) {
+    const field = type === 'web' ? 'webToken' : 'deviceToken';
+    await this.userRepo.update(userId, { [field]: token });
+    return { message: 'Token stored' };
+  }
+
   async deleteAccount(userId: string) {
     await this.userRepo.softDelete(userId);
     return { message: 'Account deactivated successfully' };
@@ -155,6 +170,70 @@ export class AuthService {
 
   async getProfile(userId: string) {
     return this.userRepo.findOne({ where: { id: userId }, relations: ['branch'] });
+  }
+
+  async getCustomerDashboard(userId: string) {
+    const user = await this.userRepo.findOne({ where: { id: userId }, relations: ['branch'] });
+    if (!user) throw new NotFoundException('User not found');
+
+    const [totalVisits, spentResult, topCategoryRows, peakDayRows, peakTimeRows] = await Promise.all([
+      this.orderRepo.count({ where: { userId } }),
+      this.orderRepo
+        .createQueryBuilder('o')
+        .where('o.userId = :userId AND o.paymentStatus = :ps', { userId, ps: PaymentStatus.PAID })
+        .select('SUM(o.total)', 'total')
+        .addSelect('AVG(o.total)', 'avg')
+        .getRawOne(),
+      this.orderItemRepo
+        .createQueryBuilder('oi')
+        .innerJoin('oi.order', 'o', 'o.userId = :userId', { userId })
+        .innerJoin('oi.item', 'item')
+        .innerJoin('item.category', 'cat')
+        .select('cat.name', 'category')
+        .addSelect('SUM(oi.quantity)', 'qty')
+        .groupBy('cat.name')
+        .orderBy('SUM(oi.quantity)', 'DESC')
+        .limit(3)
+        .getRawMany(),
+      this.orderRepo
+        .createQueryBuilder('o')
+        .where('o.userId = :userId', { userId })
+        .select("TO_CHAR(o.createdAt, 'Day')", 'day')
+        .addSelect('COUNT(*)', 'count')
+        .groupBy("TO_CHAR(o.createdAt, 'Day')")
+        .orderBy('COUNT(*)', 'DESC')
+        .limit(1)
+        .getRawMany(),
+      this.orderRepo
+        .createQueryBuilder('o')
+        .where('o.userId = :userId', { userId })
+        .select("EXTRACT(HOUR FROM o.createdAt)", 'hour')
+        .addSelect('COUNT(*)', 'count')
+        .groupBy("EXTRACT(HOUR FROM o.createdAt)")
+        .orderBy('COUNT(*)', 'DESC')
+        .limit(1)
+        .getRawMany(),
+    ]);
+
+    const totalSpent = Number(spentResult?.total || 0);
+    const avgOrderValue = Number(spentResult?.avg || 0);
+    const peakHour = peakTimeRows[0]?.hour;
+    const peakTime = peakHour != null ? `${String(peakHour).padStart(2, '0')}:00` : null;
+
+    return {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      profileImage: user.profileImage,
+      walletBalance: Number(user.balance),
+      isGuest: user.isGuest,
+      totalVisits,
+      totalSpent,
+      avgOrderValue: Math.round(avgOrderValue * 100) / 100,
+      topCategories: topCategoryRows.map((r) => r.category),
+      peakDay: peakDayRows[0]?.day?.trim() || null,
+      peakTime,
+    };
   }
 
   /** Create minimal customer at POS without full registration */

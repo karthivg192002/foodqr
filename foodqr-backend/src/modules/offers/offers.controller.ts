@@ -47,4 +47,19 @@ export class OffersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
   @Delete('admin/offers/items/:offerItemId') removeOfferItem(@Param('offerItemId', ParseUUIDPipe) offerItemId: string) { return this.offersService.removeOfferItem(offerItemId); }
+
+  // ─── Promotion Banners ────────────────────────────────────────────────────
+  @Public() @Get('frontend/promotion-banners') getActivePromoBanners() { return this.offersService.getActivePromotionBanners(); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
+  @Get('admin/promotion-banners') getAllPromoBanners() { return this.offersService.getAllPromotionBanners(); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
+  @Post('admin/promotion-banners') createPromoBanner(@Body() data: any) { return this.offersService.createPromotionBanner(data); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
+  @Patch('admin/promotion-banners/:id') updatePromoBanner(@Param('id', ParseUUIDPipe) id: string, @Body() data: any) { return this.offersService.updatePromotionBanner(id, data); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
+  @Delete('admin/promotion-banners/:id') deletePromoBanner(@Param('id', ParseUUIDPipe) id: string) { return this.offersService.deletePromotionBanner(id); }
 }
