@@ -1,39 +1,66 @@
-<div class="p-6">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Branch Time Slots</h1>
+﻿<div class="space-y-5 fade-in-up">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Branch Time Slots</h1>
+      <p class="page-subtitle">Configure opening and closing hours for each branch and day of the week</p>
+    </div>
     <div class="flex items-center gap-3">
-      <select [(ngModel)]="selectedBranchId" (change)="onBranchChange()" class="input">
+      <select [(ngModel)]="selectedBranchId" (change)="onBranchChange()" class="input-field" style="width:200px">
         <option *ngFor="let b of branches" [value]="b.id">{{ b.name }}</option>
       </select>
-      <button (click)="save()" [disabled]="saving" class="btn btn-primary">
-        {{ saving ? 'Saving...' : 'Save Time Slots' }}
+      <button (click)="save()" [disabled]="saving" class="btn-primary btn-sm">
+        {{ saving ? 'Saving…' : 'Save Time Slots' }}
       </button>
     </div>
   </div>
 
-  <div *ngIf="loading" class="text-center py-8 text-gray-400">Loading...</div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="spinner"></div>
+  </div>
 
-  <div *ngIf="!loading" class="bg-white rounded-xl shadow-sm overflow-hidden">
-    <table class="w-full text-sm">
-      <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+  <!-- Time slots table -->
+  <div *ngIf="!loading" class="table-container">
+    <table class="data-table">
+      <thead>
         <tr>
-          <th class="px-4 py-3 text-left">Day</th>
-          <th class="px-4 py-3 text-left">Open</th>
-          <th class="px-4 py-3 text-left">Opening Time</th>
-          <th class="px-4 py-3 text-left">Closing Time</th>
+          <th style="width:140px">Day</th>
+          <th style="width:80px;text-align:center">Open</th>
+          <th>Opening Time</th>
+          <th>Closing Time</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let slot of slots" class="border-t hover:bg-gray-50">
-          <td class="px-4 py-3 font-medium">{{ dayNames[slot.day] }}</td>
-          <td class="px-4 py-3">
-            <input type="checkbox" [(ngModel)]="slot.isOpen" class="rounded" />
+        <tr *ngFor="let slot of slots">
+          <td>
+            <div class="flex items-center gap-2.5">
+              <div class="w-2 h-2 rounded-full flex-shrink-0"
+                [style.background]="slot.isOpen ? '#22c55e' : '#e2e8f0'"></div>
+              <span style="font-size:13.5px;font-weight:600;color:#0f172a">{{ dayNames[slot.day] }}</span>
+            </div>
           </td>
-          <td class="px-4 py-3">
-            <input type="time" [(ngModel)]="slot.openingTime" [disabled]="!slot.isOpen" class="input" />
+          <td style="text-align:center">
+            <button (click)="slot.isOpen=!slot.isOpen"
+              class="inline-flex rounded-full transition-colors"
+              [style.background]="slot.isOpen ? '#22c55e' : '#e2e8f0'"
+              style="width:36px;height:20px;position:relative">
+              <span style="position:absolute;top:2px;width:16px;height:16px;background:white;border-radius:50%;transition:left 0.2s"
+                [style.left]="slot.isOpen ? '18px' : '2px'"></span>
+            </button>
           </td>
-          <td class="px-4 py-3">
-            <input type="time" [(ngModel)]="slot.closingTime" [disabled]="!slot.isOpen" class="input" />
+          <td>
+            <input type="time" [(ngModel)]="slot.openingTime" [disabled]="!slot.isOpen"
+              class="input-field" style="width:140px"
+              [style.opacity]="slot.isOpen ? '1' : '0.4'"
+              [style.cursor]="slot.isOpen ? 'text' : 'not-allowed'" />
+          </td>
+          <td>
+            <input type="time" [(ngModel)]="slot.closingTime" [disabled]="!slot.isOpen"
+              class="input-field" style="width:140px"
+              [style.opacity]="slot.isOpen ? '1' : '0.4'"
+              [style.cursor]="slot.isOpen ? 'text' : 'not-allowed'" />
           </td>
         </tr>
       </tbody>

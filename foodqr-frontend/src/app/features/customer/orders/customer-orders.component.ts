@@ -17,7 +17,7 @@ export class CustomerOrdersComponent implements OnInit {
 
   load(): void {
     this.api.get<any>('orders/my-orders').subscribe({
-      next: (res) => { this.orders = res.data || []; this.loading = false; },
+      next: (res) => { this.orders = Array.isArray(res) ? res : (res.data ?? []); this.loading = false; },
       error: () => { this.loading = false; },
     });
   }
@@ -26,6 +26,12 @@ export class CustomerOrdersComponent implements OnInit {
     this.api.get<Order>(`orders/track/${order.token}`).subscribe({
       next: (o) => this.selected = o,
     });
+  }
+
+  private readonly STATUS_STEPS = ['pending', 'accepted', 'preparing', 'prepared', 'out_for_delivery', 'delivered'];
+
+  getStepIndex(status: string): number {
+    return this.STATUS_STEPS.indexOf(status);
   }
 
   statusClass(status: string): string {

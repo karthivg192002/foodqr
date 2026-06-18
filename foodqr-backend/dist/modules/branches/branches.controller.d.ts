@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { BranchesService, CreateBranchDto } from './branches.service';
 export declare class BranchesController {
     private readonly branchesService;
@@ -11,4 +12,5 @@ export declare class BranchesController {
     remove(id: string): Promise<{
         message: string;
     }>;
+    exportExcel(res: Response): Promise<void>;
 }

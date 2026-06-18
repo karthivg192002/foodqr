@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
+import { ApiService } from '../../../core/services/api.service';
 import { UserRole } from '../../../core/models';
 
 interface NavItem {
@@ -27,32 +28,21 @@ export class AdminLayoutComponent implements OnInit {
   userMenuOpen = false;
   breadcrumbs: { label: string; url?: string }[] = [];
 
-  navGroups: NavGroup[] = [
+  private readonly DEFAULT_NAV_GROUPS: NavGroup[] = [
     {
       heading: 'Overview',
       items: [
-        { label: 'Dashboard', icon: 'home', route: '/admin/dashboard' },
+        { label: 'Dashboard', icon: 'home', route: '/admin/dashboard', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
+        { label: 'My Dashboard', icon: 'home', route: '/admin/staff-dashboard', roles: [UserRole.WAITER, UserRole.CHEF, UserRole.STAFF] },
       ],
     },
     {
       heading: 'Operations',
       items: [
         { label: 'Live Orders', icon: 'orders', route: '/admin/orders' },
-        {
-          label: 'Kitchen Display', icon: 'kitchen', route: '/kds',
-          external: true,
-          roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.CHEF, UserRole.STAFF],
-        },
-        {
-          label: 'Order Status', icon: 'tv', route: '/oss',
-          external: true,
-          roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER],
-        },
-        {
-          label: 'Point of Sale', icon: 'pos', route: '/pos',
-          external: true,
-          roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.POS_OPERATOR],
-        },
+        { label: 'Kitchen Display', icon: 'kitchen', route: '/kds', external: true, roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.CHEF, UserRole.STAFF] },
+        { label: 'Order Status', icon: 'tv', route: '/oss', external: true, roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
+        { label: 'Point of Sale', icon: 'pos', route: '/pos', external: true, roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.POS_OPERATOR] },
       ],
     },
     {
@@ -104,14 +94,18 @@ export class AdminLayoutComponent implements OnInit {
     },
   ];
 
+  navGroups: NavGroup[] = this.DEFAULT_NAV_GROUPS;
+
   constructor(
     public authService: AuthService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
+    private api: ApiService,
   ) {}
 
   ngOnInit(): void {
     this.buildBreadcrumbs();
+    this.loadNav();
     this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe(() => {
@@ -120,10 +114,36 @@ export class AdminLayoutComponent implements OnInit {
         this.userMenuOpen = false;
       });
 
-    // Collapse sidebar on small screens by default
     if (window.innerWidth < 1024) {
       this.sidebarOpen = false;
     }
+  }
+
+  private loadNav(): void {
+    this.api.get<any[]>('admin/nav-menus/my-nav').subscribe({
+      next: (items) => {
+        if (!items?.length) return;
+        this.navGroups = this.buildGroupsFromApi(items);
+      },
+      error: () => { /* fall back to DEFAULT_NAV_GROUPS already set */ },
+    });
+  }
+
+  private buildGroupsFromApi(items: any[]): NavGroup[] {
+    const groupMap = new Map<string, NavGroup>();
+    for (const item of items) {
+      if (!groupMap.has(item.group)) {
+        groupMap.set(item.group, { heading: item.group, items: [] });
+      }
+      groupMap.get(item.group)!.items.push({
+        label: item.name,
+        icon: item.iconKey,
+        route: item.route,
+        external: item.external,
+        roles: item.roles?.length ? (item.roles as UserRole[]) : undefined,
+      });
+    }
+    return Array.from(groupMap.values());
   }
 
   @HostListener('window:resize', ['$event'])

@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { AuthGuard } from '../../core/guards/auth.guard';
+import { UserRole } from '../../core/models';
 
 import { AdminLayoutComponent } from './layout/admin-layout.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -28,6 +30,7 @@ import { MenuManagementComponent } from './menu-management/menu-management.compo
 import { RolesPermissionsComponent } from './roles-permissions/roles-permissions.component';
 import { AnalyticsSectionsComponent } from './analytics-sections/analytics-sections.component';
 import { StaffDashboardComponent } from './staff-dashboard/staff-dashboard.component';
+import { RoleManagerComponent } from './role-manager/role-manager.component';
 
 const routes: Routes = [
   {
@@ -35,7 +38,7 @@ const routes: Routes = [
     component: AdminLayoutComponent,
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard',            component: DashboardComponent },
+      { path: 'dashboard',            component: DashboardComponent, canActivate: [AuthGuard], data: { roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] } },
       { path: 'orders',               component: OrdersComponent },
       { path: 'menu/categories',      component: MenuCategoriesComponent },
       { path: 'menu/items',           component: MenuItemsComponent },
@@ -59,6 +62,7 @@ const routes: Routes = [
       { path: 'roles-permissions',    component: RolesPermissionsComponent },
       { path: 'analytics-sections',   component: AnalyticsSectionsComponent },
       { path: 'staff-dashboard',       component: StaffDashboardComponent },
+      { path: 'role-manager',          component: RoleManagerComponent },
     ],
   },
 ];
@@ -90,6 +94,7 @@ const routes: Routes = [
     RolesPermissionsComponent,
     AnalyticsSectionsComponent,
     StaffDashboardComponent,
+    RoleManagerComponent,
   ],
   imports: [
     CommonModule,

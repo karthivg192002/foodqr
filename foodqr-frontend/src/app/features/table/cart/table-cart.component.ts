@@ -40,7 +40,7 @@ export class TableCartComponent {
           items: this.cartService.toOrderItems(),
           orderNote: this.orderNote,
         };
-        this.api.post<any>('orders', order).subscribe({
+        this.api.post<any>('table/orders', order).subscribe({
           next: (created) => {
             this.cartService.clear();
             this.toastr.success('Order placed!');

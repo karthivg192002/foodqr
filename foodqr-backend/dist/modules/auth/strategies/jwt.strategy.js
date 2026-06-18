@@ -24,9 +24,13 @@ const enums_1 = require("../../../common/enums");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
     constructor(config, userRepo) {
         super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
+                passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+                (req) => req?.query?.token || null,
+            ]),
             ignoreExpiration: false,
             secretOrKey: config.get('JWT_SECRET', 'secret'),
+            passReqToCallback: false,
         });
         this.userRepo = userRepo;
     }

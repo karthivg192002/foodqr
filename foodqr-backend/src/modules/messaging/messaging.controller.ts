@@ -36,7 +36,7 @@ export class MessagingController {
   markRead(@Param('id') id: string) { return this.service.markRead(id); }
 
   @Post('chatbot')
-  chatbot(@Request() req, @Body() body: { message: string }) {
+  askChatbot(@Request() req, @Body() body: { message: string }) {
     return this.chatbot.respond(req.user.sub, body.message);
   }
 }

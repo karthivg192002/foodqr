@@ -59,6 +59,31 @@ let CurrencyService = class CurrencyService {
         await this.currencyRepo.delete(id);
         return { message: 'Currency deleted' };
     }
+    async getDefault() {
+        return this.currencyRepo.findOne({ where: { isDefault: true, status: true } });
+    }
+    async convertAmount(amount, toCurrencyCode) {
+        const target = await this.currencyRepo.findOne({ where: { code: toCurrencyCode.toUpperCase(), status: true } });
+        if (!target)
+            throw new common_1.NotFoundException(`Currency ${toCurrencyCode} not found`);
+        const defaultCurrency = await this.getDefault();
+        const baseRate = defaultCurrency?.exchangeRate || 1;
+        const converted = (amount / Number(baseRate)) * Number(target.exchangeRate);
+        return {
+            amount,
+            converted: Math.round(converted * 100) / 100,
+            rate: Number(target.exchangeRate),
+            symbol: target.symbol,
+            code: target.code,
+        };
+    }
+    async convertBulk(amounts, toCurrencyCode) {
+        const target = await this.currencyRepo.findOne({ where: { code: toCurrencyCode.toUpperCase(), status: true } });
+        if (!target)
+            throw new common_1.NotFoundException(`Currency ${toCurrencyCode} not found`);
+        const rate = Number(target.exchangeRate);
+        return { rate, symbol: target.symbol, code: target.code, amounts: amounts.map((a) => Math.round(a * rate * 100) / 100) };
+    }
 };
 exports.CurrencyService = CurrencyService;
 exports.CurrencyService = CurrencyService = __decorate([

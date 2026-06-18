@@ -7,6 +7,7 @@ export declare class CreateCategoryDto {
     image?: string;
     parentCategoryId?: string;
     status?: boolean;
+    variationOnly?: boolean;
     sortOrder?: number;
 }
 export declare class CategoriesService {
@@ -25,5 +26,10 @@ export declare class CategoriesService {
         sortOrder: number;
     }>): Promise<{
         message: string;
+    }>;
+    exportExcel(res: any): Promise<void>;
+    importFromCsv(csvContent: string): Promise<{
+        imported: number;
+        errors: string[];
     }>;
 }

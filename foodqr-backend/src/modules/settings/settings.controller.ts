@@ -135,6 +135,26 @@ export class SettingsController {
     return this.settingsService.setMany(settings, 'theme');
   }
 
+  @Get('otp')
+  @Roles(UserRole.ADMIN)
+  getOtp() { return this.settingsService.getAll('otp'); }
+
+  @Post('otp')
+  @Roles(UserRole.ADMIN)
+  setOtp(@Body() settings: Record<string, string>) {
+    return this.settingsService.setMany(settings, 'otp');
+  }
+
+  @Get('firebase')
+  @Roles(UserRole.ADMIN)
+  getFirebase() { return this.settingsService.getAll('firebase'); }
+
+  @Post('firebase')
+  @Roles(UserRole.ADMIN)
+  setFirebase(@Body() settings: Record<string, string>) {
+    return this.settingsService.setMany(settings, 'firebase');
+  }
+
   @Post('upload-logo')
   @Roles(UserRole.ADMIN)
   @ApiConsumes('multipart/form-data')

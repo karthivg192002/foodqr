@@ -2,6 +2,7 @@ import { Repository } from 'typeorm';
 import { Branch } from './entities/branch.entity';
 export declare class CreateBranchDto {
     name: string;
+    slug?: string;
     address?: string;
     city?: string;
     state?: string;
@@ -12,6 +13,7 @@ export declare class CreateBranchDto {
     longitude?: string;
     image?: string;
     isDefault?: boolean;
+    status?: boolean;
 }
 export declare class BranchesService {
     private branchRepo;
@@ -24,4 +26,5 @@ export declare class BranchesService {
         message: string;
     }>;
     setDefault(id: string): Promise<Branch>;
+    exportExcel(res: any): Promise<void>;
 }

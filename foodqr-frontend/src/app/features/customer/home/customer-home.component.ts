@@ -64,7 +64,7 @@ export class CustomerHomeComponent implements OnInit {
     const filterCat = this.selectedSubCategory || this.selectedCategory;
     if (filterCat) params.categoryId = filterCat;
     this.api.get<any>('frontend/items', params).subscribe({
-      next: (res) => { this.allItems = res.data || []; this.loading = false; },
+      next: (res) => { this.allItems = Array.isArray(res) ? res : (res.data ?? []); this.loading = false; },
       error: () => { this.loading = false; },
     });
   }

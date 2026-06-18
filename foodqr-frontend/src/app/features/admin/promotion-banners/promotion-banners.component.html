@@ -1,96 +1,142 @@
-<div class="p-6">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Promotion Banners</h1>
-    <button (click)="openCreate()" class="btn-primary px-4 py-2 text-sm">+ Add Banner</button>
-  </div>
+﻿<div class="space-y-5 fade-in-up">
 
-  <!-- Form modal -->
-  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl w-full max-w-lg p-6 max-h-screen overflow-y-auto">
-      <h2 class="text-lg font-bold text-gray-900 mb-4">{{ editingId ? 'Edit' : 'New' }} Promotion Banner</h2>
-      <form [formGroup]="form" (ngSubmit)="save()" class="space-y-3">
-        <div>
-          <label class="label">Title *</label>
-          <input formControlName="title" class="input w-full" placeholder="e.g. Weekend Special">
-        </div>
-        <div>
-          <label class="label">Subtitle</label>
-          <input formControlName="subtitle" class="input w-full" placeholder="Short tagline">
-        </div>
-        <div>
-          <label class="label">Description</label>
-          <textarea formControlName="description" class="input w-full" rows="2"></textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="label">Badge Text</label>
-            <input formControlName="badgeText" class="input w-full" placeholder="e.g. HOT">
-          </div>
-          <div>
-            <label class="label">Badge Color</label>
-            <input formControlName="badgeColor" type="color" class="input w-full h-10 cursor-pointer">
-          </div>
-        </div>
-        <div>
-          <label class="label">Link URL</label>
-          <input formControlName="linkUrl" class="input w-full" placeholder="https://...">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="label">Start Date</label>
-            <input formControlName="startDate" type="date" class="input w-full">
-          </div>
-          <div>
-            <label class="label">End Date</label>
-            <input formControlName="endDate" type="date" class="input w-full">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="label">Sort Order</label>
-            <input formControlName="sortOrder" type="number" class="input w-full" min="0">
-          </div>
-          <div class="flex items-center gap-2 mt-5">
-            <input formControlName="status" type="checkbox" id="status" class="w-4 h-4">
-            <label for="status" class="text-sm">Active</label>
-          </div>
-        </div>
-        <div class="flex gap-3 pt-2">
-          <button type="submit" [disabled]="saving" class="btn-primary px-5 py-2 text-sm flex-1">
-            {{ saving ? 'Saving...' : (editingId ? 'Update' : 'Create') }}
-          </button>
-          <button type="button" (click)="showForm=false" class="btn-secondary px-5 py-2 text-sm flex-1">Cancel</button>
-        </div>
-      </form>
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Promotion Banners</h1>
+      <p class="page-subtitle">Manage promotional banners displayed on the customer-facing app</p>
     </div>
+    <button (click)="openCreate()" class="btn-primary btn-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Add Banner
+    </button>
   </div>
 
-  <!-- List -->
-  <div *ngIf="loading" class="text-center py-12 text-gray-400">Loading...</div>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <div *ngFor="let b of banners" class="bg-white rounded-2xl shadow-sm overflow-hidden">
-      <div class="h-24 bg-gradient-to-r from-orange-400 to-orange-600 relative flex items-center justify-center">
-        <span class="text-white font-bold text-lg">{{ b.title }}</span>
-        <span *ngIf="b.badgeText" class="absolute top-2 right-2 text-xs text-white font-bold px-2 py-0.5 rounded-full"
-          [style.background-color]="b.badgeColor || '#FF6B35'">{{ b.badgeText }}</span>
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Banner grid -->
+  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+    <div *ngFor="let b of banners"
+      class="card p-0 overflow-hidden"
+      onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.1)'"
+      onmouseout="this.style.transform='';this.style.boxShadow=''">
+
+      <!-- Banner image/header -->
+      <div style="height:96px;background:linear-gradient(135deg,#ea580c,#f97316);position:relative;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:16px;font-weight:800;color:white;text-shadow:0 1px 4px rgba(0,0,0,0.3)">{{ b.title }}</span>
+        <span *ngIf="b.badgeText"
+          style="position:absolute;top:10px;right:10px;font-size:11px;font-weight:700;color:white;padding:2px 8px;border-radius:20px"
+          [style.background]="b.badgeColor || '#dc2626'">{{ b.badgeText }}</span>
+        <span [class]="b.status ? 'badge-success' : 'badge-danger'"
+          style="position:absolute;bottom:10px;left:10px">{{ b.status ? 'Active' : 'Inactive' }}</span>
       </div>
+
+      <!-- Card body -->
       <div class="p-4">
-        <p class="text-sm text-gray-600 mb-1">{{ b.subtitle }}</p>
-        <p *ngIf="b.startDate || b.endDate" class="text-xs text-gray-400">
-          {{ b.startDate | date:'MMM d' }} – {{ b.endDate | date:'MMM d, y' }}
-        </p>
-        <div class="flex items-center justify-between mt-3">
-          <span [class]="b.status ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
-            class="text-xs font-medium px-2 py-1 rounded-full">{{ b.status ? 'Active' : 'Inactive' }}</span>
-          <div class="flex gap-2">
-            <button (click)="openEdit(b)" class="text-blue-500 text-sm font-medium">Edit</button>
-            <button (click)="delete(b.id)" class="text-red-500 text-sm font-medium">Delete</button>
+        <p *ngIf="b.subtitle" style="font-size:13px;color:#334155;font-weight:500;margin-bottom:4px">{{ b.subtitle }}</p>
+        <p *ngIf="b.description" style="font-size:12.5px;color:#94a3b8;line-height:1.4" class="truncate">{{ b.description }}</p>
+        <div *ngIf="b.startDate || b.endDate"
+          class="flex items-center gap-1.5 mt-3"
+          style="font-size:11.5px;color:#94a3b8">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          {{ b.startDate | date:'MMM d' }} &mdash; {{ b.endDate | date:'MMM d, y' }}
+        </div>
+        <div class="flex items-center justify-between mt-4">
+          <span style="font-size:11.5px;color:#94a3b8">Order: {{ b.sortOrder ?? 0 }}</span>
+          <div class="flex gap-1">
+            <button (click)="openEdit(b)" class="action-link action-link-blue">Edit</button>
+            <button (click)="delete(b.id)" class="action-link action-link-danger">Delete</button>
           </div>
         </div>
       </div>
     </div>
-    <div *ngIf="!loading && !banners.length" class="col-span-3 text-center py-16 text-gray-400">
-      No promotion banners yet
+
+    <!-- Empty state -->
+    <div *ngIf="!banners.length" class="col-span-3">
+      <div class="empty-state card py-20">
+        <div class="empty-state-icon">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <p class="empty-state-title">No promotion banners</p>
+        <p class="empty-state-desc">Create banners to highlight promotions and special offers in the customer app.</p>
+        <button (click)="openCreate()" class="btn-primary btn-sm">Add First Banner</button>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- ── Banner Form Modal ── -->
+<div *ngIf="showForm" class="modal-backdrop">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingId ? 'Edit Banner' : 'New Promotion Banner' }}</p>
+      <button (click)="showForm=false" class="modal-close-btn">×</button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="modal-body space-y-4">
+        <div class="form-group">
+          <label class="label">Title <span style="color:#dc2626">*</span></label>
+          <input formControlName="title" class="input-field" placeholder="e.g. Weekend Special">
+        </div>
+        <div class="form-group">
+          <label class="label">Subtitle</label>
+          <input formControlName="subtitle" class="input-field" placeholder="Short tagline">
+        </div>
+        <div class="form-group">
+          <label class="label">Description</label>
+          <textarea formControlName="description" class="input-field" rows="2" placeholder="Optional longer description"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Badge Text</label>
+            <input formControlName="badgeText" class="input-field" placeholder="e.g. HOT, NEW">
+          </div>
+          <div class="form-group">
+            <label class="label">Badge Color</label>
+            <input formControlName="badgeColor" type="color" class="input-field" style="height:42px;cursor:pointer;padding:4px">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label">Link URL</label>
+          <input formControlName="linkUrl" class="input-field" placeholder="https://...">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Start Date</label>
+            <input formControlName="startDate" type="date" class="input-field">
+          </div>
+          <div class="form-group">
+            <label class="label">End Date</label>
+            <input formControlName="endDate" type="date" class="input-field">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Sort Order</label>
+            <input formControlName="sortOrder" type="number" min="0" class="input-field" placeholder="0">
+          </div>
+          <div class="flex items-end pb-1">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" formControlName="status" class="w-4 h-4">
+              <span style="font-size:13.5px;font-weight:500;color:#334155">Active</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" (click)="showForm=false" class="btn-secondary btn-sm">Cancel</button>
+        <button type="submit" [disabled]="saving || form.invalid" class="btn-primary btn-sm">
+          {{ saving ? 'Saving…' : (editingId ? 'Update' : 'Create Banner') }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>

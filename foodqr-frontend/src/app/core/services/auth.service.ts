@@ -93,7 +93,7 @@ export class AuthService {
       case UserRole.BRANCH_MANAGER: return '/admin/dashboard';
       case UserRole.CHEF:
       case UserRole.STAFF: return '/kds';
-      case UserRole.WAITER: return '/admin/orders';
+      case UserRole.WAITER: return '/admin/staff-dashboard';
       case UserRole.POS_OPERATOR: return '/pos';
       case UserRole.CUSTOMER: return '/customer/home';
       default: return '/auth/login';

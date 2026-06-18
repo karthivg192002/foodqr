@@ -28,4 +28,42 @@ export declare class LoyaltyController {
     createProgram(data: any): Promise<import("./entities/loyalty-program.entity").LoyaltyProgram>;
     updateProgram(id: string, data: any): Promise<import("./entities/loyalty-program.entity").LoyaltyProgram>;
     addConfiguration(id: string, data: any): Promise<import("./entities/loyalty-configuration.entity").LoyaltyConfiguration>;
+    getConfiguration(id: string): Promise<import("./entities/loyalty-configuration.entity").LoyaltyConfiguration>;
+    updateConfiguration(id: string, data: any): Promise<import("./entities/loyalty-configuration.entity").LoyaltyConfiguration>;
+    removeConfiguration(id: string): Promise<{
+        message: string;
+    }>;
+    getSegmentsForCustomers(): Promise<{
+        segments: {
+            new: any[];
+            bronze: any[];
+            silver: any[];
+            gold: any[];
+        };
+        summary: {
+            total: number;
+            new: number;
+            bronze: number;
+            silver: number;
+            gold: number;
+        };
+        requiredStamps: number;
+    }>;
+    getSegments(): Promise<{
+        segments: {
+            new: any[];
+            bronze: any[];
+            silver: any[];
+            gold: any[];
+        };
+        summary: {
+            total: number;
+            new: number;
+            bronze: number;
+            silver: number;
+            gold: number;
+        };
+        requiredStamps: number;
+    }>;
+    getLeaderboard(): Promise<any[]>;
 }

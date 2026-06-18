@@ -16,6 +16,7 @@ export declare class Item {
     thumbImage: string;
     coverImage: string;
     videoUrl: string;
+    arImage: string;
     gallery: string[];
     calories: number;
     protein: number;
@@ -29,4 +30,5 @@ export declare class Item {
     variations: ItemVariation[];
     createdAt: Date;
     updatedAt: Date;
+    deletedAt: Date;
 }

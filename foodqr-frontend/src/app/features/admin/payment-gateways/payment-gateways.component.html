@@ -1,49 +1,110 @@
-<div class="p-6">
-  <h1 class="text-2xl font-bold text-gray-800 mb-6">Payment Gateways</h1>
+﻿<div class="space-y-5 fade-in-up">
 
-  <div *ngIf="loading" class="text-center py-8 text-gray-400">Loading...</div>
-
-  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <div *ngFor="let gw of gateways" class="bg-white rounded-xl shadow-sm p-4 flex flex-col gap-3">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">{{ getGatewayIcon(gw.slug) }}</span>
-          <div>
-            <p class="font-semibold text-gray-800">{{ gw.name }}</p>
-            <p class="text-xs text-gray-400">{{ gw.mode || 'sandbox' }} mode</p>
-          </div>
-        </div>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" [checked]="gw.isActive" (change)="toggle(gw)" class="sr-only peer" />
-          <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-primary-600 after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition peer-checked:after:translate-x-5"></div>
-        </label>
-      </div>
-      <button (click)="openConfig(gw)" class="btn btn-outline btn-sm w-full">Configure</button>
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Payment Gateways</h1>
+      <p class="page-subtitle">Enable and configure payment methods for your platform</p>
     </div>
   </div>
 
-  <!-- Config Modal -->
-  <div *ngIf="selectedGateway" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
-      <h2 class="text-lg font-semibold mb-4">Configure {{ selectedGateway.name }}</h2>
-      <div class="mb-3">
-        <label class="block text-sm font-medium mb-1">Mode</label>
-        <select [(ngModel)]="selectedGateway.mode" class="input w-full">
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Gateway cards grid -->
+  <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div *ngFor="let gw of gateways"
+      class="card p-5 transition-all duration-200"
+      onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.09)'"
+      onmouseout="this.style.boxShadow=''">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-11 h-11 rounded-xl text-2xl"
+            style="background:linear-gradient(135deg,#f8fafc,#f1f5f9);border:1px solid #e2e8f0">
+            {{ getGatewayIcon(gw.slug) }}
+          </div>
+          <div>
+            <p style="font-size:14px;font-weight:700;color:#0f172a">{{ gw.name }}</p>
+            <span class="badge-plain capitalize"
+              [style.background]="gw.mode==='live' ? '#f0fdf4' : '#fffbeb'"
+              [style.color]="gw.mode==='live' ? '#16a34a' : '#d97706'"
+              style="font-size:11px;border-radius:99px;padding:2px 8px;font-weight:600">
+              {{ gw.mode || 'sandbox' }} mode
+            </span>
+          </div>
+        </div>
+        <!-- Toggle switch -->
+        <button (click)="toggle(gw)"
+          class="inline-flex rounded-full transition-colors flex-shrink-0"
+          [style.background]="gw.isActive ? '#22c55e' : '#e2e8f0'"
+          style="width:44px;height:24px;position:relative">
+          <span style="position:absolute;top:2px;width:20px;height:20px;background:white;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:left 0.2s"
+            [style.left]="gw.isActive ? '22px' : '2px'"></span>
+        </button>
+      </div>
+
+      <!-- Status indicator -->
+      <div class="flex items-center gap-2 mb-4 p-2.5 rounded-lg" style="background:#f8fafc;border:1px solid #f1f5f9">
+        <div class="w-2 h-2 rounded-full flex-shrink-0"
+          [style.background]="gw.isActive ? '#22c55e' : '#e2e8f0'"></div>
+        <span style="font-size:12px;color:#64748b">
+          {{ gw.isActive ? 'Enabled and accepting payments' : 'Disabled' }}
+        </span>
+      </div>
+
+      <button (click)="openConfig(gw)" class="btn-secondary btn-sm w-full">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Configure
+      </button>
+    </div>
+
+    <div *ngIf="!gateways.length" class="col-span-full">
+      <div class="empty-state card py-16">
+        <div class="empty-state-icon">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+        </div>
+        <p class="empty-state-title">No payment gateways available</p>
+        <p class="empty-state-desc">Payment gateways will appear here once they are seeded.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Configure Modal ── -->
+<div *ngIf="selectedGateway" class="modal-backdrop">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">{{ getGatewayIcon(selectedGateway.slug) }}</span>
+        <p class="modal-header-title">Configure {{ selectedGateway.name }}</p>
+      </div>
+      <button (click)="selectedGateway=null" class="modal-close-btn">×</button>
+    </div>
+    <div class="modal-body space-y-4">
+      <div class="form-group">
+        <label class="label">Mode</label>
+        <select [(ngModel)]="selectedGateway.mode" class="input-field">
           <option value="sandbox">Sandbox / Test</option>
           <option value="live">Live</option>
         </select>
       </div>
-      <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">Configuration (JSON)</label>
-        <textarea [(ngModel)]="configJson" rows="8" class="input w-full font-mono text-sm" placeholder='{ "api_key": "", "secret_key": "" }'></textarea>
-        <p class="text-xs text-gray-400 mt-1">Enter gateway credentials as JSON key-value pairs.</p>
+      <div class="form-group">
+        <label class="label">Configuration (JSON)</label>
+        <textarea [(ngModel)]="configJson" rows="9" class="input-field font-mono"
+          style="font-size:12px"
+          placeholder='{ "api_key": "", "secret_key": "" }'></textarea>
+        <p style="font-size:11.5px;color:#94a3b8;margin-top:4px">Enter gateway credentials as JSON key-value pairs</p>
       </div>
-      <div class="flex justify-end gap-2">
-        <button (click)="selectedGateway = null" class="btn btn-outline">Cancel</button>
-        <button (click)="saveConfig()" [disabled]="saving" class="btn btn-primary">
-          {{ saving ? 'Saving...' : 'Save Configuration' }}
-        </button>
-      </div>
+    </div>
+    <div class="modal-footer">
+      <button (click)="selectedGateway=null" class="btn-secondary btn-sm">Cancel</button>
+      <button (click)="saveConfig()" [disabled]="saving" class="btn-primary btn-sm">
+        {{ saving ? 'Saving…' : 'Save Configuration' }}
+      </button>
     </div>
   </div>
 </div>

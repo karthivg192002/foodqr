@@ -16,11 +16,34 @@ exports.DiningTablesService = exports.CreateDiningTableDto = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const uuid_1 = require("uuid");
 const QRCode = require("qrcode");
+const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const dining_table_entity_1 = require("./entities/dining-table.entity");
 class CreateDiningTableDto {
 }
 exports.CreateDiningTableDto = CreateDiningTableDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDiningTableDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], CreateDiningTableDto.prototype, "capacity", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDiningTableDto.prototype, "branchId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDiningTableDto.prototype, "waiterId", void 0);
 let DiningTablesService = class DiningTablesService {
     constructor(tableRepo) {
         this.tableRepo = tableRepo;
@@ -75,6 +98,21 @@ let DiningTablesService = class DiningTablesService {
     async updateStatus(id, status) {
         await this.tableRepo.update(id, { status });
         return this.findOne(id);
+    }
+    async regenerateToken(id) {
+        const token = (0, uuid_1.v4)();
+        await this.tableRepo.update(id, { accessToken: token });
+        return { id, accessToken: token, message: 'Session token regenerated' };
+    }
+    async exportExcel(branchId, res) {
+        const tables = await this.findAll(branchId);
+        const headers = ['Name', 'Capacity', 'Status', 'Branch', 'Waiter', 'Slug'];
+        const rows = tables.map((t) => [t.name, t.capacity || '-', t.status, t.branch?.name || '', t.waiter?.name || '', t.slug]);
+        const ths = headers.map((h) => `<th style="background:#f97316;color:white;padding:6px 10px;border:1px solid #ddd">${h}</th>`).join('');
+        const trs = rows.map((r) => `<tr>${r.map((c) => `<td style="padding:5px 10px;border:1px solid #ddd">${c ?? ''}</td>`).join('')}</tr>`).join('');
+        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><h2>Dining Tables</h2><table border="1"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></body></html>`;
+        res.set({ 'Content-Type': 'application/vnd.ms-excel', 'Content-Disposition': 'attachment; filename="dining-tables.xls"' });
+        res.send(html);
     }
 };
 exports.DiningTablesService = DiningTablesService;

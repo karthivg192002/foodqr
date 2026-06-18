@@ -26,7 +26,7 @@ export class OffersComponent implements OnInit {
   ngOnInit(): void {
     this.loadOffers();
     this.loadBanners();
-    this.api.get<any>('frontend/items', { limit: 500 }).subscribe({ next: (r) => this.allItems = r.data || [] });
+    this.api.get<any>('frontend/items', { limit: 500 }).subscribe({ next: (r) => this.allItems = Array.isArray(r) ? r : (r.data ?? []) });
   }
 
   loadOffers(): void { this.api.get<Offer[]>('admin/offers').subscribe({ next: (d) => this.offers = d }); }

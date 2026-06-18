@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { Item } from './entities/item.entity';
 import { ItemVariation } from '../variations/entities/item-variation.entity';
+import { ItemCategory } from '../categories/entities/item-category.entity';
 import { ItemType } from '../../../common/enums';
 export declare class CreateItemDto {
     name: string;
@@ -9,10 +10,12 @@ export declare class CreateItemDto {
     ingredients?: string;
     price: number;
     categoryId?: string;
+    subCategoryId?: string;
     itemType?: ItemType;
     thumbImage?: string;
     coverImage?: string;
     videoUrl?: string;
+    arImage?: string;
     gallery?: string[];
     calories?: number;
     protein?: number;
@@ -33,7 +36,9 @@ export declare class CreateItemDto {
 export declare class ItemsService {
     private itemRepo;
     private variationRepo;
-    constructor(itemRepo: Repository<Item>, variationRepo: Repository<ItemVariation>);
+    private catRepo;
+    constructor(itemRepo: Repository<Item>, variationRepo: Repository<ItemVariation>, catRepo: Repository<ItemCategory>);
+    private resolveCategoryIds;
     findAll(search?: string, categoryId?: string, isFeatured?: boolean, page?: number, limit?: number): Promise<{
         data: Item[];
         total: number;
@@ -55,6 +60,19 @@ export declare class ItemsService {
     update(id: string, dto: Partial<CreateItemDto>): Promise<Item>;
     remove(id: string): Promise<{
         message: string;
+    }>;
+    restore(id: string): Promise<Item>;
+    exportExcel(res: any): Promise<void>;
+    importFromCsv(csvContent: string): Promise<{
+        imported: number;
+        errors: string[];
+    }>;
+    findAllWithDeleted(search?: string, categoryId?: string, page?: number, limit?: number): Promise<{
+        data: Item[];
+        total: number;
+        page: number;
+        limit: number;
+        pages: number;
     }>;
     toggleStatus(id: string): Promise<Item>;
     toggleFeatured(id: string): Promise<Item>;

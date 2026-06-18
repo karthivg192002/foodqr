@@ -1,75 +1,139 @@
-<div>
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="page-title">Dining Tables</h1>
-    <button (click)="openCreate()" class="btn-primary flex items-center gap-2">
+﻿<div class="space-y-5 fade-in-up">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Dining Tables</h1>
+      <p class="page-subtitle">Manage table layout, capacity and QR codes for dine-in ordering</p>
+    </div>
+    <button (click)="openCreate()" class="btn-primary">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       Add Table
     </button>
   </div>
 
-  <div *ngIf="loading" class="flex justify-center py-12">
-    <div class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="spinner"></div>
   </div>
 
+  <!-- Tables grid -->
   <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-    <div *ngFor="let table of tables" class="card hover:shadow-md transition-shadow">
-      <div class="flex items-start justify-between mb-3">
+    <div *ngFor="let table of tables"
+      class="card p-5 transition-all duration-200"
+      onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.09)';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.boxShadow='';this.style.transform='translateY(0)'">
+
+      <!-- Header row -->
+      <div class="flex items-start justify-between gap-2 mb-4">
         <div>
-          <h3 class="font-semibold text-gray-900 text-lg">{{ table.name }}</h3>
-          <p class="text-sm text-gray-500">Capacity: {{ table.capacity }} seats</p>
-          <p *ngIf="table.waiter" class="text-xs text-blue-500">Waiter: {{ table.waiter.name }}</p>
+          <h3 class="font-bold" style="font-size:15px;color:#0f172a">{{ table.name }}</h3>
+          <div class="flex items-center gap-1.5 mt-1">
+            <svg class="w-3.5 h-3.5" style="color:#94a3b8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span style="font-size:12px;color:#64748b">{{ table.capacity }} seats</span>
+          </div>
+          <p *ngIf="table.waiter" class="mt-1" style="font-size:11.5px;color:#3b82f6">
+            Waiter: {{ table.waiter.name }}
+          </p>
         </div>
-        <span [class]="getStatusBadge(table.status)">{{ table.status }}</span>
+        <span [class]="getStatusBadge(table.status)" class="capitalize flex-shrink-0">{{ table.status }}</span>
       </div>
 
-      <!-- QR Code preview -->
-      <div *ngIf="table.qrCode" class="mb-3 cursor-pointer" (click)="selectedQr = table">
-        <img [src]="table.qrCode" class="w-20 h-20 border rounded-lg">
-        <p class="text-xs text-gray-400 mt-1">Click to view QR</p>
+      <!-- QR code preview -->
+      <div *ngIf="table.qrCode"
+        class="mb-4 flex flex-col items-center p-3 rounded-xl cursor-pointer transition-colors"
+        style="background:#f8fafc;border:1px solid #e2e8f0"
+        onmouseover="this.style.borderColor='#ea580c';this.style.background='#fff7ed'"
+        onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'"
+        (click)="selectedQr = table">
+        <img [src]="table.qrCode" class="rounded-lg" style="width:72px;height:72px">
+        <p style="font-size:11px;color:#94a3b8;margin-top:6px">Click to enlarge QR</p>
       </div>
 
-      <div class="flex gap-2 flex-wrap">
-        <button (click)="openEdit(table)" class="btn-secondary text-xs py-1.5 px-3">Edit</button>
-        <button (click)="regenerateQr(table.id)" class="btn-secondary text-xs py-1.5 px-3">Regen QR</button>
-        <button (click)="delete(table.id)" class="text-red-500 hover:text-red-600 text-xs font-medium py-1.5 px-3">Delete</button>
+      <!-- No QR placeholder -->
+      <div *ngIf="!table.qrCode"
+        class="mb-4 flex flex-col items-center justify-center p-4 rounded-xl"
+        style="background:#f8fafc;border:1.5px dashed #e2e8f0;height:96px">
+        <svg class="w-6 h-6" style="color:#cbd5e1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+        <p style="font-size:11px;color:#cbd5e1;margin-top:4px">No QR generated yet</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-1.5">
+        <button (click)="openEdit(table)" class="action-link action-link-gray flex-1 text-center">Edit</button>
+        <button (click)="regenerateQr(table.id)" class="action-link action-link-blue flex-1 text-center">Regen QR</button>
+        <button (click)="delete(table.id)" class="action-link action-link-danger">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
       </div>
     </div>
-    <p *ngIf="!tables.length" class="col-span-full text-center text-gray-400 py-12">No tables yet</p>
-  </div>
 
-  <!-- QR Modal -->
-  <div *ngIf="selectedQr" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" (click)="selectedQr = null">
-    <div class="bg-white rounded-2xl p-8 text-center" (click)="$event.stopPropagation()">
-      <h3 class="font-bold text-xl mb-4">{{ selectedQr.name }}</h3>
-      <img [src]="selectedQr.qrCode" class="w-64 h-64 mx-auto">
-      <p class="text-sm text-gray-500 mt-3">Scan to order from this table</p>
-      <button (click)="selectedQr = null" class="btn-secondary mt-4">Close</button>
+    <!-- Empty state -->
+    <div *ngIf="!tables.length" class="col-span-full">
+      <div class="empty-state card py-16">
+        <div class="empty-state-icon">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+        </div>
+        <p class="empty-state-title">No tables yet</p>
+        <p class="empty-state-desc">Add your first dining table to enable dine-in QR ordering.</p>
+        <button (click)="openCreate()" class="btn-primary btn-sm">Add First Table</button>
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- Form Modal -->
-  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-      <div class="flex items-center justify-between p-6 border-b">
-        <h2 class="font-bold">{{ editingId ? 'Edit' : 'New' }} Table</h2>
-        <button (click)="showForm = false">✕</button>
+<!-- ── QR Code Modal ── -->
+<div *ngIf="selectedQr" class="modal-backdrop" (click)="selectedQr=null">
+  <div class="modal-box" style="max-width:340px;text-align:center" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ selectedQr.name }} — QR Code</p>
+      <button (click)="selectedQr=null" class="modal-close-btn">×</button>
+    </div>
+    <div class="modal-body flex flex-col items-center gap-3">
+      <img [src]="selectedQr.qrCode" class="rounded-2xl shadow-md" style="width:220px;height:220px">
+      <p style="font-size:12.5px;color:#64748b">Scan this code to order from {{ selectedQr.name }}</p>
+      <div class="flex items-center gap-2 px-3 py-2 rounded-lg w-full" style="background:#f8fafc;border:1px solid #e2e8f0">
+        <svg class="w-3.5 h-3.5 flex-shrink-0" style="color:#94a3b8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span style="font-size:12px;color:#334155">Capacity: <strong>{{ selectedQr.capacity }}</strong> seats</span>
       </div>
-      <form [formGroup]="form" (ngSubmit)="save()" class="p-6 space-y-4">
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Table Name *</label>
-          <input formControlName="name" class="input-field" placeholder="e.g. Table 1, Table A"></div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Capacity (seats)</label>
-          <input formControlName="capacity" type="number" class="input-field"></div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Assigned Waiter</label>
+    </div>
+    <div class="modal-footer">
+      <button (click)="selectedQr=null" class="btn-secondary btn-sm w-full">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Table Form Modal ── -->
+<div *ngIf="showForm" class="modal-backdrop">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingId ? 'Edit Table' : 'Add New Table' }}</p>
+      <button (click)="showForm=false" class="modal-close-btn">×</button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="modal-body space-y-4">
+        <div class="form-group">
+          <label class="label">Table Name <span style="color:#dc2626">*</span></label>
+          <input formControlName="name" class="input-field" placeholder="e.g. Table 1, VIP Table A">
+        </div>
+        <div class="form-group">
+          <label class="label">Seating Capacity</label>
+          <input formControlName="capacity" type="number" class="input-field" placeholder="4">
+        </div>
+        <div class="form-group">
+          <label class="label">Assigned Waiter</label>
           <select formControlName="waiterId" class="input-field">
-            <option value="">— No waiter —</option>
+            <option value="">— No waiter assigned —</option>
             <option *ngFor="let w of waiters" [value]="w.id">{{ w.name }}</option>
           </select>
         </div>
-        <div class="flex gap-3 pt-2">
-          <button type="submit" [disabled]="saving" class="btn-primary flex-1">{{ saving ? 'Saving...' : 'Save' }}</button>
-          <button type="button" (click)="showForm = false" class="btn-secondary flex-1">Cancel</button>
-        </div>
-      </form>
-    </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" (click)="showForm=false" class="btn-secondary btn-sm">Cancel</button>
+        <button type="submit" [disabled]="saving || form.invalid" class="btn-primary btn-sm">
+          {{ saving ? 'Saving…' : (editingId ? 'Update Table' : 'Create Table') }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>

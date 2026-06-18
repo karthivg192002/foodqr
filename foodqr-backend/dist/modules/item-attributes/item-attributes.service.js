@@ -18,10 +18,12 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const item_attribute_entity_1 = require("./entities/item-attribute.entity");
 const item_category_attribute_entity_1 = require("./entities/item-category-attribute.entity");
+const item_variation_entity_1 = require("../menu/variations/entities/item-variation.entity");
 let ItemAttributesService = class ItemAttributesService {
-    constructor(attrRepo, pivotRepo) {
+    constructor(attrRepo, pivotRepo, variationRepo) {
         this.attrRepo = attrRepo;
         this.pivotRepo = pivotRepo;
+        this.variationRepo = variationRepo;
     }
     findAll() {
         return this.attrRepo.find({ order: { name: 'ASC' } });
@@ -53,13 +55,33 @@ let ItemAttributesService = class ItemAttributesService {
         const rows = attributeIds.map((attributeId) => this.pivotRepo.create({ categoryId, attributeId }));
         return this.pivotRepo.save(rows);
     }
+    async listGroupByAttribute(itemId) {
+        const variations = await this.variationRepo.find({
+            where: { itemId, status: true },
+            order: { sortOrder: 'ASC', name: 'ASC' },
+        });
+        const grouped = {};
+        for (const v of variations) {
+            const key = v.attributeName || 'default';
+            if (!grouped[key])
+                grouped[key] = [];
+            grouped[key].push(v);
+        }
+        return Object.entries(grouped).map(([attributeName, items]) => ({
+            attributeName,
+            attributeId: items[0]?.attributeId || null,
+            variations: items,
+        }));
+    }
 };
 exports.ItemAttributesService = ItemAttributesService;
 exports.ItemAttributesService = ItemAttributesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(item_attribute_entity_1.ItemAttribute)),
     __param(1, (0, typeorm_1.InjectRepository)(item_category_attribute_entity_1.ItemCategoryAttribute)),
+    __param(2, (0, typeorm_1.InjectRepository)(item_variation_entity_1.ItemVariation)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository])
 ], ItemAttributesService);
 //# sourceMappingURL=item-attributes.service.js.map

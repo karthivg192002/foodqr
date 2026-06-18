@@ -22,18 +22,24 @@ let ItemAttributesController = class ItemAttributesController {
         this.service = service;
     }
     findAll() { return this.service.findAll(); }
-    findOne(id) { return this.service.findOne(id); }
-    create(body) { return this.service.create(body); }
-    update(id, body) {
-        return this.service.update(id, body);
+    listGroupByAttribute(itemId) {
+        return this.service.listGroupByAttribute(itemId);
     }
-    remove(id) { return this.service.remove(id); }
     getByCategory(categoryId) {
         return this.service.getByCategory(categoryId);
     }
     assignToCategory(categoryId, body) {
         return this.service.assignToCategory(categoryId, body.attributeIds);
     }
+    assignToCategoryFlat(body) {
+        return this.service.assignToCategory(body.categoryId, [body.attributeId]);
+    }
+    findOne(id) { return this.service.findOne(id); }
+    create(body) { return this.service.create(body); }
+    update(id, body) {
+        return this.service.update(id, body);
+    }
+    remove(id) { return this.service.remove(id); }
 };
 exports.ItemAttributesController = ItemAttributesController;
 __decorate([
@@ -43,34 +49,12 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ItemAttributesController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)('items/:itemId/group-by-attribute'),
+    __param(0, (0, common_1.Param)('itemId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
-], ItemAttributesController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], ItemAttributesController.prototype, "create", null);
-__decorate([
-    (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], ItemAttributesController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ItemAttributesController.prototype, "remove", null);
+], ItemAttributesController.prototype, "listGroupByAttribute", null);
 __decorate([
     (0, common_1.Get)('category/:categoryId'),
     __param(0, (0, common_1.Param)('categoryId')),
@@ -86,11 +70,47 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], ItemAttributesController.prototype, "assignToCategory", null);
+__decorate([
+    (0, common_1.Post)('assign-to-category'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ItemAttributesController.prototype, "assignToCategoryFlat", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ItemAttributesController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ItemAttributesController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], ItemAttributesController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ItemAttributesController.prototype, "remove", null);
 exports.ItemAttributesController = ItemAttributesController = __decorate([
     (0, swagger_1.ApiTags)('Item Attributes'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.Controller)('item-attributes'),
+    (0, common_1.Controller)('admin/item-attributes'),
     __metadata("design:paramtypes", [item_attributes_service_1.ItemAttributesService])
 ], ItemAttributesController);
 //# sourceMappingURL=item-attributes.controller.js.map

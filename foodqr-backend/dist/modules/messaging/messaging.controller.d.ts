@@ -1,7 +1,9 @@
 import { MessagingService } from './messaging.service';
+import { ChatbotService } from './chatbot.service';
 export declare class MessagingController {
     private readonly service;
-    constructor(service: MessagingService);
+    private readonly chatbot;
+    constructor(service: MessagingService, chatbot: ChatbotService);
     getThreadsForBranch(branchId: string): Promise<import("./entities/message.entity").Message[]>;
     getOrCreateThread(req: any, body: {
         branchId: string;
@@ -12,5 +14,11 @@ export declare class MessagingController {
     }): Promise<import("./entities/message-history.entity").MessageHistory>;
     markRead(id: string): Promise<{
         message: string;
+    }>;
+    askChatbot(req: any, body: {
+        message: string;
+    }): Promise<{
+        reply: string;
+        type: string;
     }>;
 }

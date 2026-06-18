@@ -1,75 +1,100 @@
-<div>
+﻿<div class="space-y-5 fade-in-up">
+
   <!-- Page header -->
-  <div class="flex items-center justify-between mb-6">
+  <div class="page-header">
     <div>
       <h1 class="page-title">Item Extras</h1>
-      <p class="text-sm text-gray-500 mt-1">Manage add-ons and extras for each menu item</p>
+      <p class="page-subtitle">Manage add-ons and extras for each menu item</p>
     </div>
   </div>
 
+  <!-- Split panel -->
   <div class="grid grid-cols-12 gap-5">
-    <!-- ═══ LEFT: Item List ═══ -->
+
+    <!-- LEFT: Item selector -->
     <div class="col-span-12 lg:col-span-4">
-      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-gray-100">
-          <h2 class="section-title text-sm mb-3">Select Menu Item</h2>
-          <div class="relative">
-            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="table-container" style="overflow:hidden">
+        <div class="px-4 py-4" style="border-bottom:1px solid #f1f5f9">
+          <p style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px">
+            Menu Items
+          </p>
+          <div class="search-input-wrapper">
+            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
-            <input [(ngModel)]="itemSearch" placeholder="Search items..." class="input-field pl-9 text-sm py-2">
+            <input [(ngModel)]="itemSearch" placeholder="Search items…" class="input-field">
           </div>
         </div>
-        <div *ngIf="loadingItems" class="flex items-center justify-center py-10">
-          <div class="w-6 h-6 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+
+        <div *ngIf="loadingItems" class="flex items-center justify-center py-12">
+          <div class="spinner"></div>
         </div>
-        <ul *ngIf="!loadingItems" class="divide-y divide-gray-100 max-h-[calc(100vh-320px)] overflow-y-auto">
+
+        <ul *ngIf="!loadingItems"
+          class="overflow-y-auto"
+          style="max-height:calc(100vh - 280px)">
+
           <li *ngFor="let item of filteredItems">
             <button (click)="selectItem(item)"
-              [class]="selectedItem?.id === item.id ? 'bg-orange-50 border-r-2 border-orange-500' : 'hover:bg-gray-50'"
-              class="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left">
-              <div class="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                <img *ngIf="item.thumbImage" [src]="item.thumbImage" [alt]="item.name" class="w-full h-full object-cover">
-                <div *ngIf="!item.thumbImage" class="w-full h-full flex items-center justify-center">
-                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              class="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
+              [style.background]="selectedItem?.id === item.id ? '#fff7ed' : 'transparent'"
+              [style.borderRight]="selectedItem?.id === item.id ? '3px solid #ea580c' : '3px solid transparent'"
+              onmouseover="if(!this.style.borderRight || this.style.borderRight==='3px solid transparent'){this.style.background='#f8fafc'}"
+              onmouseout="if(this.style.borderRight==='3px solid transparent'){this.style.background='transparent'}">
+              <div class="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0"
+                style="background:#f1f5f9">
+                <img *ngIf="item.thumbImage" [src]="item.thumbImage" [alt]="item.name"
+                  class="w-full h-full object-cover">
+                <div *ngIf="!item.thumbImage"
+                  class="w-full h-full flex items-center justify-center">
+                  <svg class="w-5 h-5" style="color:#cbd5e1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                   </svg>
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate"
-                  [class.text-orange-700]="selectedItem?.id === item.id">{{ item.name }}</p>
-                <p class="text-xs text-gray-400">{{ item.price | number:'1.2-2' }}</p>
+                <p style="font-size:13px;font-weight:600;color:#0f172a"
+                  [style.color]="selectedItem?.id === item.id ? '#ea580c' : '#0f172a'"
+                  class="truncate">{{ item.name }}</p>
+                <p style="font-size:11.5px;color:#94a3b8">+{{ item.price | number:'1.2-2' }}</p>
               </div>
-              <svg *ngIf="selectedItem?.id === item.id" class="w-4 h-4 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              <svg *ngIf="selectedItem?.id === item.id" class="w-4 h-4 flex-shrink-0"
+                style="color:#ea580c" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
               </svg>
             </button>
           </li>
-          <li *ngIf="filteredItems.length === 0" class="px-4 py-8 text-center text-gray-400 text-sm">No items found</li>
+
+          <li *ngIf="filteredItems.length === 0" class="px-4 py-12 text-center" style="color:#94a3b8;font-size:13px">
+            No items match your search
+          </li>
         </ul>
       </div>
     </div>
 
-    <!-- ═══ RIGHT: Extras Panel ═══ -->
+    <!-- RIGHT: Extras panel -->
     <div class="col-span-12 lg:col-span-8">
-      <!-- Empty state -->
-      <div *ngIf="!selectedItem" class="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center py-24">
-        <svg class="w-14 h-14 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <p class="text-gray-500 font-medium">Select an item to manage its extras</p>
-        <p class="text-gray-400 text-sm mt-1">Choose a menu item from the left panel</p>
+
+      <!-- Empty state (no item selected) -->
+      <div *ngIf="!selectedItem" class="card flex flex-col items-center justify-center" style="min-height:400px">
+        <div class="empty-state-icon" style="background:#fff7ed">
+          <svg class="w-7 h-7" style="color:#ea580c" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <p class="empty-state-title">Select a menu item</p>
+        <p class="empty-state-desc">Choose an item from the left panel to manage its add-ons and extras.</p>
       </div>
 
-      <!-- Extras for selected item -->
-      <div *ngIf="selectedItem" class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <!-- Extras table (item selected) -->
+      <div *ngIf="selectedItem" class="table-container" style="overflow:hidden">
+        <div class="flex items-center justify-between px-5 py-4"
+          style="border-bottom:1px solid #f1f5f9">
           <div>
-            <h2 class="font-bold text-gray-900">{{ selectedItem.name }}</h2>
-            <p class="text-xs text-gray-400">{{ extras.length }} extra(s) configured</p>
+            <p style="font-size:14px;font-weight:700;color:#0f172a">{{ selectedItem.name }}</p>
+            <p style="font-size:12px;color:#94a3b8;margin-top:2px">{{ extras.length }} extra{{ extras.length !== 1 ? 's' : '' }} configured</p>
           </div>
-          <button (click)="openCreate()" class="btn-primary flex items-center gap-2 text-sm">
+          <button (click)="openCreate()" class="btn-primary btn-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -78,91 +103,105 @@
         </div>
 
         <div *ngIf="loadingExtras" class="flex items-center justify-center py-16">
-          <div class="w-7 h-7 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <div class="spinner"></div>
         </div>
 
-        <table *ngIf="!loadingExtras" class="w-full">
-          <thead class="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Extra Name</th>
-              <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
-              <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Max Qty</th>
-              <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Required</th>
-              <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="text-right px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            <tr *ngFor="let extra of extras" class="hover:bg-gray-50 transition-colors">
-              <td class="px-6 py-4 font-medium text-gray-900 text-sm">{{ extra.name }}</td>
-              <td class="px-6 py-4 text-sm text-gray-700 font-semibold">+{{ extra.price | number:'1.2-2' }}</td>
-              <td class="px-6 py-4 text-sm text-gray-600">{{ extra.maxQuantity ?? 1 }}</td>
-              <td class="px-6 py-4">
-                <span [class]="extra.isRequired ? 'badge-warning' : 'badge-gray'">{{ extra.isRequired ? 'Required' : 'Optional' }}</span>
-              </td>
-              <td class="px-6 py-4">
-                <span [class]="extra.status ? 'badge-success' : 'badge-danger'">{{ extra.status ? 'Active' : 'Inactive' }}</span>
-              </td>
-              <td class="px-6 py-4">
-                <div class="flex items-center justify-end gap-2">
-                  <button (click)="openEdit(extra)" class="text-xs text-gray-600 hover:text-gray-900 font-medium px-2.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">Edit</button>
-                  <button (click)="delete(extra.id)" class="text-xs text-red-600 hover:text-red-800 font-medium px-2.5 py-1 rounded-lg hover:bg-red-50 transition-colors">Delete</button>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="extras.length === 0">
-              <td colspan="6" class="px-6 py-16 text-center text-gray-400">
-                <p class="text-sm font-medium">No extras for this item</p>
-                <p class="text-xs mt-1">Click "Add Extra" to create one</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div *ngIf="!loadingExtras" class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Max Qty</th>
+                <th style="text-align:center">Required</th>
+                <th style="text-align:center">Status</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let extra of extras">
+                <td style="font-size:13.5px;font-weight:600;color:#0f172a">{{ extra.name }}</td>
+                <td style="font-size:13px;font-weight:700;color:#ea580c">+{{ extra.price | number:'1.2-2' }}</td>
+                <td style="font-size:13px;color:#64748b">{{ extra.maxQuantity ?? 1 }}</td>
+                <td style="text-align:center">
+                  <span [class]="extra.isRequired ? 'badge-warning' : 'badge-gray'">
+                    {{ extra.isRequired ? 'Required' : 'Optional' }}
+                  </span>
+                </td>
+                <td style="text-align:center">
+                  <span [class]="extra.status ? 'badge-success' : 'badge-danger'">
+                    {{ extra.status ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td style="text-align:right">
+                  <div class="flex items-center justify-end gap-1">
+                    <button (click)="openEdit(extra)" class="action-link action-link-blue">Edit</button>
+                    <button (click)="delete(extra.id)" class="action-link action-link-danger">Delete</button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="extras.length === 0">
+                <td colspan="6">
+                  <div class="empty-state">
+                    <div class="empty-state-icon">
+                      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                    <p class="empty-state-title">No extras yet</p>
+                    <p class="empty-state-desc">Click <strong>Add Extra</strong> to create the first add-on for this item.</p>
+                    <button (click)="openCreate()" class="btn-primary btn-sm">Add Extra</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══ Modal ═══ -->
-<div *ngIf="showModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-    <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-      <h2 class="text-lg font-bold text-gray-900">{{ editingId ? 'Edit Extra' : 'Add Extra' }}</h2>
-      <button (click)="showModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
+<!-- ── Extra Form Modal ── -->
+<div *ngIf="showModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:440px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingId ? 'Edit Extra' : 'Add Extra' }}</p>
+      <button (click)="showModal=false" class="modal-close-btn">×</button>
     </div>
-    <form [formGroup]="form" (ngSubmit)="save()" class="px-6 py-5 space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Extra Name *</label>
-        <input formControlName="name" class="input-field" placeholder="e.g. Extra Cheese">
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Additional Price *</label>
-          <input formControlName="price" type="number" step="0.01" class="input-field" placeholder="0.00">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="modal-body space-y-4">
+        <div class="form-group">
+          <label class="label">Extra Name <span style="color:#dc2626">*</span></label>
+          <input formControlName="name" class="input-field" placeholder="e.g. Extra Cheese">
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Max Quantity</label>
-          <input formControlName="maxQuantity" type="number" min="1" class="input-field">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Additional Price <span style="color:#dc2626">*</span></label>
+            <input formControlName="price" type="number" step="0.01" min="0" class="input-field" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label class="label">Max Quantity</label>
+            <input formControlName="maxQuantity" type="number" min="1" class="input-field" placeholder="1">
+          </div>
+        </div>
+        <div class="flex items-center gap-5 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" formControlName="isRequired" class="w-4 h-4">
+            <span style="font-size:13.5px;font-weight:500;color:#334155">Required</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" formControlName="status" class="w-4 h-4">
+            <span style="font-size:13.5px;font-weight:500;color:#334155">Active</span>
+          </label>
         </div>
       </div>
-      <div class="flex items-center gap-6">
-        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-          <input type="checkbox" formControlName="isRequired" class="w-4 h-4 accent-orange-500">
-          Required
-        </label>
-        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-          <input type="checkbox" formControlName="status" class="w-4 h-4 accent-orange-500">
-          Active
-        </label>
+      <div class="modal-footer">
+        <button type="button" (click)="showModal=false" class="btn-secondary btn-sm">Cancel</button>
+        <button type="submit" [disabled]="saving || form.invalid" class="btn-primary btn-sm">
+          {{ saving ? 'Saving…' : (editingId ? 'Update' : 'Add Extra') }}
+        </button>
       </div>
     </form>
-    <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
-      <button (click)="showModal = false" class="btn-secondary">Cancel</button>
-      <button (click)="save()" [disabled]="saving" class="btn-primary">
-        {{ saving ? 'Saving...' : (editingId ? 'Update Extra' : 'Add Extra') }}
-      </button>
-    </div>
   </div>
 </div>

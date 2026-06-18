@@ -36,6 +36,9 @@ export class ItemCategory {
   @Column({ default: true })
   status: boolean;
 
+  @Column({ default: false })
+  variationOnly: boolean;
+
   @Column({ default: 0 })
   sortOrder: number;
 

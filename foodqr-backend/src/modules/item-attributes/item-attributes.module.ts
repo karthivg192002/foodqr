@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ItemAttribute } from './entities/item-attribute.entity';
 import { ItemCategoryAttribute } from './entities/item-category-attribute.entity';
+import { ItemVariation } from '../menu/variations/entities/item-variation.entity';
 import { ItemAttributesService } from './item-attributes.service';
 import { ItemAttributesController } from './item-attributes.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ItemAttribute, ItemCategoryAttribute])],
+  imports: [TypeOrmModule.forFeature([ItemAttribute, ItemCategoryAttribute, ItemVariation])],
   providers: [ItemAttributesService],
   controllers: [ItemAttributesController],
   exports: [ItemAttributesService],

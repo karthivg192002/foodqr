@@ -4,6 +4,7 @@ export declare class OrderItem {
     id: string;
     orderId: string;
     order: Order;
+    branchId: string;
     itemId: string;
     item: Item;
     variationId: string;

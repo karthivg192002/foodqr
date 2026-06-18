@@ -33,6 +33,9 @@ let BranchesController = class BranchesController {
     }
     setDefault(id) { return this.branchesService.setDefault(id); }
     remove(id) { return this.branchesService.remove(id); }
+    async exportExcel(res) {
+        return this.branchesService.exportExcel(res);
+    }
 };
 exports.BranchesController = BranchesController;
 __decorate([
@@ -100,6 +103,16 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], BranchesController.prototype, "remove", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/branches/export/excel'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], BranchesController.prototype, "exportExcel", null);
 exports.BranchesController = BranchesController = __decorate([
     (0, swagger_1.ApiTags)('Branches'),
     (0, common_1.Controller)(),

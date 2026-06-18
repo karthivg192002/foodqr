@@ -75,6 +75,10 @@ __decorate([
     __metadata("design:type", String)
 ], Item.prototype, "videoUrl", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Item.prototype, "arImage", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'simple-array', nullable: true }),
     __metadata("design:type", Array)
 ], Item.prototype, "gallery", void 0);
@@ -126,6 +130,10 @@ __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)
 ], Item.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)(),
+    __metadata("design:type", Date)
+], Item.prototype, "deletedAt", void 0);
 exports.Item = Item = __decorate([
     (0, typeorm_1.Entity)('items')
 ], Item);

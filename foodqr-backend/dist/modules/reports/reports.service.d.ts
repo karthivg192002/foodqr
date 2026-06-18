@@ -36,6 +36,43 @@ export declare class ReportsService {
         topItems: any[];
         newCustomers: number;
     }>;
+    getCategoryWiseSales(startDate?: string, endDate?: string): Promise<any[]>;
+    getHourlyPeakOrders(startDate?: string, endDate?: string): Promise<any[]>;
+    getStaffLeaderboard(startDate?: string, endDate?: string): Promise<any[]>;
+    getSalesOverview(startDate?: string, endDate?: string): Promise<{
+        period: {
+            startDate: string;
+            endDate: string;
+        };
+        totalOrders: number;
+        paidOrders: number;
+        unpaidOrders: number;
+        totalRevenue: number;
+        avgOrderValue: number;
+        topSellingItem: any;
+    }>;
+    getQrRevenueSummary(startDate?: string, endDate?: string): Promise<any[]>;
+    getCustomerStates(startDate?: string, endDate?: string): Promise<{
+        totalCustomers: number;
+        newCustomers: number;
+        returningCustomers: number;
+        guestCustomers: number;
+        byRole: any[];
+    }>;
+    getPeakOrdersBarChart(startDate?: string, endDate?: string): Promise<{
+        hourly: {
+            hour: number;
+            label: string;
+            orderCount: number;
+            revenue: number;
+        }[];
+        daily: {
+            dayOfWeek: number;
+            label: string;
+            orderCount: number;
+            revenue: number;
+        }[];
+    }>;
     getCustomerStats(): Promise<{
         total: number;
         newThisMonth: number;

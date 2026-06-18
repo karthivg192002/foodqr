@@ -20,4 +20,18 @@ export declare class CurrencyService {
     remove(id: string): Promise<{
         message: string;
     }>;
+    getDefault(): Promise<Currency | null>;
+    convertAmount(amount: number, toCurrencyCode: string): Promise<{
+        amount: number;
+        converted: number;
+        rate: number;
+        symbol: string;
+        code: string;
+    }>;
+    convertBulk(amounts: number[], toCurrencyCode: string): Promise<{
+        rate: number;
+        symbol: string;
+        code: string;
+        amounts: number[];
+    }>;
 }

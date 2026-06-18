@@ -1,14 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import * as QRCode from 'qrcode';
+import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 import { DiningTable } from './entities/dining-table.entity';
 import { TableStatus } from '../../common/enums';
 
 export class CreateDiningTableDto {
+  @IsString()
   name: string;
+
+  @IsNumber() @IsOptional() @Type(() => Number)
   capacity?: number;
+
+  @IsString() @IsOptional()
   branchId?: string;
+
+  @IsString() @IsOptional()
   waiterId?: string;
 }
 
@@ -72,5 +82,22 @@ export class DiningTablesService {
   async updateStatus(id: string, status: TableStatus) {
     await this.tableRepo.update(id, { status });
     return this.findOne(id);
+  }
+
+  async regenerateToken(id: string) {
+    const token = uuidv4();
+    await this.tableRepo.update(id, { accessToken: token } as any);
+    return { id, accessToken: token, message: 'Session token regenerated' };
+  }
+
+  async exportExcel(branchId: string, res: any) {
+    const tables = await this.findAll(branchId);
+    const headers = ['Name', 'Capacity', 'Status', 'Branch', 'Waiter', 'Slug'];
+    const rows = tables.map((t) => [t.name, t.capacity || '-', t.status, (t as any).branch?.name || '', (t as any).waiter?.name || '', t.slug]);
+    const ths = headers.map((h) => `<th style="background:#f97316;color:white;padding:6px 10px;border:1px solid #ddd">${h}</th>`).join('');
+    const trs = rows.map((r) => `<tr>${r.map((c) => `<td style="padding:5px 10px;border:1px solid #ddd">${c ?? ''}</td>`).join('')}</tr>`).join('');
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><h2>Dining Tables</h2><table border="1"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></body></html>`;
+    res.set({ 'Content-Type': 'application/vnd.ms-excel', 'Content-Disposition': 'attachment; filename="dining-tables.xls"' });
+    res.send(html);
   }
 }

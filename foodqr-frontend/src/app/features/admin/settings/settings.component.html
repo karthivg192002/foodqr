@@ -1,300 +1,497 @@
-<div class="p-6">
-  <h1 class="text-2xl font-bold text-gray-800 mb-6">Settings</h1>
+﻿<div class="space-y-5 fade-in-up">
 
-  <div *ngIf="loading" class="flex justify-center py-20">
-    <div class="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full"></div>
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-subtitle">Configure your restaurant platform preferences and integrations</p>
+    </div>
   </div>
 
-  <div *ngIf="!loading" class="flex flex-col lg:flex-row gap-6">
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="spinner"></div>
+  </div>
+
+  <div *ngIf="!loading" class="flex flex-col lg:flex-row gap-5">
+
     <!-- Sidebar tabs -->
-    <aside class="lg:w-52 flex-shrink-0">
-      <nav class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <button *ngFor="let tab of tabs" (click)="activeTab = tab.key"
-          [class.bg-primary-50]="activeTab === tab.key"
-          [class.text-primary-700]="activeTab === tab.key"
-          [class.border-r-4]="activeTab === tab.key"
-          [class.border-primary-500]="activeTab === tab.key"
-          [class.font-semibold]="activeTab === tab.key"
-          [class.text-gray-600]="activeTab !== tab.key"
-          class="w-full text-left px-4 py-3 text-sm border-b border-gray-100 hover:bg-gray-50 transition-all">
+    <aside class="lg:w-56 flex-shrink-0">
+      <div class="card p-1.5 space-y-0.5">
+        <button *ngFor="let tab of tabs" (click)="onTabChange(tab.key)"
+          class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all"
+          [style.background]="activeTab===tab.key ? '#fff7ed' : ''"
+          [style.color]="activeTab===tab.key ? '#ea580c' : '#64748b'"
+          [style.fontWeight]="activeTab===tab.key ? '600' : '400'"
+          style="font-size:13.5px">
           {{ tab.label }}
         </button>
-      </nav>
+      </div>
     </aside>
 
-    <!-- Content panel -->
-    <div class="flex-1">
+    <!-- Content -->
+    <div class="flex-1 min-w-0">
 
-      <!-- COMPANY -->
-      <div *ngIf="activeTab === 'company'" class="bg-white rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b"><h2 class="font-semibold text-gray-800">Company Information</h2></div>
-        <div class="px-6 py-5 space-y-4 max-w-2xl">
-          <div><label class="block text-sm font-medium mb-1">Business Name</label>
-            <input [(ngModel)]="companySettings['business_name']" class="input w-full" /></div>
-          <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium mb-1">Email</label>
-              <input [(ngModel)]="companySettings['business_email']" type="email" class="input w-full" /></div>
-            <div><label class="block text-sm font-medium mb-1">Phone</label>
-              <input [(ngModel)]="companySettings['business_phone']" class="input w-full" /></div>
-          </div>
-          <div><label class="block text-sm font-medium mb-1">Address</label>
-            <input [(ngModel)]="companySettings['business_address']" class="input w-full" /></div>
-          <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium mb-1">City</label>
-              <input [(ngModel)]="companySettings['business_city']" class="input w-full" /></div>
-            <div><label class="block text-sm font-medium mb-1">Country</label>
-              <input [(ngModel)]="companySettings['business_country']" class="input w-full" /></div>
+      <!-- ── COMPANY ── -->
+      <div *ngIf="activeTab==='company'" class="card">
+        <div class="card-header">
+          <p class="card-title">Company Information</p>
+          <p class="card-subtitle">Your restaurant's public-facing business details</p>
+        </div>
+        <div class="card-body space-y-4 max-w-2xl">
+          <div class="form-group">
+            <label class="label">Business Name</label>
+            <input [(ngModel)]="companySettings['business_name']" class="input-field" />
           </div>
           <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium mb-1">Currency Symbol</label>
-              <input [(ngModel)]="companySettings['currency_symbol']" class="input w-full" /></div>
-            <div><label class="block text-sm font-medium mb-1">Currency Code</label>
-              <input [(ngModel)]="companySettings['currency_code']" class="input w-full" /></div>
+            <div class="form-group">
+              <label class="label">Email</label>
+              <input [(ngModel)]="companySettings['business_email']" type="email" class="input-field" />
+            </div>
+            <div class="form-group">
+              <label class="label">Phone</label>
+              <input [(ngModel)]="companySettings['business_phone']" class="input-field" />
+            </div>
           </div>
-          <div><label class="block text-sm font-medium mb-1">Timezone</label>
-            <input [(ngModel)]="companySettings['timezone']" class="input w-full" placeholder="UTC" /></div>
+          <div class="form-group">
+            <label class="label">Address</label>
+            <input [(ngModel)]="companySettings['business_address']" class="input-field" />
+          </div>
           <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium mb-1">Logo URL</label>
-              <input [(ngModel)]="companySettings['logo']" class="input w-full" /></div>
-            <div><label class="block text-sm font-medium mb-1">Favicon URL</label>
-              <input [(ngModel)]="companySettings['favicon']" class="input w-full" /></div>
+            <div class="form-group">
+              <label class="label">City</label>
+              <input [(ngModel)]="companySettings['business_city']" class="input-field" />
+            </div>
+            <div class="form-group">
+              <label class="label">Country</label>
+              <input [(ngModel)]="companySettings['business_country']" class="input-field" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="label">Currency Symbol</label>
+              <input [(ngModel)]="companySettings['currency_symbol']" class="input-field" />
+            </div>
+            <div class="form-group">
+              <label class="label">Currency Code</label>
+              <input [(ngModel)]="companySettings['currency_code']" class="input-field" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="label">Timezone</label>
+            <input [(ngModel)]="companySettings['timezone']" class="input-field" placeholder="UTC" />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="label">Logo URL</label>
+              <input [(ngModel)]="companySettings['logo']" class="input-field" />
+            </div>
+            <div class="form-group">
+              <label class="label">Favicon URL</label>
+              <input [(ngModel)]="companySettings['favicon']" class="input-field" />
+            </div>
           </div>
         </div>
-        <div class="px-6 py-4 border-t flex justify-end">
-          <button (click)="save('company')" [disabled]="saving" class="btn btn-primary">{{ saving ? 'Saving...' : 'Save' }}</button>
+        <div class="card-footer">
+          <button (click)="save('company')" [disabled]="saving" class="btn-primary btn-sm">
+            {{ saving ? 'Saving…' : 'Save Changes' }}
+          </button>
         </div>
       </div>
 
-      <!-- SITE -->
-      <div *ngIf="activeTab === 'site'" class="bg-white rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b"><h2 class="font-semibold text-gray-800">Site Settings</h2></div>
-        <div class="px-6 py-5 space-y-4 max-w-2xl">
-          <div><label class="block text-sm font-medium mb-1">Meta Title</label>
-            <input [(ngModel)]="siteSettings['meta_title']" class="input w-full" /></div>
-          <div><label class="block text-sm font-medium mb-1">Meta Description</label>
-            <textarea [(ngModel)]="siteSettings['meta_description']" class="input w-full" rows="3"></textarea></div>
-          <div><label class="block text-sm font-medium mb-1">Google Analytics ID</label>
-            <input [(ngModel)]="siteSettings['google_analytics_id']" class="input w-full" placeholder="G-XXXXXXXX" /></div>
-          <div class="flex items-center gap-3">
-            <input type="checkbox" [(ngModel)]="siteSettings['maintenance_mode']" id="maintenance" />
-            <label for="maintenance" class="text-sm font-medium">Maintenance Mode</label>
+      <!-- ── SITE ── -->
+      <div *ngIf="activeTab==='site'" class="card">
+        <div class="card-header">
+          <p class="card-title">Site Settings</p>
+          <p class="card-subtitle">SEO, meta tags and general site configuration</p>
+        </div>
+        <div class="card-body space-y-4 max-w-2xl">
+          <div class="form-group">
+            <label class="label">Meta Title</label>
+            <input [(ngModel)]="siteSettings['meta_title']" class="input-field" />
           </div>
-          <div class="flex items-center gap-3">
-            <input type="checkbox" [(ngModel)]="siteSettings['customer_registration']" id="registration" />
-            <label for="registration" class="text-sm font-medium">Allow Customer Registration</label>
+          <div class="form-group">
+            <label class="label">Meta Description</label>
+            <textarea [(ngModel)]="siteSettings['meta_description']" class="input-field" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="label">Google Analytics ID</label>
+            <input [(ngModel)]="siteSettings['google_analytics_id']" class="input-field" placeholder="G-XXXXXXXX" />
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+              <input type="checkbox" [(ngModel)]="siteSettings['maintenance_mode']" id="maintenance" class="w-4 h-4">
+              <label for="maintenance" style="font-size:13.5px;font-weight:500;color:#334155;cursor:pointer">Maintenance Mode</label>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+              <input type="checkbox" [(ngModel)]="siteSettings['customer_registration']" id="registration" class="w-4 h-4">
+              <label for="registration" style="font-size:13.5px;font-weight:500;color:#334155;cursor:pointer">Allow Customer Registration</label>
+            </div>
           </div>
         </div>
-        <div class="px-6 py-4 border-t flex justify-end">
-          <button (click)="save('site')" [disabled]="saving" class="btn btn-primary">{{ saving ? 'Saving...' : 'Save' }}</button>
+        <div class="card-footer">
+          <button (click)="save('site')" [disabled]="saving" class="btn-primary btn-sm">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
         </div>
       </div>
 
-      <!-- ORDER SETUP -->
-      <div *ngIf="activeTab === 'order_setup'" class="bg-white rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b"><h2 class="font-semibold text-gray-800">Order Setup</h2></div>
-        <div class="px-6 py-5 space-y-4 max-w-2xl">
-          <div class="grid grid-cols-2 gap-3">
-            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer">
-              <input type="checkbox" [(ngModel)]="orderSetupSettings['enable_delivery']" />
-              <span class="text-sm font-medium">Delivery</span>
-            </label>
-            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer">
-              <input type="checkbox" [(ngModel)]="orderSetupSettings['enable_takeaway']" />
-              <span class="text-sm font-medium">Takeaway</span>
-            </label>
-            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer">
-              <input type="checkbox" [(ngModel)]="orderSetupSettings['enable_dining_table']" />
-              <span class="text-sm font-medium">Dine In</span>
-            </label>
-            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer">
-              <input type="checkbox" [(ngModel)]="orderSetupSettings['enable_pos']" />
-              <span class="text-sm font-medium">POS</span>
-            </label>
-            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer">
-              <input type="checkbox" [(ngModel)]="orderSetupSettings['enable_loyalty']" />
-              <span class="text-sm font-medium">Loyalty</span>
-            </label>
-            <label class="flex items-center gap-2 p-3 border rounded-xl cursor-pointer">
-              <input type="checkbox" [(ngModel)]="orderSetupSettings['enable_scheduled_order']" />
-              <span class="text-sm font-medium">Scheduled Orders</span>
-            </label>
+      <!-- ── ORDER SETUP ── -->
+      <div *ngIf="activeTab==='order_setup'" class="card">
+        <div class="card-header">
+          <p class="card-title">Order Setup</p>
+          <p class="card-subtitle">Enable order types, delivery configuration and order defaults</p>
+        </div>
+        <div class="card-body space-y-5 max-w-2xl">
+          <div>
+            <p class="label mb-2">Order Types</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              <label *ngFor="let opt of [
+                {key:'enable_delivery', label:'Delivery'},
+                {key:'enable_takeaway', label:'Takeaway'},
+                {key:'enable_dining_table', label:'Dine In'},
+                {key:'enable_pos', label:'POS'},
+                {key:'enable_loyalty', label:'Loyalty'},
+                {key:'enable_scheduled_order', label:'Scheduled'}
+              ]" class="flex items-center gap-2.5 p-3 rounded-xl cursor-pointer transition-colors"
+                style="border:1px solid #e2e8f0;background:#f8fafc"
+                onmouseover="this.style.borderColor='#ea580c';this.style.background='#fff7ed'"
+                onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'">
+                <input type="checkbox" [(ngModel)]="orderSetupSettings[opt.key]" class="w-4 h-4">
+                <span style="font-size:13px;font-weight:500;color:#334155">{{ opt.label }}</span>
+              </label>
+            </div>
           </div>
           <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium mb-1">Min Order Amount</label>
-              <input [(ngModel)]="orderSetupSettings['min_order_amount']" type="number" class="input w-full" /></div>
-            <div><label class="block text-sm font-medium mb-1">Order Prefix</label>
-              <input [(ngModel)]="orderSetupSettings['order_prefix']" class="input w-full" /></div>
+            <div class="form-group">
+              <label class="label">Min Order Amount</label>
+              <input [(ngModel)]="orderSetupSettings['min_order_amount']" type="number" class="input-field" />
+            </div>
+            <div class="form-group">
+              <label class="label">Order Prefix</label>
+              <input [(ngModel)]="orderSetupSettings['order_prefix']" class="input-field" />
+            </div>
           </div>
-          <hr />
-          <p class="text-sm font-semibold text-gray-700">Delivery Charge Configuration</p>
-          <div class="grid grid-cols-3 gap-4">
-            <div><label class="block text-sm font-medium mb-1">Free Delivery (km)</label>
-              <input [(ngModel)]="orderSetupSettings['delivery_free_km']" type="number" class="input w-full" /></div>
-            <div><label class="block text-sm font-medium mb-1">Basic Charge ($)</label>
-              <input [(ngModel)]="orderSetupSettings['delivery_basic_charge']" type="number" class="input w-full" /></div>
-            <div><label class="block text-sm font-medium mb-1">Per Km Charge ($)</label>
-              <input [(ngModel)]="orderSetupSettings['delivery_per_km_charge']" type="number" class="input w-full" /></div>
+          <div style="border-top:1px solid #f1f5f9;padding-top:16px">
+            <p class="label mb-3">Delivery Charge Configuration</p>
+            <div class="grid grid-cols-3 gap-4">
+              <div class="form-group">
+                <label class="label" style="font-size:11.5px">Free Delivery (km)</label>
+                <input [(ngModel)]="orderSetupSettings['delivery_free_km']" type="number" class="input-field" />
+              </div>
+              <div class="form-group">
+                <label class="label" style="font-size:11.5px">Basic Charge ($)</label>
+                <input [(ngModel)]="orderSetupSettings['delivery_basic_charge']" type="number" class="input-field" />
+              </div>
+              <div class="form-group">
+                <label class="label" style="font-size:11.5px">Per Km Charge ($)</label>
+                <input [(ngModel)]="orderSetupSettings['delivery_per_km_charge']" type="number" class="input-field" />
+              </div>
+            </div>
           </div>
         </div>
-        <div class="px-6 py-4 border-t flex justify-end">
-          <button (click)="save('order_setup')" [disabled]="saving" class="btn btn-primary">{{ saving ? 'Saving...' : 'Save' }}</button>
-        </div>
-      </div>
-
-      <!-- NOTIFICATIONS -->
-      <div *ngIf="activeTab === 'notification'" class="bg-white rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b"><h2 class="font-semibold text-gray-800">Notification Settings</h2></div>
-        <div class="px-6 py-5 space-y-4 max-w-2xl">
-          <div class="flex items-center gap-3">
-            <input type="checkbox" [(ngModel)]="notificationSettings['new_order_admin_notification']" id="adminNotif" />
-            <label for="adminNotif" class="text-sm font-medium">New Order — Admin Notification</label>
-          </div>
-          <div class="flex items-center gap-3">
-            <input type="checkbox" [(ngModel)]="notificationSettings['new_order_customer_notification']" id="custNotif" />
-            <label for="custNotif" class="text-sm font-medium">New Order — Customer Notification</label>
-          </div>
-          <div class="flex items-center gap-3">
-            <input type="checkbox" [(ngModel)]="notificationSettings['order_status_customer_notification']" id="statusNotif" />
-            <label for="statusNotif" class="text-sm font-medium">Order Status Update — Customer Notification</label>
-          </div>
-          <div><label class="block text-sm font-medium mb-1">Firebase Server Key</label>
-            <input [(ngModel)]="notificationSettings['firebase_server_key']" class="input w-full" /></div>
-          <div><label class="block text-sm font-medium mb-1">Push Notification Vapid Key</label>
-            <input [(ngModel)]="notificationSettings['push_notification_key']" class="input w-full" /></div>
-        </div>
-        <div class="px-6 py-4 border-t flex justify-end">
-          <button (click)="save('notification')" [disabled]="saving" class="btn btn-primary">{{ saving ? 'Saving...' : 'Save' }}</button>
+        <div class="card-footer">
+          <button (click)="save('order_setup')" [disabled]="saving" class="btn-primary btn-sm">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
         </div>
       </div>
 
-      <!-- MAIL -->
-      <div *ngIf="activeTab === 'mail'" class="bg-white rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b"><h2 class="font-semibold text-gray-800">Email / SMTP Configuration</h2></div>
-        <div class="px-6 py-5 space-y-4 max-w-2xl">
-          <div><label class="block text-sm font-medium mb-1">Mail Driver</label>
-            <select [(ngModel)]="mailSettings['mail_driver']" class="input w-full">
+      <!-- ── NOTIFICATIONS ── -->
+      <div *ngIf="activeTab==='notification'" class="card">
+        <div class="card-header">
+          <p class="card-title">Notification Settings</p>
+          <p class="card-subtitle">Configure push and email notification triggers</p>
+        </div>
+        <div class="card-body space-y-4 max-w-2xl">
+          <div class="space-y-2.5">
+            <div *ngFor="let n of [
+              {key:'new_order_admin_notification', label:'New Order — Admin Notification'},
+              {key:'new_order_customer_notification', label:'New Order — Customer Notification'},
+              {key:'order_status_customer_notification', label:'Order Status Update — Customer Notification'}
+            ]" class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+              <input type="checkbox" [(ngModel)]="notificationSettings[n.key]" [id]="n.key" class="w-4 h-4">
+              <label [for]="n.key" style="font-size:13.5px;font-weight:500;color:#334155;cursor:pointer">{{ n.label }}</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="label">Firebase Server Key</label>
+            <input [(ngModel)]="notificationSettings['firebase_server_key']" class="input-field" />
+          </div>
+          <div class="form-group">
+            <label class="label">Push Notification Vapid Key</label>
+            <input [(ngModel)]="notificationSettings['push_notification_key']" class="input-field" />
+          </div>
+        </div>
+        <div class="card-footer">
+          <button (click)="save('notification')" [disabled]="saving" class="btn-primary btn-sm">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
+        </div>
+      </div>
+
+      <!-- ── MAIL ── -->
+      <div *ngIf="activeTab==='mail'" class="card">
+        <div class="card-header">
+          <p class="card-title">Email / SMTP Configuration</p>
+          <p class="card-subtitle">Set up transactional email delivery</p>
+        </div>
+        <div class="card-body space-y-4 max-w-2xl">
+          <div class="form-group">
+            <label class="label">Mail Driver</label>
+            <select [(ngModel)]="mailSettings['mail_driver']" class="input-field">
               <option value="smtp">SMTP</option>
               <option value="sendmail">Sendmail</option>
               <option value="mailgun">Mailgun</option>
             </select>
           </div>
           <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium mb-1">Host</label>
-              <input [(ngModel)]="mailSettings['mail_host']" class="input w-full" /></div>
-            <div><label class="block text-sm font-medium mb-1">Port</label>
-              <input [(ngModel)]="mailSettings['mail_port']" class="input w-full" /></div>
+            <div class="form-group"><label class="label">Host</label><input [(ngModel)]="mailSettings['mail_host']" class="input-field" /></div>
+            <div class="form-group"><label class="label">Port</label><input [(ngModel)]="mailSettings['mail_port']" class="input-field" /></div>
           </div>
           <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium mb-1">Username</label>
-              <input [(ngModel)]="mailSettings['mail_username']" class="input w-full" /></div>
-            <div><label class="block text-sm font-medium mb-1">Password</label>
-              <input [(ngModel)]="mailSettings['mail_password']" type="password" class="input w-full" /></div>
+            <div class="form-group"><label class="label">Username</label><input [(ngModel)]="mailSettings['mail_username']" class="input-field" /></div>
+            <div class="form-group"><label class="label">Password</label><input [(ngModel)]="mailSettings['mail_password']" type="password" class="input-field" /></div>
           </div>
           <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium mb-1">From Email</label>
-              <input [(ngModel)]="mailSettings['mail_from_address']" type="email" class="input w-full" /></div>
-            <div><label class="block text-sm font-medium mb-1">From Name</label>
-              <input [(ngModel)]="mailSettings['mail_from_name']" class="input w-full" /></div>
+            <div class="form-group"><label class="label">From Email</label><input [(ngModel)]="mailSettings['mail_from_address']" type="email" class="input-field" /></div>
+            <div class="form-group"><label class="label">From Name</label><input [(ngModel)]="mailSettings['mail_from_name']" class="input-field" /></div>
           </div>
-          <div><label class="block text-sm font-medium mb-1">Encryption</label>
-            <select [(ngModel)]="mailSettings['mail_encryption']" class="input w-full">
-              <option value="">None</option>
-              <option value="tls">TLS</option>
-              <option value="ssl">SSL</option>
+          <div class="form-group">
+            <label class="label">Encryption</label>
+            <select [(ngModel)]="mailSettings['mail_encryption']" class="input-field">
+              <option value="">None</option><option value="tls">TLS</option><option value="ssl">SSL</option>
             </select>
           </div>
         </div>
-        <div class="px-6 py-4 border-t flex justify-end">
-          <button (click)="save('mail')" [disabled]="saving" class="btn btn-primary">{{ saving ? 'Saving...' : 'Save' }}</button>
+        <div class="card-footer">
+          <button (click)="save('mail')" [disabled]="saving" class="btn-primary btn-sm">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
         </div>
       </div>
 
-      <!-- PAYMENT (legacy keys for old SMS/Payment gateway integration) -->
-      <div *ngIf="activeTab === 'payment'" class="bg-white rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b"><h2 class="font-semibold text-gray-800">Payment Gateway Keys</h2>
-          <p class="text-sm text-gray-400 mt-0.5">For detailed gateway configuration visit Payment Gateways settings.</p></div>
-        <div class="px-6 py-5 space-y-4 max-w-2xl">
-          <div><label class="block text-sm font-medium mb-1">Stripe Publishable Key</label>
-            <input [(ngModel)]="paymentSettings['stripe_key']" class="input w-full" placeholder="pk_live_..." /></div>
-          <div><label class="block text-sm font-medium mb-1">Stripe Secret Key</label>
-            <input [(ngModel)]="paymentSettings['stripe_secret']" type="password" class="input w-full" /></div>
-          <div><label class="block text-sm font-medium mb-1">Razorpay Key ID</label>
-            <input [(ngModel)]="paymentSettings['razorpay_key']" class="input w-full" /></div>
-          <div><label class="block text-sm font-medium mb-1">Razorpay Key Secret</label>
-            <input [(ngModel)]="paymentSettings['razorpay_secret']" type="password" class="input w-full" /></div>
+      <!-- ── PAYMENT ── -->
+      <div *ngIf="activeTab==='payment'" class="card">
+        <div class="card-header">
+          <p class="card-title">Payment Gateway Keys</p>
+          <p class="card-subtitle">For detailed gateway configuration visit the Payment Gateways page</p>
         </div>
-        <div class="px-6 py-4 border-t flex justify-end">
-          <button (click)="save('payment')" [disabled]="saving" class="btn btn-primary">{{ saving ? 'Saving...' : 'Save' }}</button>
+        <div class="card-body space-y-4 max-w-2xl">
+          <div class="form-group"><label class="label">Stripe Publishable Key</label><input [(ngModel)]="paymentSettings['stripe_key']" class="input-field" placeholder="pk_live_..." /></div>
+          <div class="form-group"><label class="label">Stripe Secret Key</label><input [(ngModel)]="paymentSettings['stripe_secret']" type="password" class="input-field" /></div>
+          <div class="form-group"><label class="label">Razorpay Key ID</label><input [(ngModel)]="paymentSettings['razorpay_key']" class="input-field" /></div>
+          <div class="form-group"><label class="label">Razorpay Key Secret</label><input [(ngModel)]="paymentSettings['razorpay_secret']" type="password" class="input-field" /></div>
+        </div>
+        <div class="card-footer">
+          <button (click)="save('payment')" [disabled]="saving" class="btn-primary btn-sm">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
         </div>
       </div>
 
-      <!-- SMS -->
-      <div *ngIf="activeTab === 'sms'" class="bg-white rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b"><h2 class="font-semibold text-gray-800">SMS Configuration</h2></div>
-        <div class="px-6 py-5 space-y-4 max-w-2xl">
-          <div><label class="block text-sm font-medium mb-1">Twilio Account SID</label>
-            <input [(ngModel)]="smsSettings['twilio_sid']" class="input w-full" /></div>
-          <div><label class="block text-sm font-medium mb-1">Twilio Auth Token</label>
-            <input [(ngModel)]="smsSettings['twilio_token']" type="password" class="input w-full" /></div>
-          <div><label class="block text-sm font-medium mb-1">Twilio From Number</label>
-            <input [(ngModel)]="smsSettings['twilio_from']" class="input w-full" placeholder="+1234567890" /></div>
+      <!-- ── SMS ── -->
+      <div *ngIf="activeTab==='sms'" class="card">
+        <div class="card-header">
+          <p class="card-title">SMS Configuration</p>
+          <p class="card-subtitle">Connect Twilio for SMS order notifications</p>
         </div>
-        <div class="px-6 py-4 border-t flex justify-end">
-          <button (click)="save('sms')" [disabled]="saving" class="btn btn-primary">{{ saving ? 'Saving...' : 'Save' }}</button>
+        <div class="card-body space-y-4 max-w-2xl">
+          <div class="form-group"><label class="label">Twilio Account SID</label><input [(ngModel)]="smsSettings['twilio_sid']" class="input-field" /></div>
+          <div class="form-group"><label class="label">Twilio Auth Token</label><input [(ngModel)]="smsSettings['twilio_token']" type="password" class="input-field" /></div>
+          <div class="form-group"><label class="label">Twilio From Number</label><input [(ngModel)]="smsSettings['twilio_from']" class="input-field" placeholder="+1234567890" /></div>
         </div>
-      </div>
-
-      <!-- SOCIAL MEDIA -->
-      <div *ngIf="activeTab === 'social_media'" class="bg-white rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b"><h2 class="font-semibold text-gray-800">Social Media Links</h2></div>
-        <div class="px-6 py-5 space-y-4 max-w-2xl">
-          <div><label class="block text-sm font-medium mb-1">Facebook URL</label>
-            <input [(ngModel)]="socialSettings['facebook_url']" class="input w-full" /></div>
-          <div><label class="block text-sm font-medium mb-1">Instagram URL</label>
-            <input [(ngModel)]="socialSettings['instagram_url']" class="input w-full" /></div>
-          <div><label class="block text-sm font-medium mb-1">Twitter / X URL</label>
-            <input [(ngModel)]="socialSettings['twitter_url']" class="input w-full" /></div>
-          <div><label class="block text-sm font-medium mb-1">YouTube URL</label>
-            <input [(ngModel)]="socialSettings['youtube_url']" class="input w-full" /></div>
-          <div><label class="block text-sm font-medium mb-1">WhatsApp Number</label>
-            <input [(ngModel)]="socialSettings['whatsapp_number']" class="input w-full" placeholder="+1234567890" /></div>
-        </div>
-        <div class="px-6 py-4 border-t flex justify-end">
-          <button (click)="save('social_media')" [disabled]="saving" class="btn btn-primary">{{ saving ? 'Saving...' : 'Save' }}</button>
+        <div class="card-footer">
+          <button (click)="save('sms')" [disabled]="saving" class="btn-primary btn-sm">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
         </div>
       </div>
 
-      <!-- THEME -->
-      <div *ngIf="activeTab === 'theme'" class="bg-white rounded-xl shadow-sm">
-        <div class="px-6 py-4 border-b"><h2 class="font-semibold text-gray-800">Theme & Branding</h2></div>
-        <div class="px-6 py-5 space-y-4 max-w-2xl">
+      <!-- ── SOCIAL MEDIA ── -->
+      <div *ngIf="activeTab==='social_media'" class="card">
+        <div class="card-header">
+          <p class="card-title">Social Media Links</p>
+          <p class="card-subtitle">Links shown in your storefront footer and app</p>
+        </div>
+        <div class="card-body space-y-4 max-w-2xl">
+          <div class="form-group"><label class="label">Facebook URL</label><input [(ngModel)]="socialSettings['facebook_url']" class="input-field" /></div>
+          <div class="form-group"><label class="label">Instagram URL</label><input [(ngModel)]="socialSettings['instagram_url']" class="input-field" /></div>
+          <div class="form-group"><label class="label">Twitter / X URL</label><input [(ngModel)]="socialSettings['twitter_url']" class="input-field" /></div>
+          <div class="form-group"><label class="label">YouTube URL</label><input [(ngModel)]="socialSettings['youtube_url']" class="input-field" /></div>
+          <div class="form-group"><label class="label">WhatsApp Number</label><input [(ngModel)]="socialSettings['whatsapp_number']" class="input-field" placeholder="+1234567890" /></div>
+        </div>
+        <div class="card-footer">
+          <button (click)="save('social_media')" [disabled]="saving" class="btn-primary btn-sm">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
+        </div>
+      </div>
+
+      <!-- ── THEME ── -->
+      <div *ngIf="activeTab==='theme'" class="card">
+        <div class="card-header">
+          <p class="card-title">Theme & Branding</p>
+          <p class="card-subtitle">Customise your storefront colours and typography</p>
+        </div>
+        <div class="card-body space-y-4 max-w-2xl">
           <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium mb-1">Primary Color</label>
+            <div class="form-group">
+              <label class="label">Primary Color</label>
               <div class="flex gap-2">
-                <input type="color" [(ngModel)]="themeSettings['primary_color']" class="h-10 w-16 rounded border" />
-                <input [(ngModel)]="themeSettings['primary_color']" class="input flex-1" placeholder="#FF6B35" />
+                <input type="color" [(ngModel)]="themeSettings['primary_color']" class="rounded-lg" style="height:40px;width:56px;border:1px solid #e2e8f0;padding:2px;cursor:pointer" />
+                <input [(ngModel)]="themeSettings['primary_color']" class="input-field flex-1" placeholder="#ea580c" />
               </div>
             </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">Secondary Color</label>
+            <div class="form-group">
+              <label class="label">Secondary Color</label>
               <div class="flex gap-2">
-                <input type="color" [(ngModel)]="themeSettings['secondary_color']" class="h-10 w-16 rounded border" />
-                <input [(ngModel)]="themeSettings['secondary_color']" class="input flex-1" placeholder="#1A1A2E" />
+                <input type="color" [(ngModel)]="themeSettings['secondary_color']" class="rounded-lg" style="height:40px;width:56px;border:1px solid #e2e8f0;padding:2px;cursor:pointer" />
+                <input [(ngModel)]="themeSettings['secondary_color']" class="input-field flex-1" placeholder="#0f172a" />
               </div>
             </div>
           </div>
-          <div><label class="block text-sm font-medium mb-1">Font Family</label>
-            <select [(ngModel)]="themeSettings['font_family']" class="input w-full">
+          <div class="form-group">
+            <label class="label">Font Family</label>
+            <select [(ngModel)]="themeSettings['font_family']" class="input-field">
               <option>Inter</option><option>Roboto</option><option>Open Sans</option><option>Poppins</option>
             </select>
           </div>
         </div>
-        <div class="px-6 py-4 border-t flex justify-end">
-          <button (click)="save('theme')" [disabled]="saving" class="btn btn-primary">{{ saving ? 'Saving...' : 'Save' }}</button>
+        <div class="card-footer">
+          <button (click)="save('theme')" [disabled]="saving" class="btn-primary btn-sm">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
         </div>
       </div>
 
+      <!-- ── MENU PERMISSIONS ── -->
+      <div *ngIf="activeTab==='menu_permissions'" class="space-y-4">
+
+        <div class="card">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p class="card-title">Menu & Permissions</p>
+              <p class="card-subtitle mt-0.5">Control which roles can access each sidebar navigation item</p>
+            </div>
+            <div class="flex gap-2">
+              <button (click)="seedNav()" class="btn-secondary btn-sm">Seed Defaults</button>
+              <button (click)="seedNav(true)" class="btn-sm" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:600">Re-seed (Reset)</button>
+              <button (click)="openNavCreate()" class="btn-primary btn-sm">+ Add Item</button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="navLoading" class="flex items-center justify-center py-16">
+          <div class="spinner"></div>
+        </div>
+
+        <!-- Nav items by group -->
+        <div *ngFor="let group of navGroups" class="table-container">
+          <div class="px-5 py-3" style="background:#f8fafc;border-bottom:1px solid #f1f5f9">
+            <h3 style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em">{{ group }}</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Route</th>
+                  <th *ngFor="let role of allRoles" style="text-align:center">{{ role.label }}</th>
+                  <th style="text-align:center">Active</th>
+                  <th style="text-align:right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of navItemsByGroup(group)">
+                  <td style="font-weight:600;color:#0f172a">{{ item.name }}</td>
+                  <td><span class="font-mono" style="font-size:11.5px;color:#64748b">{{ item.route }}</span></td>
+                  <td *ngFor="let role of allRoles" style="text-align:center">
+                    <input type="checkbox"
+                      [checked]="hasRole(item, role.name)"
+                      (change)="toggleRole(item, role.name)"
+                      class="w-4 h-4 cursor-pointer" />
+                  </td>
+                  <td style="text-align:center">
+                    <button (click)="toggleNavActive(item)"
+                      class="inline-flex rounded-full transition-colors"
+                      [style.background]="item.isActive ? '#22c55e' : '#e2e8f0'"
+                      style="width:36px;height:20px;position:relative">
+                      <span style="position:absolute;top:2px;width:16px;height:16px;background:white;border-radius:50%;transition:left 0.2s"
+                        [style.left]="item.isActive ? '18px' : '2px'"></span>
+                    </button>
+                  </td>
+                  <td style="text-align:right">
+                    <div class="flex items-center justify-end gap-1">
+                      <button (click)="openNavEdit(item)" class="action-link action-link-blue">Edit</button>
+                      <button (click)="deleteNav(item.id)" class="action-link action-link-danger">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div *ngIf="!navLoading && !navItems.length" class="empty-state card py-16">
+          <div class="empty-state-icon">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h7"/></svg>
+          </div>
+          <p class="empty-state-title">No menu items configured</p>
+          <p class="empty-state-desc">Click <strong>Seed Defaults</strong> to populate with the current navigation structure.</p>
+          <button (click)="seedNav()" class="btn-primary btn-sm">Seed Defaults</button>
+        </div>
+      </div><!-- /menu_permissions -->
+
+    </div><!-- /content -->
+  </div>
+</div>
+
+<!-- ── Nav Item Modal ── -->
+<div *ngIf="showNavForm" class="modal-backdrop">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingNavId ? 'Edit' : 'Add' }} Menu Item</p>
+      <button (click)="showNavForm=false" class="modal-close-btn">×</button>
+    </div>
+    <div class="modal-body space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="form-group">
+          <label class="label">Group Name <span style="color:#dc2626">*</span></label>
+          <input [(ngModel)]="navForm.group" class="input-field" placeholder="e.g. Operations" />
+        </div>
+        <div class="form-group">
+          <label class="label">Group Order</label>
+          <input [(ngModel)]="navForm.groupOrder" type="number" class="input-field" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="form-group">
+          <label class="label">Item Name <span style="color:#dc2626">*</span></label>
+          <input [(ngModel)]="navForm.name" class="input-field" placeholder="e.g. Live Orders" />
+        </div>
+        <div class="form-group">
+          <label class="label">Sort Order</label>
+          <input [(ngModel)]="navForm.sortOrder" type="number" class="input-field" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="label">Route <span style="color:#dc2626">*</span></label>
+        <input [(ngModel)]="navForm.route" class="input-field" placeholder="/admin/orders" />
+      </div>
+      <div class="form-group">
+        <label class="label">Icon Key</label>
+        <select [(ngModel)]="navForm.iconKey" class="input-field">
+          <option *ngFor="let k of ICON_KEYS" [value]="k">{{ k }}</option>
+        </select>
+      </div>
+      <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+        <input type="checkbox" [(ngModel)]="navForm.external" id="navExternal" class="w-4 h-4">
+        <label for="navExternal" style="font-size:13.5px;font-weight:500;color:#334155;cursor:pointer">Open in new tab (external link)</label>
+      </div>
+      <div class="form-group">
+        <label class="label">Allowed Roles <span style="color:#94a3b8;font-weight:400">(empty = all roles)</span></label>
+        <div class="flex flex-wrap gap-2 mt-1">
+          <label *ngFor="let role of allRoles"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-colors"
+            style="border:1px solid #e2e8f0;background:#f8fafc;font-size:12.5px">
+            <input type="checkbox"
+              [checked]="navForm.roles.includes(role.name)"
+              (change)="toggleNavFormRole(role.name)"
+              class="w-3.5 h-3.5" />
+            {{ role.label }}
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button (click)="showNavForm=false" class="btn-secondary btn-sm">Cancel</button>
+      <button (click)="saveNav()" [disabled]="navSaving" class="btn-primary btn-sm">
+        {{ navSaving ? 'Saving…' : 'Save Item' }}
+      </button>
     </div>
   </div>
 </div>

@@ -37,6 +37,14 @@ __decorate([
     __metadata("design:type", Number)
 ], ItemExtra.prototype, "price", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true, default: null }),
+    __metadata("design:type", Number)
+], ItemExtra.prototype, "maxQuantity", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], ItemExtra.prototype, "isRequired", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)
 ], ItemExtra.prototype, "status", void 0);

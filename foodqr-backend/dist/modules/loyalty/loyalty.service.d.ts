@@ -16,6 +16,11 @@ export declare class LoyaltyService {
     createProgram(data: Partial<LoyaltyProgram>): Promise<LoyaltyProgram>;
     updateProgram(id: string, data: Partial<LoyaltyProgram>): Promise<LoyaltyProgram>;
     addConfiguration(programId: string, data: Partial<LoyaltyConfiguration>): Promise<LoyaltyConfiguration>;
+    getConfiguration(id: string): Promise<LoyaltyConfiguration>;
+    updateConfiguration(id: string, data: Partial<LoyaltyConfiguration>): Promise<LoyaltyConfiguration>;
+    removeConfiguration(id: string): Promise<{
+        message: string;
+    }>;
     getUserDashboard(userId: string): Promise<{
         program: any;
         stamps: number;
@@ -38,4 +43,21 @@ export declare class LoyaltyService {
         message: string;
     }>;
     getCustomerStamps(userId: string): Promise<LoyaltyStamp[]>;
+    getCustomerSegments(): Promise<{
+        segments: {
+            new: any[];
+            bronze: any[];
+            silver: any[];
+            gold: any[];
+        };
+        summary: {
+            total: number;
+            new: number;
+            bronze: number;
+            silver: number;
+            gold: number;
+        };
+        requiredStamps: number;
+    }>;
+    getLeaderboard(): Promise<any[]>;
 }

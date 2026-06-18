@@ -1,4 +1,8 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ParseUUIDPipe, UploadedFile, UseInterceptors, Res } from '@nestjs/common';
+import { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { OffersService } from './offers.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -25,6 +29,25 @@ export class OffersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
   @Delete('admin/offers/:id') deleteOffer(@Param('id', ParseUUIDPipe) id: string) { return this.offersService.deleteOffer(id); }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
+  @Patch('admin/offers/:id/image')
+  updateOfferImage(@Param('id', ParseUUIDPipe) id: string, @Body() body: { image: string }) {
+    return this.offersService.updateOffer(id, { image: body.image });
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
+  @Post('admin/offers/:id/upload-image')
+  @UseInterceptors(FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './uploads/offers',
+      filename: (_req, file, cb) => cb(null, `offer-${Date.now()}${extname(file.originalname)}`),
+    }),
+  }))
+  uploadOfferImage(@Param('id', ParseUUIDPipe) id: string, @UploadedFile() file: Express.Multer.File) {
+    const imageUrl = `/uploads/offers/${file.filename}`;
+    return this.offersService.updateOffer(id, { image: imageUrl });
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
   @Get('admin/banners') getAllBanners() { return this.offersService.getAllBanners(); }
@@ -62,4 +85,11 @@ export class OffersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
   @Delete('admin/promotion-banners/:id') deletePromoBanner(@Param('id', ParseUUIDPipe) id: string) { return this.offersService.deletePromotionBanner(id); }
+
+  /** Export offers to Excel */
+  @UseGuards(JwtAuthGuard, RolesGuard) @Roles(UserRole.ADMIN) @ApiBearerAuth()
+  @Get('admin/offers/export/excel')
+  async exportOffersExcel(@Res() res: Response) {
+    return this.offersService.exportOffersExcel(res);
+  }
 }

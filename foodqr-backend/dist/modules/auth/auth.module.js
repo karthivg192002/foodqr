@@ -16,14 +16,20 @@ const auth_controller_1 = require("./auth.controller");
 const auth_service_1 = require("./auth.service");
 const jwt_strategy_1 = require("./strategies/jwt.strategy");
 const user_entity_1 = require("../users/entities/user.entity");
+const order_entity_1 = require("../orders/entities/order.entity");
+const order_item_entity_1 = require("../orders/entities/order-item.entity");
+const mail_module_1 = require("../mail/mail.module");
+const sms_gateways_module_1 = require("../sms-gateways/sms-gateways.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, order_entity_1.Order, order_item_entity_1.OrderItem]),
             passport_1.PassportModule,
+            mail_module_1.MailModule,
+            sms_gateways_module_1.SmsGatewaysModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: (config) => ({

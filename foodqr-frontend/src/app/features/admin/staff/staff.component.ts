@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
+import { RolesService, RoleDef } from '../../../core/services/roles.service';
 import { User } from '../../../core/models';
 
 @Component({ selector: 'app-staff', templateUrl: './staff.component.html' })
@@ -11,9 +12,14 @@ export class StaffComponent implements OnInit {
   showForm = false;
   saving = false;
   form: FormGroup;
-  roles = ['waiter', 'chef', 'staff', 'pos_operator', 'branch_manager'];
+  roles: RoleDef[] = [];
 
-  constructor(private api: ApiService, private toastr: ToastrService, private fb: FormBuilder) {
+  constructor(
+    private api: ApiService,
+    private toastr: ToastrService,
+    private fb: FormBuilder,
+    private rolesService: RolesService,
+  ) {
     this.form = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -23,7 +29,13 @@ export class StaffComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+    this.rolesService.load();
+    this.rolesService.roles$.subscribe((roles) => {
+      this.roles = roles.filter((r) => r.name !== 'customer');
+    });
+  }
 
   load(): void {
     this.loading = true;

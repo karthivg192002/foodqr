@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, ParseUUIDPipe, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { DiningTablesService, CreateDiningTableDto } from './dining-tables.service';
@@ -28,7 +29,7 @@ export class DiningTablesController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.WAITER)
   @ApiBearerAuth()
   @Get('admin/dining-tables')
   findAllAdmin(@Query('branchId') branchId?: string) {
@@ -75,5 +76,32 @@ export class DiningTablesController {
   @Delete('admin/dining-tables/:id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.diningTablesService.remove(id);
+  }
+
+  /** Regenerate the session access token for a table */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  @ApiBearerAuth()
+  @Post('admin/dining-tables/:id/regenerate-token')
+  regenerateToken(@Param('id', ParseUUIDPipe) id: string) {
+    return this.diningTablesService.regenerateToken(id);
+  }
+
+  /** Assign a waiter to a dining table */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  @ApiBearerAuth()
+  @Patch('admin/dining-tables/:id/waiter')
+  assignWaiter(@Param('id', ParseUUIDPipe) id: string, @Body('waiterId') waiterId: string) {
+    return this.diningTablesService.update(id, { waiterId });
+  }
+
+  /** Export dining tables to Excel */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  @ApiBearerAuth()
+  @Get('admin/dining-tables/export/excel')
+  async exportExcel(@Query('branchId') branchId: string, @Res() res: Response) {
+    return this.diningTablesService.exportExcel(branchId, res);
   }
 }

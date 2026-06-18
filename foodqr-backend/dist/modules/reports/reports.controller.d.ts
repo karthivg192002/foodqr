@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { ReportsService } from './reports.service';
 export declare class ReportsController {
     private readonly reportsService;
@@ -30,4 +31,52 @@ export declare class ReportsController {
         topItems: any[];
         newCustomers: number;
     }>;
+    getCategoryWiseSales(startDate?: string, endDate?: string): Promise<any[]>;
+    getHourlyPeak(startDate?: string, endDate?: string): Promise<any[]>;
+    getStaffLeaderboard(startDate?: string, endDate?: string): Promise<any[]>;
+    getQrRevenueSummary(startDate?: string, endDate?: string): Promise<any[]>;
+    getCustomerStates(startDate?: string, endDate?: string): Promise<{
+        totalCustomers: number;
+        newCustomers: number;
+        returningCustomers: number;
+        guestCustomers: number;
+        byRole: any[];
+    }>;
+    getPeakOrdersBarChart(startDate?: string, endDate?: string): Promise<{
+        hourly: {
+            hour: number;
+            label: string;
+            orderCount: number;
+            revenue: number;
+        }[];
+        daily: {
+            dayOfWeek: number;
+            label: string;
+            orderCount: number;
+            revenue: number;
+        }[];
+    }>;
+    getSalesOverview(startDate?: string, endDate?: string): Promise<{
+        period: {
+            startDate: string;
+            endDate: string;
+        };
+        totalOrders: number;
+        paidOrders: number;
+        unpaidOrders: number;
+        totalRevenue: number;
+        avgOrderValue: number;
+        topSellingItem: any;
+    }>;
+    exportSales(startDate: string, endDate: string, res: Response): Promise<void>;
+    exportItems(startDate: string, endDate: string, res: Response): Promise<void>;
+    exportCreditBalance(res: Response): Promise<void>;
+    exportCustomers(res: Response): Promise<void>;
+    exportSalesExcel(startDate: string, endDate: string, res: Response): Promise<void>;
+    exportItemsExcel(startDate?: string, endDate?: string, res?: Response): Promise<void>;
+    exportCustomersExcel(res: Response): Promise<void>;
+    exportSalesPdf(startDate: string, endDate: string, res: Response): Promise<void>;
+    exportItemsPdf(startDate?: string, endDate?: string, res?: Response): Promise<void>;
+    private buildExcelHtml;
+    private buildPrintHtml;
 }

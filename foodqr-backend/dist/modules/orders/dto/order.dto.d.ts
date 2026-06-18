@@ -25,6 +25,8 @@ export declare class CreateOrderDto {
     couponCode?: string;
     deliveryDistanceKm?: number;
     deliveryAddressSnapshot?: object;
+    posReceivedAmount?: number;
+    customerId?: string;
 }
 export declare class UpdateOrderStatusDto {
     status: string;

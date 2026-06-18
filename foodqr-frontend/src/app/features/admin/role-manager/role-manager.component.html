@@ -1,0 +1,138 @@
+﻿<div class="space-y-5 fade-in-up">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Role Manager</h1>
+      <p class="page-subtitle">Create and manage roles — new roles appear in all staff dropdowns automatically</p>
+    </div>
+    <div class="flex gap-2">
+      <button (click)="seed()" class="btn-secondary btn-sm">Seed Defaults</button>
+      <button (click)="openCreate()" class="btn-primary btn-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Add Role
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Roles table -->
+  <div *ngIf="!loading" class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Role Slug</th>
+          <th>Label</th>
+          <th>Description</th>
+          <th style="text-align:center">Type</th>
+          <th style="text-align:center">Status</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let role of roles">
+          <td>
+            <span class="font-mono" style="font-size:12.5px;color:#334155;background:#f1f5f9;padding:2px 8px;border-radius:6px">
+              {{ role.name }}
+            </span>
+          </td>
+          <td>
+            <span [class]="colorClass(role.color)" class="capitalize">{{ role.label }}</span>
+          </td>
+          <td style="font-size:13px;color:#64748b;max-width:260px">
+            <span class="truncate block">{{ role.description || '—' }}</span>
+          </td>
+          <td style="text-align:center">
+            <span *ngIf="role.isSystem" class="badge-info badge-plain">System</span>
+            <span *ngIf="!role.isSystem" class="badge-gray badge-plain">Custom</span>
+          </td>
+          <td style="text-align:center">
+            <span [class]="role.isActive ? 'badge-success' : 'badge-danger'">{{ role.isActive ? 'Active' : 'Inactive' }}</span>
+          </td>
+          <td style="text-align:right">
+            <div class="flex items-center justify-end gap-1">
+              <button (click)="openEdit(role)" class="action-link action-link-blue">Edit</button>
+              <button (click)="delete(role)" [disabled]="role.isSystem"
+                class="action-link action-link-danger"
+                [style.opacity]="role.isSystem ? '0.3' : '1'"
+                [style.pointerEvents]="role.isSystem ? 'none' : 'auto'">
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="!roles.length">
+          <td colspan="6">
+            <div class="empty-state">
+              <div class="empty-state-icon">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              </div>
+              <p class="empty-state-title">No roles found</p>
+              <p class="empty-state-desc">Click <strong>Seed Defaults</strong> to add built-in system roles.</p>
+              <button (click)="seed()" class="btn-primary btn-sm">Seed Defaults</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── Create / Edit Role Modal ── -->
+<div *ngIf="showForm" class="modal-backdrop">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingId ? 'Edit Role' : 'Create Role' }}</p>
+      <button (click)="showForm=false" class="modal-close-btn">×</button>
+    </div>
+    <div class="modal-body space-y-4">
+
+      <div class="form-group">
+        <label class="label">Role Slug <span style="color:#dc2626">*</span></label>
+        <input [(ngModel)]="form.name" [disabled]="!!editingId && !!form['isSystem']"
+          class="input-field font-mono" placeholder="e.g. cashier, delivery_boy" />
+        <p style="font-size:11.5px;color:#94a3b8;margin-top:4px">Lowercase letters and underscores only. Cannot be changed after creation.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="label">Display Label <span style="color:#dc2626">*</span></label>
+        <input [(ngModel)]="form.label" class="input-field" placeholder="e.g. Cashier, Delivery Boy" />
+      </div>
+
+      <div class="form-group">
+        <label class="label">Description</label>
+        <input [(ngModel)]="form.description" class="input-field" placeholder="Brief description of this role's access" />
+      </div>
+
+      <!-- Color picker -->
+      <div class="form-group">
+        <label class="label">Badge Color</label>
+        <div class="flex flex-wrap gap-2 mt-1">
+          <button *ngFor="let c of colors" (click)="form.color = c"
+            [class]="colorClass(c)"
+            [style.outline]="form.color===c ? '2px solid #ea580c' : ''"
+            [style.outlineOffset]="form.color===c ? '2px' : ''"
+            class="capitalize transition-all">
+            {{ c }}
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+        <input type="checkbox" [(ngModel)]="form.isActive" id="roleActive" class="w-4 h-4">
+        <label for="roleActive" style="font-size:13.5px;font-weight:500;color:#334155;cursor:pointer">Role is active</label>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button (click)="showForm=false" class="btn-secondary btn-sm">Cancel</button>
+      <button (click)="save()" [disabled]="saving" class="btn-primary btn-sm">
+        {{ saving ? 'Saving…' : (editingId ? 'Update Role' : 'Create Role') }}
+      </button>
+    </div>
+  </div>
+</div>

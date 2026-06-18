@@ -16,10 +16,52 @@ exports.CategoriesService = exports.CreateCategoryDto = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const item_category_entity_1 = require("./entities/item-category.entity");
 class CreateCategoryDto {
 }
 exports.CreateCategoryDto = CreateCategoryDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "icon", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "image", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "parentCategoryId", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateCategoryDto.prototype, "status", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateCategoryDto.prototype, "variationOnly", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], CreateCategoryDto.prototype, "sortOrder", void 0);
 let CategoriesService = class CategoriesService {
     constructor(catRepo) {
         this.catRepo = catRepo;
@@ -59,6 +101,54 @@ let CategoriesService = class CategoriesService {
     async updateSortOrder(items) {
         await Promise.all(items.map((i) => this.catRepo.update(i.id, { sortOrder: i.sortOrder })));
         return { message: 'Sort order updated' };
+    }
+    async exportExcel(res) {
+        const cats = await this.catRepo.find({
+            relations: ['parentCategory'],
+            order: { sortOrder: 'ASC', name: 'ASC' },
+        });
+        const headers = ['Name', 'Description', 'Parent Category', 'Status', 'Variation Only', 'Sort Order'];
+        const rows = cats.map((c) => [
+            c.name, c.description || '', c.parentCategory?.name || '',
+            c.status ? 'Active' : 'Inactive', c.variationOnly ? 'Yes' : 'No', c.sortOrder,
+        ]);
+        const ths = headers.map((h) => `<th style="background:#f97316;color:white;padding:6px 10px;border:1px solid #ddd">${h}</th>`).join('');
+        const trs = rows.map((r) => `<tr>${r.map((c) => `<td style="padding:5px 10px;border:1px solid #ddd">${c}</td>`).join('')}</tr>`).join('');
+        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><h2>Categories</h2><table border="1"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></body></html>`;
+        res.set({ 'Content-Type': 'application/vnd.ms-excel', 'Content-Disposition': 'attachment; filename="categories.xls"' });
+        res.send(html);
+    }
+    async importFromCsv(csvContent) {
+        const lines = csvContent.split('\n').filter((l) => l.trim());
+        if (lines.length < 2)
+            return { imported: 0, errors: ['Empty file'] };
+        const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
+        const created = [];
+        const errors = [];
+        for (let i = 1; i < lines.length; i++) {
+            try {
+                const values = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)?.map((v) => v.trim().replace(/^"|"$/g, '')) || [];
+                const row = {};
+                headers.forEach((h, idx) => (row[h] = values[idx] || ''));
+                if (!row.name) {
+                    errors.push(`Row ${i + 1}: missing name`);
+                    continue;
+                }
+                const dto = {
+                    name: row.name,
+                    description: row.description,
+                    parentCategoryId: row.parentCategoryId || undefined,
+                    status: row.status !== 'false',
+                    variationOnly: row.variationOnly === 'true',
+                };
+                const cat = await this.create(dto);
+                created.push(cat.id);
+            }
+            catch (e) {
+                errors.push(`Row ${i + 1}: ${e.message}`);
+            }
+        }
+        return { imported: created.length, errors };
     }
 };
 exports.CategoriesService = CategoriesService;

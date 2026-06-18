@@ -1,12 +1,14 @@
 import { Repository } from 'typeorm';
 import { Offer } from './entities/offer.entity';
 import { Banner } from './entities/banner.entity';
+import { PromotionBanner } from './entities/promotion-banner.entity';
 import { OfferItem } from './entities/offer-item.entity';
 export declare class OffersService {
     private offerRepo;
     private bannerRepo;
+    private promoRepo;
     private offerItemRepo;
-    constructor(offerRepo: Repository<Offer>, bannerRepo: Repository<Banner>, offerItemRepo: Repository<OfferItem>);
+    constructor(offerRepo: Repository<Offer>, bannerRepo: Repository<Banner>, promoRepo: Repository<PromotionBanner>, offerItemRepo: Repository<OfferItem>);
     getActiveOffers(): Promise<Offer[]>;
     getAllOffers(): Promise<Offer[]>;
     createOffer(data: Partial<Offer>): Promise<Offer>;
@@ -26,4 +28,12 @@ export declare class OffersService {
     removeOfferItem(offerItemId: string): Promise<{
         message: string;
     }>;
+    getActivePromotionBanners(): Promise<PromotionBanner[]>;
+    getAllPromotionBanners(): Promise<PromotionBanner[]>;
+    createPromotionBanner(data: Partial<PromotionBanner>): Promise<PromotionBanner>;
+    updatePromotionBanner(id: string, data: Partial<PromotionBanner>): Promise<PromotionBanner>;
+    deletePromotionBanner(id: string): Promise<{
+        message: string;
+    }>;
+    exportOffersExcel(res: any): Promise<void>;
 }

@@ -14,7 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoriesController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const swagger_1 = require("@nestjs/swagger");
+const multer_1 = require("multer");
 const categories_service_1 = require("./categories.service");
 const jwt_auth_guard_1 = require("../../../common/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../../common/guards/roles.guard");
@@ -31,10 +33,28 @@ let CategoriesController = class CategoriesController {
     update(id, dto) {
         return this.categoriesService.update(id, dto);
     }
+    getPosCategories() { return this.categoriesService.findAll(true); }
+    getPosSubCategories(id) {
+        return this.categoriesService.findOne(id).then((cat) => cat.children || []);
+    }
     updateSortOrder(items) {
         return this.categoriesService.updateSortOrder(items);
     }
     remove(id) { return this.categoriesService.remove(id); }
+    async exportExcel(res) {
+        return this.categoriesService.exportExcel(res);
+    }
+    downloadSample(res) {
+        const csv = ['name,description,parentCategoryId,status,variationOnly',
+            '"Burgers","All burger options",,true,false',
+            '"Veggie Burgers","Plant-based burgers",,true,false',
+        ].join('\n');
+        res.set({ 'Content-Type': 'text/csv', 'Content-Disposition': 'attachment; filename="categories-import-sample.csv"' });
+        res.send(csv);
+    }
+    async importCsv(file) {
+        return this.categoriesService.importFromCsv(file.buffer.toString('utf-8'));
+    }
 };
 exports.CategoriesController = CategoriesController;
 __decorate([
@@ -84,6 +104,25 @@ __decorate([
 ], CategoriesController.prototype, "update", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER, enums_1.UserRole.POS_OPERATOR, enums_1.UserRole.STAFF),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/pos/categories'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], CategoriesController.prototype, "getPosCategories", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER, enums_1.UserRole.POS_OPERATOR, enums_1.UserRole.STAFF),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/pos/categories/:id/sub-categories'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], CategoriesController.prototype, "getPosSubCategories", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Patch)('admin/categories/sort-order'),
@@ -102,6 +141,37 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], CategoriesController.prototype, "remove", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/categories/export/excel'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CategoriesController.prototype, "exportExcel", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/categories/export/sample'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], CategoriesController.prototype, "downloadSample", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)('admin/categories/import'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', { storage: (0, multer_1.memoryStorage)() })),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CategoriesController.prototype, "importCsv", null);
 exports.CategoriesController = CategoriesController = __decorate([
     (0, swagger_1.ApiTags)('Menu - Categories'),
     (0, common_1.Controller)(),

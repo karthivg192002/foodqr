@@ -83,7 +83,7 @@ This creates the following users (all with password `Admin@123`):
 |---|---|
 | Admin (Super Admin) | admin@foodqr.com |
 | Branch Manager | manager@foodqr.com |
-| Waiter | waiter@foodqr.com |
+| Waiter | waiter@foodqr.com | 
 | Chef | chef@foodqr.com |
 | POS Operator | pos@foodqr.com |
 | Staff | staff@foodqr.com |

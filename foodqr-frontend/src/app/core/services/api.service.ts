@@ -27,6 +27,12 @@ export class ApiService {
     );
   }
 
+  /** Returns the full response object without unwrapping — use for paginated endpoints that need total/page metadata. */
+  getPaginated<T>(endpoint: string, params?: Record<string, any>): Observable<T> {
+    const options = params ? { params: this.buildParams(params) } : {};
+    return this.http.get<T>(`${this.baseUrl}/${endpoint}`, options);
+  }
+
   post<T>(endpoint: string, body: any): Observable<T> {
     return this.http.post<any>(`${this.baseUrl}/${endpoint}`, body).pipe(
       map((res) => res.data ?? res)

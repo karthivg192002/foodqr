@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ItemAttribute } from './entities/item-attribute.entity';
 import { ItemCategoryAttribute } from './entities/item-category-attribute.entity';
+import { ItemVariation } from '../menu/variations/entities/item-variation.entity';
 
 @Injectable()
 export class ItemAttributesService {
   constructor(
     @InjectRepository(ItemAttribute) private attrRepo: Repository<ItemAttribute>,
     @InjectRepository(ItemCategoryAttribute) private pivotRepo: Repository<ItemCategoryAttribute>,
+    @InjectRepository(ItemVariation) private variationRepo: Repository<ItemVariation>,
   ) {}
 
   findAll() {
@@ -47,5 +49,26 @@ export class ItemAttributesService {
       this.pivotRepo.create({ categoryId, attributeId }),
     );
     return this.pivotRepo.save(rows);
+  }
+
+  /** Returns variations for an item grouped by their attributeName */
+  async listGroupByAttribute(itemId: string) {
+    const variations = await this.variationRepo.find({
+      where: { itemId, status: true },
+      order: { sortOrder: 'ASC', name: 'ASC' },
+    });
+
+    const grouped: Record<string, typeof variations> = {};
+    for (const v of variations) {
+      const key = v.attributeName || 'default';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(v);
+    }
+
+    return Object.entries(grouped).map(([attributeName, items]) => ({
+      attributeName,
+      attributeId: items[0]?.attributeId || null,
+      variations: items,
+    }));
   }
 }

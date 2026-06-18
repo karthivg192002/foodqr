@@ -1,61 +1,142 @@
-<div>
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="page-title">Item Categories</h1>
-    <button (click)="openCreate()" class="btn-primary flex items-center gap-2">
+﻿<div class="space-y-5 fade-in-up">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Item Categories</h1>
+      <p class="page-subtitle">Organise your menu with categories and sub-categories</p>
+    </div>
+    <button (click)="openCreate()" class="btn-primary">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       Add Category
     </button>
   </div>
 
-  <div *ngIf="loading" class="flex justify-center py-12">
-    <div class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="spinner"></div>
   </div>
 
+  <!-- Category grid -->
   <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-    <div *ngFor="let cat of categories" class="card hover:shadow-md transition-shadow">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-lg">
-          {{ cat.icon || '🍽️' }}
-        </div>
-        <div class="flex gap-1">
-          <button (click)="openEdit(cat)" class="text-gray-400 hover:text-orange-500 p-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-          </button>
-          <button (click)="delete(cat.id)" class="text-gray-400 hover:text-red-500 p-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-          </button>
-        </div>
-      </div>
-      <h3 class="font-semibold text-gray-900">{{ cat.name }}</h3>
-      <p class="text-xs text-gray-400 mt-1">{{ cat.description || 'No description' }}</p>
-      <span [class]="cat.status ? 'badge-success' : 'badge-danger'" class="mt-2 inline-block">{{ cat.status ? 'Active' : 'Inactive' }}</span>
-    </div>
-    <div *ngIf="!categories.length" class="col-span-full text-center py-12 text-gray-400">No categories yet</div>
-  </div>
+    <div *ngFor="let cat of categories"
+      class="card p-0 overflow-hidden transition-all duration-200"
+      onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.09)';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.boxShadow='';this.style.transform='translateY(0)'">
 
-  <!-- Modal -->
-  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-      <div class="flex items-center justify-between p-6 border-b">
-        <h2 class="font-bold text-gray-900">{{ editingId ? 'Edit' : 'New' }} Category</h2>
-        <button (click)="showForm = false" class="text-gray-400 hover:text-gray-600">✕</button>
+      <!-- Image / icon banner -->
+      <div class="relative flex items-center justify-center overflow-hidden" style="height:110px;background:linear-gradient(135deg,#fff7ed,#fef3c7)">
+        <img *ngIf="cat.image" [src]="cat.image" [alt]="cat.name" class="w-full h-full object-cover" />
+        <div *ngIf="!cat.image" class="text-4xl select-none">{{ cat.icon || '🍽️' }}</div>
+        <span [class]="cat.status ? 'badge-success' : 'badge-danger'" class="absolute top-2.5 right-2.5 shadow-sm">
+          {{ cat.status ? 'Active' : 'Inactive' }}
+        </span>
       </div>
-      <form [formGroup]="form" (ngSubmit)="save()" class="p-6 space-y-4">
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-          <input formControlName="name" class="input-field" placeholder="Category name"></div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea formControlName="description" class="input-field" rows="2" placeholder="Optional description"></textarea></div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Icon (Emoji)</label>
-          <input formControlName="icon" class="input-field" placeholder="🍕"></div>
-        <div class="flex items-center gap-3">
-          <input formControlName="status" type="checkbox" id="status" class="w-4 h-4">
-          <label for="status" class="text-sm text-gray-700">Active</label>
+
+      <!-- Card body -->
+      <div class="p-4">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold truncate" style="font-size:14.5px;color:#0f172a">{{ cat.name }}</h3>
+            <p class="mt-0.5 truncate" style="font-size:12px;color:#94a3b8">{{ cat.description || 'No description' }}</p>
+          </div>
+          <div class="flex gap-0.5 flex-shrink-0">
+            <button (click)="openEdit(cat)"
+              class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
+              style="color:#94a3b8"
+              onmouseover="this.style.background='#fff7ed';this.style.color='#ea580c'"
+              onmouseout="this.style.background='';this.style.color='#94a3b8'">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            </button>
+            <button (click)="delete(cat.id)"
+              class="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
+              style="color:#94a3b8"
+              onmouseover="this.style.background='#fef2f2';this.style.color='#dc2626'"
+              onmouseout="this.style.background='';this.style.color='#94a3b8'">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
         </div>
-        <div class="flex gap-3 pt-2">
-          <button type="submit" [disabled]="saving" class="btn-primary flex-1">{{ saving ? 'Saving...' : 'Save' }}</button>
-          <button type="button" (click)="showForm = false" class="btn-secondary flex-1">Cancel</button>
-        </div>
-      </form>
+      </div>
     </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!categories.length" class="col-span-full">
+      <div class="empty-state card py-16">
+        <div class="empty-state-icon">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        </div>
+        <p class="empty-state-title">No categories yet</p>
+        <p class="empty-state-desc">Create your first category to start building your menu.</p>
+        <button (click)="openCreate()" class="btn-primary btn-sm">Create First Category</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Category Modal ── -->
+<div *ngIf="showForm" class="modal-backdrop">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingId ? 'Edit Category' : 'New Category' }}</p>
+      <button (click)="showForm=false" class="modal-close-btn">×</button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="modal-body space-y-4">
+
+        <!-- Image preview strip -->
+        <div *ngIf="form.get('image')?.value" class="rounded-xl overflow-hidden" style="height:100px">
+          <img [src]="form.get('image')?.value" class="w-full h-full object-cover" alt="Preview" />
+        </div>
+
+        <div class="form-group">
+          <label class="label">Category Name <span style="color:#dc2626">*</span></label>
+          <input formControlName="name" class="input-field" placeholder="e.g. Starters, Main Course">
+        </div>
+
+        <div class="form-group">
+          <label class="label">Description</label>
+          <textarea formControlName="description" class="input-field" rows="2" placeholder="Brief description of this category"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="label">Icon (Emoji)</label>
+          <input formControlName="icon" class="input-field" placeholder="🍕">
+        </div>
+
+        <!-- Image upload -->
+        <div class="form-group">
+          <label class="label">Category Image</label>
+          <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors"
+            style="border:1.5px dashed #e2e8f0;background:#f8fafc"
+            onmouseover="this.style.borderColor='#ea580c';this.style.background='#fff7ed'"
+            onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc'">
+            <div class="flex items-center justify-center w-9 h-9 rounded-lg" style="background:#fff;border:1px solid #e2e8f0">
+              <svg class="w-4 h-4" style="color:#94a3b8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <div>
+              <p style="font-size:13px;font-weight:500;color:#334155">{{ uploadingImage ? 'Uploading…' : 'Click to upload image' }}</p>
+              <p style="font-size:11.5px;color:#94a3b8">PNG, JPG up to 5 MB</p>
+            </div>
+            <input type="file" accept="image/*" (change)="onImageSelected($event)" class="hidden" [disabled]="uploadingImage" />
+          </label>
+        </div>
+
+        <!-- Active toggle -->
+        <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+          <input type="checkbox" formControlName="status" id="cat-active" class="w-4 h-4">
+          <label for="cat-active" style="font-size:13.5px;font-weight:500;color:#334155;cursor:pointer">Category is active and visible on the menu</label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" (click)="showForm=false" class="btn-secondary btn-sm">Cancel</button>
+        <button type="submit" [disabled]="saving || form.invalid" class="btn-primary btn-sm">
+          {{ saving ? 'Saving…' : (editingId ? 'Update Category' : 'Create Category') }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>

@@ -14,7 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ItemsController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const swagger_1 = require("@nestjs/swagger");
+const multer_1 = require("multer");
 const items_service_1 = require("./items.service");
 const jwt_auth_guard_1 = require("../../../common/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../../common/guards/roles.guard");
@@ -40,6 +42,23 @@ let ItemsController = class ItemsController {
     toggleStatus(id) { return this.itemsService.toggleStatus(id); }
     toggleFeatured(id) { return this.itemsService.toggleFeatured(id); }
     remove(id) { return this.itemsService.remove(id); }
+    restore(id) { return this.itemsService.restore(id); }
+    findArchived(search, categoryId, page, limit) {
+        return this.itemsService.findAllWithDeleted(search, categoryId, page, limit);
+    }
+    async exportExcel(res) {
+        return this.itemsService.exportExcel(res);
+    }
+    downloadSample(res) {
+        const csv = ['name,description,price,categoryId,itemType,caution,ingredients,calories,protein,carbs,fat,taxRate,isFeatured,status',
+            '"Sample Burger","Juicy beef burger",12.99,,non_veg,"Contains allergens","Beef, Lettuce, Tomato",450,30,35,18,5,false,true',
+        ].join('\n');
+        res.set({ 'Content-Type': 'text/csv', 'Content-Disposition': 'attachment; filename="items-import-sample.csv"' });
+        res.send(csv);
+    }
+    async importCsv(file) {
+        return this.itemsService.importFromCsv(file.buffer.toString('utf-8'));
+    }
 };
 exports.ItemsController = ItemsController;
 __decorate([
@@ -142,6 +161,60 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ItemsController.prototype, "remove", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)('admin/items/:id/restore'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ItemsController.prototype, "restore", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/items/archived'),
+    __param(0, (0, common_1.Query)('search')),
+    __param(1, (0, common_1.Query)('categoryId')),
+    __param(2, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
+    __param(3, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Number, Number]),
+    __metadata("design:returntype", void 0)
+], ItemsController.prototype, "findArchived", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/items/export/excel'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ItemsController.prototype, "exportExcel", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/items/export/sample'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ItemsController.prototype, "downloadSample", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)('admin/items/import'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', { storage: (0, multer_1.memoryStorage)() })),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ItemsController.prototype, "importCsv", null);
 exports.ItemsController = ItemsController = __decorate([
     (0, swagger_1.ApiTags)('Menu - Items'),
     (0, common_1.Controller)(),

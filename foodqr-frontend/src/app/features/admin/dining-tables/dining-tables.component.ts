@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { DiningTable } from '../../../core/models';
 
 @Component({ selector: 'app-dining-tables', templateUrl: './dining-tables.component.html' })
@@ -15,17 +16,20 @@ export class DiningTablesComponent implements OnInit {
   form: FormGroup;
   selectedQr: DiningTable | null = null;
 
-  constructor(private api: ApiService, private toastr: ToastrService, private fb: FormBuilder) {
+  constructor(private api: ApiService, private toastr: ToastrService, private fb: FormBuilder, private auth: AuthService) {
     this.form = this.fb.group({ name: ['', Validators.required], capacity: [4], waiterId: [''] });
   }
 
   ngOnInit(): void {
     this.load();
-    this.api.get<any>('admin/staff', { limit: 200 }).subscribe({
-      next: (res) => {
-        this.waiters = (res.data || []).filter((u: any) => u.role === 'waiter');
-      },
-    });
+    if (!this.auth.isWaiter) {
+      this.api.get<any>('admin/staff', { limit: 200 }).subscribe({
+        next: (res) => {
+          const list: any[] = Array.isArray(res) ? res : (res?.data || []);
+          this.waiters = list.filter((u: any) => u.role === 'waiter');
+        },
+      });
+    }
   }
 
   load(): void {

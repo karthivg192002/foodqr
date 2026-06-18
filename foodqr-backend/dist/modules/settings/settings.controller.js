@@ -14,15 +14,18 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SettingsController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const swagger_1 = require("@nestjs/swagger");
 const settings_service_1 = require("./settings.service");
+const upload_service_1 = require("../upload/upload.service");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../common/guards/roles.guard");
 const decorators_1 = require("../../common/decorators");
 const enums_1 = require("../../common/enums");
 let SettingsController = class SettingsController {
-    constructor(settingsService) {
+    constructor(settingsService, uploadService) {
         this.settingsService = settingsService;
+        this.uploadService = uploadService;
     }
     getAll(group) { return this.settingsService.getAll(group); }
     getCompany() { return this.settingsService.getCompanySettings(); }
@@ -68,6 +71,28 @@ let SettingsController = class SettingsController {
     getTheme() { return this.settingsService.getAll('theme'); }
     setTheme(settings) {
         return this.settingsService.setMany(settings, 'theme');
+    }
+    getOtp() { return this.settingsService.getAll('otp'); }
+    setOtp(settings) {
+        return this.settingsService.setMany(settings, 'otp');
+    }
+    getFirebase() { return this.settingsService.getAll('firebase'); }
+    setFirebase(settings) {
+        return this.settingsService.setMany(settings, 'firebase');
+    }
+    async uploadLogo(file) {
+        if (!file)
+            throw new common_1.BadRequestException('No file uploaded');
+        const url = this.uploadService.getFileUrl(file.filename);
+        await this.settingsService.setMany({ logo: url }, 'theme');
+        return { url };
+    }
+    async uploadFavicon(file) {
+        if (!file)
+            throw new common_1.BadRequestException('No file uploaded');
+        const url = this.uploadService.getFileUrl(file.filename);
+        await this.settingsService.setMany({ favicon: url }, 'theme');
+        return { url };
     }
     getPublic() { return this.settingsService.getPublicSettings(); }
 };
@@ -246,6 +271,56 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], SettingsController.prototype, "setTheme", null);
 __decorate([
+    (0, common_1.Get)('otp'),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], SettingsController.prototype, "getOtp", null);
+__decorate([
+    (0, common_1.Post)('otp'),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], SettingsController.prototype, "setOtp", null);
+__decorate([
+    (0, common_1.Get)('firebase'),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], SettingsController.prototype, "getFirebase", null);
+__decorate([
+    (0, common_1.Post)('firebase'),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], SettingsController.prototype, "setFirebase", null);
+__decorate([
+    (0, common_1.Post)('upload-logo'),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SettingsController.prototype, "uploadLogo", null);
+__decorate([
+    (0, common_1.Post)('upload-favicon'),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SettingsController.prototype, "uploadFavicon", null);
+__decorate([
     (0, decorators_1.Public)(),
     (0, common_1.Get)('public'),
     __metadata("design:type", Function),
@@ -257,6 +332,7 @@ exports.SettingsController = SettingsController = __decorate([
     (0, common_1.Controller)('admin/settings'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [settings_service_1.SettingsService])
+    __metadata("design:paramtypes", [settings_service_1.SettingsService,
+        upload_service_1.UploadService])
 ], SettingsController);
 //# sourceMappingURL=settings.controller.js.map

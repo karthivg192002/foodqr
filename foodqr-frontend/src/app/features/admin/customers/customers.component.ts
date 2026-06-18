@@ -16,8 +16,8 @@ export class CustomersComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.api.get<PaginatedResponse<User>>('admin/customers', { page: this.page, limit: 20, search: this.search }).subscribe({
-      next: (res) => { this.customers = res.data; this.total = res.total; this.loading = false; },
+    this.api.getPaginated<PaginatedResponse<User>>('admin/customers', { page: this.page, limit: 20, search: this.search }).subscribe({
+      next: (res) => { this.customers = res.data ?? []; this.total = res.total ?? 0; this.loading = false; },
       error: () => { this.loading = false; },
     });
     this.api.get<any>('admin/loyalty/segments').subscribe({

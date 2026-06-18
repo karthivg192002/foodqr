@@ -5,6 +5,8 @@ export declare class ItemExtra {
     item: Item;
     name: string;
     price: number;
+    maxQuantity: number;
+    isRequired: boolean;
     status: boolean;
     createdAt: Date;
 }

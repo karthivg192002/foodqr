@@ -1,4 +1,5 @@
 export enum UserRole {
+  SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
   CUSTOMER = 'customer',
   WAITER = 'waiter',
@@ -38,6 +39,7 @@ export enum PaymentMethod {
   FLUTTERWAVE = 'flutterwave',
   PAYTM = 'paytm',
   BKASH = 'bkash',
+  PAYSTACK = 'paystack',
 }
 
 export enum PaymentStatus {

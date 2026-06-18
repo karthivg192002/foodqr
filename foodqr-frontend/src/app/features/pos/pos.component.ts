@@ -54,7 +54,7 @@ export class PosComponent implements OnInit {
     if (this.search) params.search = this.search;
     if (this.selectedCategory) params.categoryId = this.selectedCategory;
     this.api.get<any>('frontend/items', params).subscribe({
-      next: (res) => { this.items = res.data || []; this.loading = false; },
+      next: (res) => { this.items = Array.isArray(res) ? res : (res.data ?? []); this.loading = false; },
       error: () => { this.loading = false; },
     });
   }

@@ -22,6 +22,12 @@ export class ItemExtra {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
+  @Column({ nullable: true, default: null })
+  maxQuantity: number;
+
+  @Column({ default: false })
+  isRequired: boolean;
+
   @Column({ default: true })
   status: boolean;
 

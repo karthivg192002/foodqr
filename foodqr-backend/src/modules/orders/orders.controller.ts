@@ -1,7 +1,8 @@
 import {
-  Controller, Get, Post, Patch, Body, Param, Query,
+  Controller, Get, Post, Patch, Body, Param, Query, Res,
   UseGuards, ParseUUIDPipe, DefaultValuePipe, ParseIntPipe, ParseFloatPipe, HttpCode, HttpStatus,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto/order.dto';
@@ -127,7 +128,7 @@ export class OrdersController {
   @ApiBearerAuth()
   @Get('staff/dashboard')
   getStaffDashboard(@CurrentUser() user: User) {
-    return this.ordersService.getStaffDashboard(user.id);
+    return this.ordersService.getStaffDashboardWithKds(user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -141,5 +142,52 @@ export class OrdersController {
     return this.ordersService.findOne(id).then((order) =>
       this.ordersService.posChangeCalc(Number(order.total), received),
     );
+  }
+
+  /** Assign or update the serving staff on a table order */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.WAITER)
+  @ApiBearerAuth()
+  @Patch('admin/orders/:id/staff')
+  changeOrderStaff(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { staffId: string },
+  ) {
+    return this.ordersService.changeOrderStaff(id, body.staffId);
+  }
+
+  /** Admin toggles payment status on any order */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  @ApiBearerAuth()
+  @Patch('admin/orders/:id/payment-status')
+  changePaymentStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { paymentStatus: string },
+  ) {
+    return this.ordersService.changePaymentStatus(id, body.paymentStatus as any);
+  }
+
+  /** Export dine-in (table) orders to Excel */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  @ApiBearerAuth()
+  @Get('admin/orders/export/dining-tables')
+  async exportTableOrders(@Res() res: Response) {
+    return this.ordersService.exportTableOrdersExcel(res);
+  }
+
+  /** POS-only orders view */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.POS_OPERATOR)
+  @ApiBearerAuth()
+  @Get('admin/pos/orders')
+  getPosOrders(
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
+  ) {
+    return this.ordersService.findAll({ status, search, page, limit, orderType: 'pos' });
   }
 }

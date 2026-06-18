@@ -46,6 +46,24 @@ export class LoyaltyService {
     return this.configRepo.save(config);
   }
 
+  async getConfiguration(id: string) {
+    const config = await this.configRepo.findOne({ where: { id }, relations: ['program'] });
+    if (!config) throw new NotFoundException('Configuration not found');
+    return config;
+  }
+
+  async updateConfiguration(id: string, data: Partial<LoyaltyConfiguration>) {
+    await this.getConfiguration(id);
+    await this.configRepo.update(id, data);
+    return this.getConfiguration(id);
+  }
+
+  async removeConfiguration(id: string) {
+    await this.getConfiguration(id);
+    await this.configRepo.delete(id);
+    return { message: 'Configuration deleted' };
+  }
+
   async getUserDashboard(userId: string) {
     const program = await this.getActiveProgram();
     if (!program) return { program: null, stamps: 0, rewards: [], nextRewardAt: null };

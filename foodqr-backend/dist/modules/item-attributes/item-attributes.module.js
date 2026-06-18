@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const item_attribute_entity_1 = require("./entities/item-attribute.entity");
 const item_category_attribute_entity_1 = require("./entities/item-category-attribute.entity");
+const item_variation_entity_1 = require("../menu/variations/entities/item-variation.entity");
 const item_attributes_service_1 = require("./item-attributes.service");
 const item_attributes_controller_1 = require("./item-attributes.controller");
 let ItemAttributesModule = class ItemAttributesModule {
@@ -18,7 +19,7 @@ let ItemAttributesModule = class ItemAttributesModule {
 exports.ItemAttributesModule = ItemAttributesModule;
 exports.ItemAttributesModule = ItemAttributesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([item_attribute_entity_1.ItemAttribute, item_category_attribute_entity_1.ItemCategoryAttribute])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([item_attribute_entity_1.ItemAttribute, item_category_attribute_entity_1.ItemCategoryAttribute, item_variation_entity_1.ItemVariation])],
         providers: [item_attributes_service_1.ItemAttributesService],
         controllers: [item_attributes_controller_1.ItemAttributesController],
         exports: [item_attributes_service_1.ItemAttributesService],

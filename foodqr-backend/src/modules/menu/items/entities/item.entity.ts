@@ -1,6 +1,6 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn,
-  UpdateDateColumn, ManyToOne, OneToMany, JoinColumn,
+  UpdateDateColumn, DeleteDateColumn, ManyToOne, OneToMany, JoinColumn,
 } from 'typeorm';
 import { ItemType } from '../../../../common/enums';
 import { ItemCategory } from '../../categories/entities/item-category.entity';
@@ -51,6 +51,9 @@ export class Item {
   @Column({ nullable: true })
   videoUrl: string;
 
+  @Column({ nullable: true })
+  arImage: string;
+
   @Column({ type: 'simple-array', nullable: true })
   gallery: string[];
 
@@ -89,4 +92,7 @@ export class Item {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

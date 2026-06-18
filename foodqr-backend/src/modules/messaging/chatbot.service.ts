@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Order } from '../orders/entities/order.entity';
 import { LoyaltyStamp } from '../loyalty/entities/loyalty-stamp.entity';
 import { LoyaltyProgram } from '../loyalty/entities/loyalty-program.entity';
+import { LoyaltyReward } from '../loyalty/entities/loyalty-reward.entity';
 import { Item } from '../menu/items/entities/item.entity';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class ChatbotService {
     @InjectRepository(Order) private orderRepo: Repository<Order>,
     @InjectRepository(LoyaltyStamp) private stampRepo: Repository<LoyaltyStamp>,
     @InjectRepository(LoyaltyProgram) private programRepo: Repository<LoyaltyProgram>,
+    @InjectRepository(LoyaltyReward) private rewardRepo: Repository<LoyaltyReward>,
     @InjectRepository(Item) private itemRepo: Repository<Item>,
   ) {}
 
@@ -21,6 +23,7 @@ export class ChatbotService {
     switch (intent) {
       case 'track_order': return this.handleOrderTracking(userId);
       case 'loyalty': return this.handleLoyalty(userId);
+      case 'redeem': return this.handleRedemption(userId);
       case 'recommend': return this.handleRecommendations();
       case 'wait_time': return this.handleWaitTime(userId);
       case 'hours': return { reply: 'Our restaurant is open daily from 10:00 AM to 11:00 PM. Happy to serve you!', type: 'hours' };
@@ -32,7 +35,8 @@ export class ChatbotService {
 
   private detectIntent(text: string): string {
     if (/\b(order|track|status|where|delivery)\b/.test(text)) return 'track_order';
-    if (/\b(stamp|loyalty|reward|points|redeem)\b/.test(text)) return 'loyalty';
+    if (/\b(redeem|use reward|claim reward|use my reward|use points)\b/.test(text)) return 'redeem';
+    if (/\b(stamp|loyalty|reward|points)\b/.test(text)) return 'loyalty';
     if (/\b(recommend|suggest|popular|best|favourite|try)\b/.test(text)) return 'recommend';
     if (/\b(wait|how long|time|queue)\b/.test(text)) return 'wait_time';
     if (/\b(hour|open|close|timing|schedule)\b/.test(text)) return 'hours';
@@ -53,6 +57,19 @@ export class ChatbotService {
       reply: `Your latest order #${order.orderSerialNo} is currently "${order.status}". ${this.statusDescription(order.status)}`,
       type: 'track_order',
     };
+  }
+
+  private async handleRedemption(userId: string) {
+    const reward = await this.rewardRepo.findOne({ where: { userId, isRedeemed: false }, order: { createdAt: 'ASC' } });
+    if (!reward) {
+      const program = await this.programRepo.findOne({ where: { isActive: true } });
+      if (!program) return { reply: "There is no active loyalty program right now.", type: 'redeem' };
+      const stamps = await this.stampRepo.sum('stampCount', { userId, loyaltyProgramId: program.id }) || 0;
+      const remaining = Math.max(0, program.requiredStamps - stamps);
+      return { reply: `You don't have any rewards to redeem yet. Collect ${remaining} more stamp(s) to earn your next reward!`, type: 'redeem' };
+    }
+    await this.rewardRepo.update(reward.id, { isRedeemed: true, redeemedAt: new Date() });
+    return { reply: '🎉 Your reward has been redeemed successfully! It will be applied to your next order. Enjoy!', type: 'redeem', rewardId: reward.id };
   }
 
   private async handleLoyalty(userId: string) {

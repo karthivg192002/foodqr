@@ -113,4 +113,19 @@ export class OffersService {
     await this.promoRepo.delete(id);
     return { message: 'Promotion banner deleted' };
   }
+
+  async exportOffersExcel(res: any) {
+    const offers = await this.getAllOffers();
+    const headers = ['Name', 'Discount Type', 'Discount', 'Min Order', 'Start Date', 'End Date', 'Status'];
+    const rows = offers.map((o: any) => [
+      o.name || '', o.discountType || '', o.discount || '0',
+      o.minOrderAmount || '0', o.startDate?.toString().split('T')[0] || '',
+      o.endDate?.toString().split('T')[0] || '', o.status ? 'Active' : 'Inactive',
+    ]);
+    const ths = headers.map((h) => `<th style="background:#f97316;color:white;padding:6px 10px;border:1px solid #ddd">${h}</th>`).join('');
+    const trs = rows.map((r) => `<tr>${r.map((c) => `<td style="padding:5px 10px;border:1px solid #ddd">${c ?? ''}</td>`).join('')}</tr>`).join('');
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><h2>Offers</h2><table border="1"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></body></html>`;
+    res.set({ 'Content-Type': 'application/vnd.ms-excel', 'Content-Disposition': 'attachment; filename="offers.xls"' });
+    res.send(html);
+  }
 }

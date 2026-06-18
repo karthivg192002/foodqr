@@ -40,6 +40,9 @@ export class DiningTable {
   @Column({ nullable: true })
   qrImageUrl: string;
 
+  @Column({ nullable: true })
+  accessToken: string;
+
   @Column({ type: 'enum', enum: TableStatus, default: TableStatus.AVAILABLE })
   status: TableStatus;
 

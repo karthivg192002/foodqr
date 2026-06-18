@@ -90,6 +90,28 @@ export class ReportsController {
     return this.reportsService.getQrRevenueSummary(startDate, endDate);
   }
 
+  @Get('customer-states')
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  getCustomerStates(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+    return this.reportsService.getCustomerStates(startDate, endDate);
+  }
+
+  @Get('peak-orders-bar-chart')
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  getPeakOrdersBarChart(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+    return this.reportsService.getPeakOrdersBarChart(startDate, endDate);
+  }
+
+  /** Sales report KPI overview */
+  @Get('sales-overview')
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  getSalesOverview(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.reportsService.getSalesOverview(startDate, endDate);
+  }
+
   @Get('export/sales')
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
   async exportSales(
@@ -105,7 +127,7 @@ export class ReportsController {
 
   @Get('export/items')
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
-  async exportItems(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string, @Res() res: Response) {
+  async exportItems(@Query('startDate') startDate: string, @Query('endDate') endDate: string, @Res() res: Response) {
     const data = await this.reportsService.getItemsReport(startDate, endDate);
     const csv = ['Item,Category,Quantity Sold,Revenue,Avg Price', ...data.map((r: any) => `"${r.itemname}","${r.categoryname || ''}",${r.totalquantity},${r.totalrevenue},${r.avgprice}`)].join('\n');
     res.set({ 'Content-Type': 'text/csv', 'Content-Disposition': 'attachment; filename="items-report.csv"' });

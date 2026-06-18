@@ -1,26 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
-
-const ROLES = ['admin', 'branch_manager', 'waiter', 'chef', 'staff', 'pos_operator', 'customer'];
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'Admin',
-  branch_manager: 'Branch Manager',
-  waiter: 'Waiter',
-  chef: 'Chef',
-  staff: 'Staff',
-  pos_operator: 'POS Operator',
-  customer: 'Customer',
-};
-const ROLE_COLORS: Record<string, string> = {
-  admin: 'bg-purple-100 text-purple-800',
-  branch_manager: 'bg-blue-100 text-blue-800',
-  waiter: 'bg-green-100 text-green-800',
-  chef: 'bg-yellow-100 text-yellow-800',
-  staff: 'bg-gray-100 text-gray-700',
-  pos_operator: 'bg-indigo-100 text-indigo-800',
-  customer: 'bg-orange-100 text-orange-800',
-};
+import { RolesService } from '../../../core/services/roles.service';
 
 @Component({
   selector: 'app-roles-permissions',
@@ -30,21 +11,19 @@ export class RolesPermissionsComponent implements OnInit {
   staff: any[] = [];
   loading = false;
   saving: Record<string, boolean> = {};
-  roles = ROLES;
-  roleLabels = ROLE_LABELS;
-  roleColors = ROLE_COLORS;
+  roles: string[] = [];
   search = '';
 
-  constructor(private api: ApiService, private toastr: ToastrService) {}
-
-  roleDescriptions: Record<string, string> = {};
+  constructor(
+    private api: ApiService,
+    private toastr: ToastrService,
+    private rolesService: RolesService,
+  ) {}
 
   ngOnInit(): void {
-    // Load role definitions from backend
-    this.api.get<any>('admin/roles').subscribe({
-      next: (res) => {
-        (res.roles || []).forEach((r: any) => { this.roleDescriptions[r.value] = r.description; });
-      },
+    this.rolesService.load();
+    this.rolesService.roles$.subscribe((roles) => {
+      this.roles = roles.map((r) => r.name);
     });
     this.load();
   }
@@ -62,7 +41,7 @@ export class RolesPermissionsComponent implements OnInit {
     this.api.patch(`admin/users/${user.id}/role`, { role: newRole }).subscribe({
       next: () => {
         user.role = newRole;
-        this.toastr.success(`Role updated to ${ROLE_LABELS[newRole]}`);
+        this.toastr.success(`Role updated to ${this.roleLabel(newRole)}`);
         this.saving[user.id] = false;
       },
       error: () => { this.saving[user.id] = false; },
@@ -75,6 +54,6 @@ export class RolesPermissionsComponent implements OnInit {
     });
   }
 
-  roleLabel(role: string): string { return ROLE_LABELS[role] || role; }
-  roleClass(role: string): string { return ROLE_COLORS[role] || 'bg-gray-100 text-gray-700'; }
+  roleLabel(role: string): string { return this.rolesService.getLabel(role); }
+  roleClass(role: string): string { return this.rolesService.getClass(role); }
 }

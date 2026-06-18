@@ -12,6 +12,7 @@ import { Offer } from '../offers/entities/offer.entity';
 import { OfferItem } from '../offers/entities/offer-item.entity';
 import { AppSetting } from '../settings/entities/app-setting.entity';
 import { LoyaltyStamp } from '../loyalty/entities/loyalty-stamp.entity';
+import { LoyaltyProgram } from '../loyalty/entities/loyalty-program.entity';
 import { TimeSlotsService } from '../time-slots/time-slots.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EventsService } from '../events/events.service';
@@ -32,6 +33,7 @@ export class OrdersService {
     @InjectRepository(OfferItem) private offerItemRepo: Repository<OfferItem>,
     @InjectRepository(AppSetting) private settingRepo: Repository<AppSetting>,
     @InjectRepository(LoyaltyStamp) private stampRepo: Repository<LoyaltyStamp>,
+    @InjectRepository(LoyaltyProgram) private loyaltyProgramRepo: Repository<LoyaltyProgram>,
     private timeSlotsService: TimeSlotsService,
     private notificationsService: NotificationsService,
     private eventsService: EventsService,
@@ -106,6 +108,9 @@ export class OrdersService {
   }
 
   private async awardLoyaltyStamps(userId: string, orderId: string, orderAmount: number) {
+    const program = await this.loyaltyProgramRepo.findOne({ where: { isActive: true } });
+    if (!program) return;
+
     const [minAmountStr, stampsPerOrderStr, stampsPerAmountStr, thresholdStr] = await Promise.all([
       this.getSetting('loyalty_min_order_amount', '0'),
       this.getSetting('loyalty_stamps_per_order', '1'),
@@ -126,7 +131,9 @@ export class OrdersService {
       await this.stampRepo.save(
         this.stampRepo.create({
           userId,
+          orderId,
           sourceId: orderId,
+          loyaltyProgramId: program.id,
           stampCount: stamps,
           metadata: { source: 'order', orderId },
         } as any),
@@ -245,6 +252,7 @@ export class OrdersService {
       deliveryCharge,
       totalTax,
       total,
+      posReceivedAmount: dto.posReceivedAmount ?? 0,
     });
 
     const savedOrder = await this.orderRepo.save(order);
@@ -533,5 +541,82 @@ export class OrdersService {
   posChangeCalc(total: number, received: number): { change: number; sufficient: boolean } {
     const change = received - total;
     return { change: Math.max(0, change), sufficient: received >= total };
+  }
+
+  async changeOrderStaff(orderId: string, staffId: string) {
+    await this.findOne(orderId);
+    const staff = await this.userRepo.findOne({ where: { id: staffId } });
+    if (!staff) throw new NotFoundException('Staff member not found');
+    await this.orderRepo.update(orderId, { staffId } as any);
+    return this.findOne(orderId);
+  }
+
+  async changePaymentStatus(orderId: string, paymentStatus: PaymentStatus) {
+    await this.findOne(orderId);
+    await this.orderRepo.update(orderId, { paymentStatus });
+    return this.findOne(orderId);
+  }
+
+  async exportTableOrdersExcel(res: any) {
+    const orders = await this.orderRepo.find({
+      where: { orderType: OrderType.DINING_TABLE as any },
+      relations: ['user', 'diningTable', 'items'],
+      order: { createdAt: 'DESC' },
+    });
+
+    const rows = orders.map((o) => [
+      o.orderSerialNo,
+      o.diningTable?.name || '',
+      o.user?.name || 'Guest',
+      o.status,
+      o.paymentStatus,
+      o.paymentMethod,
+      Number(o.total).toFixed(2),
+      o.createdAt?.toISOString().split('T')[0] || '',
+    ]);
+
+    const headers = ['Order #', 'Table', 'Customer', 'Status', 'Payment Status', 'Payment Method', 'Total', 'Date'];
+    const ths = headers.map((h) => `<th style="background:#f97316;color:white;padding:6px 10px;border:1px solid #ddd">${h}</th>`).join('');
+    const trs = rows.map((r) => `<tr>${r.map((c) => `<td style="padding:5px 10px;border:1px solid #ddd">${c}</td>`).join('')}</tr>`).join('');
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><h2>Dine-In Orders</h2><table border="1"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></body></html>`;
+
+    res.set({ 'Content-Type': 'application/vnd.ms-excel', 'Content-Disposition': 'attachment; filename="dining-table-orders.xls"' });
+    res.send(html);
+  }
+
+  async getStaffDashboardWithKds(staffId: string) {
+    const base = await this.getStaffDashboard(staffId);
+
+    const kdsOrders = await this.orderRepo.find({
+      where: { status: OrderStatus.ACCEPTED as any },
+      relations: ['items', 'items.item', 'diningTable'],
+      order: { createdAt: 'ASC' },
+      take: 30,
+    });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const [todayOrderCount, todayRevenue] = await Promise.all([
+      this.orderRepo.count({ where: { staffId, createdAt: today } as any }),
+      this.orderRepo
+        .createQueryBuilder('order')
+        .where('order.staffId = :staffId', { staffId })
+        .andWhere('order.createdAt BETWEEN :start AND :end', { start: today, end: tomorrow })
+        .andWhere('order.paymentStatus = :ps', { ps: PaymentStatus.PAID })
+        .select('SUM(order.total)', 'total')
+        .getRawOne(),
+    ]);
+
+    return {
+      ...base,
+      kdsOrders,
+      todayStats: {
+        orderCount: todayOrderCount,
+        revenue: parseFloat(todayRevenue?.total || '0'),
+      },
+    };
   }
 }

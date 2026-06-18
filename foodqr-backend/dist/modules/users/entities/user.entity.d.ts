@@ -22,6 +22,10 @@ export declare class User {
     otpExpiry: Date;
     resetPasswordToken: string;
     resetPasswordExpiry: Date;
+    phoneOtpCode: string;
+    phoneOtpExpiry: Date;
+    dietaryPreferences: string[];
+    cuisinePreferences: string[];
     createdAt: Date;
     updatedAt: Date;
     deletedAt: Date;

@@ -17,9 +17,11 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
 const messaging_service_1 = require("./messaging.service");
+const chatbot_service_1 = require("./chatbot.service");
 let MessagingController = class MessagingController {
-    constructor(service) {
+    constructor(service, chatbot) {
         this.service = service;
+        this.chatbot = chatbot;
     }
     getThreadsForBranch(branchId) {
         return this.service.getThreadsForBranch(branchId);
@@ -32,6 +34,9 @@ let MessagingController = class MessagingController {
         return this.service.sendMessage(id, req.user.sub, body.text);
     }
     markRead(id) { return this.service.markRead(id); }
+    askChatbot(req, body) {
+        return this.chatbot.respond(req.user.sub, body.message);
+    }
 };
 exports.MessagingController = MessagingController;
 __decorate([
@@ -72,11 +77,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], MessagingController.prototype, "markRead", null);
+__decorate([
+    (0, common_1.Post)('chatbot'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], MessagingController.prototype, "askChatbot", null);
 exports.MessagingController = MessagingController = __decorate([
     (0, swagger_1.ApiTags)('Messaging'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('messaging'),
-    __metadata("design:paramtypes", [messaging_service_1.MessagingService])
+    __metadata("design:paramtypes", [messaging_service_1.MessagingService,
+        chatbot_service_1.ChatbotService])
 ], MessagingController);
 //# sourceMappingURL=messaging.controller.js.map

@@ -15,17 +15,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OssController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const rxjs_1 = require("rxjs");
+const operators_1 = require("rxjs/operators");
 const oss_service_1 = require("./oss.service");
+const orders_service_1 = require("../orders/orders.service");
+const events_service_1 = require("../events/events.service");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../common/guards/roles.guard");
 const decorators_1 = require("../../common/decorators");
 const enums_1 = require("../../common/enums");
 let OssController = class OssController {
-    constructor(ossService) {
+    constructor(ossService, ordersService, eventsService) {
         this.ossService = ossService;
+        this.ordersService = ordersService;
+        this.eventsService = eventsService;
     }
     getOrders(branchId) {
         return this.ossService.getOssOrders(branchId);
+    }
+    getPopularItems(branchId) {
+        return this.ordersService.getOssPopularItems(branchId);
+    }
+    stream(branchId) {
+        return this.eventsService.stream(branchId).pipe((0, operators_1.map)((event) => ({ data: JSON.stringify(event) })));
     }
 };
 exports.OssController = OssController;
@@ -37,11 +49,29 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], OssController.prototype, "getOrders", null);
+__decorate([
+    (0, common_1.Get)('popular-items'),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER, enums_1.UserRole.STAFF),
+    __param(0, (0, common_1.Query)('branchId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], OssController.prototype, "getPopularItems", null);
+__decorate([
+    (0, common_1.Sse)('stream'),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER, enums_1.UserRole.STAFF),
+    __param(0, (0, common_1.Query)('branchId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", rxjs_1.Observable)
+], OssController.prototype, "stream", null);
 exports.OssController = OssController = __decorate([
     (0, swagger_1.ApiTags)('OSS - Order Status Screen'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, common_1.Controller)('admin/oss'),
-    __metadata("design:paramtypes", [oss_service_1.OssService])
+    __metadata("design:paramtypes", [oss_service_1.OssService,
+        orders_service_1.OrdersService,
+        events_service_1.EventsService])
 ], OssController);
 //# sourceMappingURL=oss.controller.js.map

@@ -1,11 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { IsString, IsNumber, IsBoolean, IsOptional, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ItemExtra } from './entities/item-extra.entity';
 
 export class CreateItemExtraDto {
+  @IsString()
   name: string;
+
+  @IsNumber() @Type(() => Number)
   price: number;
+
+  @IsNumber() @IsOptional() @Min(1) @Type(() => Number)
+  maxQuantity?: number;
+
+  @IsBoolean() @IsOptional()
+  isRequired?: boolean;
+
+  @IsBoolean() @IsOptional()
   status?: boolean;
 }
 

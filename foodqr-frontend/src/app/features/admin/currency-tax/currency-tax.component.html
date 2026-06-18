@@ -1,232 +1,219 @@
-<div>
+﻿<div class="space-y-5 fade-in-up">
+
   <!-- Page header -->
-  <div class="flex items-center justify-between mb-6">
+  <div class="page-header">
     <div>
       <h1 class="page-title">Currency & Tax</h1>
-      <p class="text-sm text-gray-500 mt-1">Configure currencies and tax rates for your restaurant</p>
+      <p class="page-subtitle">Configure currencies and tax rates for your restaurant platform</p>
     </div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="flex gap-1 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
-    <button (click)="activeTab = 'currencies'"
-      [class]="activeTab === 'currencies' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'"
-      class="px-5 py-2 rounded-lg text-sm font-medium transition-all">
-      Currencies
+    <button *ngIf="activeTab==='currencies'" (click)="openCreateCurrency()" class="btn-primary btn-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Add Currency
     </button>
-    <button (click)="activeTab = 'taxes'"
-      [class]="activeTab === 'taxes' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'"
-      class="px-5 py-2 rounded-lg text-sm font-medium transition-all">
-      Tax Rates
+    <button *ngIf="activeTab==='taxes'" (click)="openCreateTax()" class="btn-primary btn-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Add Tax Rate
     </button>
   </div>
 
-  <!-- ═══ CURRENCIES TAB ═══ -->
-  <div *ngIf="activeTab === 'currencies'">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="section-title">Currencies</h2>
-      <button (click)="openCreateCurrency()" class="btn-primary flex items-center gap-2 text-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        Add Currency
-      </button>
-    </div>
-
-    <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
-      <table class="w-full">
-        <thead class="bg-gray-50 border-b border-gray-200">
-          <tr>
-            <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Currency</th>
-            <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Code</th>
-            <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Symbol</th>
-            <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Exchange Rate</th>
-            <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="text-right px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let c of currencies" class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-2">
-                <span class="font-semibold text-gray-900 text-sm">{{ c.name }}</span>
-                <span *ngIf="c.isDefault" class="badge-info">Default</span>
-              </div>
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-600 font-mono">{{ c.code }}</td>
-            <td class="px-6 py-4 text-sm text-gray-600 font-mono">{{ c.symbol }}</td>
-            <td class="px-6 py-4 text-sm text-gray-600">{{ c.exchangeRate | number:'1.4-4' }}</td>
-            <td class="px-6 py-4">
-              <span [class]="c.status ? 'badge-success' : 'badge-danger'">{{ c.status ? 'Active' : 'Inactive' }}</span>
-            </td>
-            <td class="px-6 py-4">
-              <div class="flex items-center justify-end gap-2">
-                <button *ngIf="!c.isDefault" (click)="setDefaultCurrency(c.id)"
-                  class="text-xs text-blue-600 hover:text-blue-800 font-medium px-2.5 py-1 rounded-lg hover:bg-blue-50 transition-colors">Set Default</button>
-                <button (click)="openEditCurrency(c)"
-                  class="text-xs text-gray-600 hover:text-gray-900 font-medium px-2.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">Edit</button>
-                <button (click)="deleteCurrency(c.id)"
-                  class="text-xs text-red-600 hover:text-red-800 font-medium px-2.5 py-1 rounded-lg hover:bg-red-50 transition-colors">Delete</button>
-              </div>
-            </td>
-          </tr>
-          <tr *ngIf="currencies.length === 0">
-            <td colspan="6" class="px-6 py-12 text-center text-gray-400 text-sm">No currencies configured yet.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <!-- Tab pills -->
+  <div class="tab-bar">
+    <button (click)="activeTab='currencies'" [class.active]="activeTab==='currencies'">Currencies</button>
+    <button (click)="activeTab='taxes'" [class.active]="activeTab==='taxes'">Tax Rates</button>
   </div>
 
-  <!-- ═══ TAXES TAB ═══ -->
-  <div *ngIf="activeTab === 'taxes'">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="section-title">Tax Rates</h2>
-      <button (click)="openCreateTax()" class="btn-primary flex items-center gap-2 text-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        Add Tax Rate
-      </button>
-    </div>
+  <!-- ── CURRENCIES ── -->
+  <div *ngIf="activeTab==='currencies'" class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Currency</th>
+          <th>Code</th>
+          <th>Symbol</th>
+          <th style="text-align:right">Exchange Rate</th>
+          <th style="text-align:center">Status</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of currencies">
+          <td>
+            <div class="flex items-center gap-2">
+              <span style="font-size:13.5px;font-weight:600;color:#0f172a">{{ c.name }}</span>
+              <span *ngIf="c.isDefault" class="badge-orange badge-plain">Default</span>
+            </div>
+          </td>
+          <td><span class="font-mono" style="font-size:13px;color:#334155">{{ c.code }}</span></td>
+          <td><span class="font-mono" style="font-size:13px;color:#334155">{{ c.symbol }}</span></td>
+          <td style="text-align:right;font-size:13px;color:#334155">{{ c.exchangeRate | number:'1.4-4' }}</td>
+          <td style="text-align:center">
+            <span [class]="c.status ? 'badge-success' : 'badge-danger'">{{ c.status ? 'Active' : 'Inactive' }}</span>
+          </td>
+          <td style="text-align:right">
+            <div class="flex items-center justify-end gap-1">
+              <button *ngIf="!c.isDefault" (click)="setDefaultCurrency(c.id)" class="action-link action-link-blue">Set Default</button>
+              <button (click)="openEditCurrency(c)" class="action-link action-link-gray">Edit</button>
+              <button (click)="deleteCurrency(c.id)" class="action-link action-link-danger">Delete</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="currencies.length===0">
+          <td colspan="6">
+            <div class="empty-state">
+              <div class="empty-state-icon">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <p class="empty-state-title">No currencies configured</p>
+              <p class="empty-state-desc">Add your first currency to enable multi-currency support.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-    <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
-      <table class="w-full">
-        <thead class="bg-gray-50 border-b border-gray-200">
-          <tr>
-            <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tax Name</th>
-            <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Rate</th>
-            <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-            <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="text-right px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let t of taxes" class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-2">
-                <span class="font-semibold text-gray-900 text-sm">{{ t.name }}</span>
-                <span *ngIf="t.isDefault" class="badge-info">Default</span>
+  <!-- ── TAXES ── -->
+  <div *ngIf="activeTab==='taxes'" class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Tax Name</th>
+          <th style="text-align:right">Rate</th>
+          <th>Type</th>
+          <th style="text-align:center">Status</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of taxes">
+          <td>
+            <div class="flex items-center gap-2">
+              <span style="font-size:13.5px;font-weight:600;color:#0f172a">{{ t.name }}</span>
+              <span *ngIf="t.isDefault" class="badge-orange badge-plain">Default</span>
+            </div>
+          </td>
+          <td style="text-align:right;font-size:14px;font-weight:700;color:#0f172a">
+            {{ t.rate }}{{ t.type==='percentage' ? '%' : '' }}
+          </td>
+          <td style="font-size:13px;color:#64748b;text-transform:capitalize">{{ t.type }}</td>
+          <td style="text-align:center">
+            <span [class]="t.status ? 'badge-success' : 'badge-danger'">{{ t.status ? 'Active' : 'Inactive' }}</span>
+          </td>
+          <td style="text-align:right">
+            <div class="flex items-center justify-end gap-1">
+              <button *ngIf="!t.isDefault" (click)="setDefaultTax(t.id)" class="action-link action-link-blue">Set Default</button>
+              <button (click)="openEditTax(t)" class="action-link action-link-gray">Edit</button>
+              <button (click)="deleteTax(t.id)" class="action-link action-link-danger">Delete</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="taxes.length===0">
+          <td colspan="5">
+            <div class="empty-state">
+              <div class="empty-state-icon">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
               </div>
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-700 font-semibold">
-              {{ t.rate }}{{ t.type === 'percentage' ? '%' : '' }}
-            </td>
-            <td class="px-6 py-4 text-sm text-gray-600 capitalize">{{ t.type }}</td>
-            <td class="px-6 py-4">
-              <span [class]="t.status ? 'badge-success' : 'badge-danger'">{{ t.status ? 'Active' : 'Inactive' }}</span>
-            </td>
-            <td class="px-6 py-4">
-              <div class="flex items-center justify-end gap-2">
-                <button *ngIf="!t.isDefault" (click)="setDefaultTax(t.id)"
-                  class="text-xs text-blue-600 hover:text-blue-800 font-medium px-2.5 py-1 rounded-lg hover:bg-blue-50 transition-colors">Set Default</button>
-                <button (click)="openEditTax(t)"
-                  class="text-xs text-gray-600 hover:text-gray-900 font-medium px-2.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">Edit</button>
-                <button (click)="deleteTax(t.id)"
-                  class="text-xs text-red-600 hover:text-red-800 font-medium px-2.5 py-1 rounded-lg hover:bg-red-50 transition-colors">Delete</button>
-              </div>
-            </td>
-          </tr>
-          <tr *ngIf="taxes.length === 0">
-            <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">No tax rates configured yet.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+              <p class="empty-state-title">No tax rates configured</p>
+              <p class="empty-state-desc">Add tax rates to apply them to menu items and orders.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
-<!-- ═══ Currency Modal ═══ -->
-<div *ngIf="showCurrencyModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-    <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-      <h2 class="text-lg font-bold text-gray-900">{{ editingCurrencyId ? 'Edit Currency' : 'Add Currency' }}</h2>
-      <button (click)="showCurrencyModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
+<!-- ── Currency Modal ── -->
+<div *ngIf="showCurrencyModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingCurrencyId ? 'Edit Currency' : 'Add Currency' }}</p>
+      <button (click)="showCurrencyModal=false" class="modal-close-btn">×</button>
     </div>
-    <form [formGroup]="currencyForm" (ngSubmit)="saveCurrency()" class="px-6 py-5 space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Currency Name *</label>
-        <input formControlName="name" class="input-field" placeholder="US Dollar">
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Code *</label>
-          <input formControlName="code" class="input-field" placeholder="USD">
+    <form [formGroup]="currencyForm" (ngSubmit)="saveCurrency()">
+      <div class="modal-body space-y-4">
+        <div class="form-group">
+          <label class="label">Currency Name <span style="color:#dc2626">*</span></label>
+          <input formControlName="name" class="input-field" placeholder="US Dollar">
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Symbol *</label>
-          <input formControlName="symbol" class="input-field" placeholder="$">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Code <span style="color:#dc2626">*</span></label>
+            <input formControlName="code" class="input-field font-mono" placeholder="USD">
+          </div>
+          <div class="form-group">
+            <label class="label">Symbol <span style="color:#dc2626">*</span></label>
+            <input formControlName="symbol" class="input-field font-mono" placeholder="$">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label">Exchange Rate</label>
+          <input formControlName="exchangeRate" type="number" step="0.0001" class="input-field" placeholder="1.0000">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+            <input type="checkbox" formControlName="isDefault" id="currDefault" class="w-4 h-4">
+            <label for="currDefault" style="font-size:13px;font-weight:500;color:#334155;cursor:pointer">Set as Default</label>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+            <input type="checkbox" formControlName="status" id="currStatus" class="w-4 h-4">
+            <label for="currStatus" style="font-size:13px;font-weight:500;color:#334155;cursor:pointer">Active</label>
+          </div>
         </div>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Exchange Rate</label>
-        <input formControlName="exchangeRate" type="number" step="0.0001" class="input-field" placeholder="1.0000">
-      </div>
-      <div class="flex items-center gap-6">
-        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-          <input type="checkbox" formControlName="isDefault" class="w-4 h-4 accent-orange-500">
-          Set as Default
-        </label>
-        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-          <input type="checkbox" formControlName="status" class="w-4 h-4 accent-orange-500">
-          Active
-        </label>
+      <div class="modal-footer">
+        <button type="button" (click)="showCurrencyModal=false" class="btn-secondary btn-sm">Cancel</button>
+        <button type="submit" [disabled]="saving" class="btn-primary btn-sm">
+          {{ saving ? 'Saving…' : (editingCurrencyId ? 'Update' : 'Create') }}
+        </button>
       </div>
     </form>
-    <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
-      <button (click)="showCurrencyModal = false" class="btn-secondary">Cancel</button>
-      <button (click)="saveCurrency()" [disabled]="saving" class="btn-primary">
-        {{ saving ? 'Saving...' : (editingCurrencyId ? 'Update' : 'Create') }}
-      </button>
-    </div>
   </div>
 </div>
 
-<!-- ═══ Tax Modal ═══ -->
-<div *ngIf="showTaxModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-    <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-      <h2 class="text-lg font-bold text-gray-900">{{ editingTaxId ? 'Edit Tax Rate' : 'Add Tax Rate' }}</h2>
-      <button (click)="showTaxModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
+<!-- ── Tax Modal ── -->
+<div *ngIf="showTaxModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingTaxId ? 'Edit Tax Rate' : 'Add Tax Rate' }}</p>
+      <button (click)="showTaxModal=false" class="modal-close-btn">×</button>
     </div>
-    <form [formGroup]="taxForm" (ngSubmit)="saveTax()" class="px-6 py-5 space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Tax Name *</label>
-        <input formControlName="name" class="input-field" placeholder="VAT">
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Rate (%)*</label>
-          <input formControlName="rate" type="number" step="0.01" class="input-field" placeholder="10">
+    <form [formGroup]="taxForm" (ngSubmit)="saveTax()">
+      <div class="modal-body space-y-4">
+        <div class="form-group">
+          <label class="label">Tax Name <span style="color:#dc2626">*</span></label>
+          <input formControlName="name" class="input-field" placeholder="VAT">
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-          <select formControlName="type" class="input-field">
-            <option value="percentage">Percentage</option>
-            <option value="fixed">Fixed</option>
-          </select>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Rate <span style="color:#dc2626">*</span></label>
+            <input formControlName="rate" type="number" step="0.01" class="input-field" placeholder="10">
+          </div>
+          <div class="form-group">
+            <label class="label">Type</label>
+            <select formControlName="type" class="input-field">
+              <option value="percentage">Percentage</option>
+              <option value="fixed">Fixed</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+            <input type="checkbox" formControlName="isDefault" id="taxDefault" class="w-4 h-4">
+            <label for="taxDefault" style="font-size:13px;font-weight:500;color:#334155;cursor:pointer">Set as Default</label>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+            <input type="checkbox" formControlName="status" id="taxStatus" class="w-4 h-4">
+            <label for="taxStatus" style="font-size:13px;font-weight:500;color:#334155;cursor:pointer">Active</label>
+          </div>
         </div>
       </div>
-      <div class="flex items-center gap-6">
-        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-          <input type="checkbox" formControlName="isDefault" class="w-4 h-4 accent-orange-500">
-          Set as Default
-        </label>
-        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-          <input type="checkbox" formControlName="status" class="w-4 h-4 accent-orange-500">
-          Active
-        </label>
+      <div class="modal-footer">
+        <button type="button" (click)="showTaxModal=false" class="btn-secondary btn-sm">Cancel</button>
+        <button type="submit" [disabled]="saving" class="btn-primary btn-sm">
+          {{ saving ? 'Saving…' : (editingTaxId ? 'Update' : 'Create') }}
+        </button>
       </div>
     </form>
-    <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
-      <button (click)="showTaxModal = false" class="btn-secondary">Cancel</button>
-      <button (click)="saveTax()" [disabled]="saving" class="btn-primary">
-        {{ saving ? 'Saving...' : (editingTaxId ? 'Update' : 'Create') }}
-      </button>
-    </div>
   </div>
 </div>

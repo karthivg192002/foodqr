@@ -27,10 +27,14 @@ const offer_entity_1 = require("../offers/entities/offer.entity");
 const offer_item_entity_1 = require("../offers/entities/offer-item.entity");
 const app_setting_entity_1 = require("../settings/entities/app-setting.entity");
 const loyalty_stamp_entity_1 = require("../loyalty/entities/loyalty-stamp.entity");
+const loyalty_program_entity_1 = require("../loyalty/entities/loyalty-program.entity");
 const time_slots_service_1 = require("../time-slots/time-slots.service");
+const notifications_service_1 = require("../notifications/notifications.service");
+const events_service_1 = require("../events/events.service");
+const delivery_zones_service_1 = require("../delivery-zones/delivery-zones.service");
 const enums_1 = require("../../common/enums");
 let OrdersService = class OrdersService {
-    constructor(orderRepo, orderItemRepo, orderAddressRepo, itemRepo, variationRepo, userRepo, offerRepo, offerItemRepo, settingRepo, stampRepo, timeSlotsService) {
+    constructor(orderRepo, orderItemRepo, orderAddressRepo, itemRepo, variationRepo, userRepo, offerRepo, offerItemRepo, settingRepo, stampRepo, loyaltyProgramRepo, timeSlotsService, notificationsService, eventsService, deliveryZonesService) {
         this.orderRepo = orderRepo;
         this.orderItemRepo = orderItemRepo;
         this.orderAddressRepo = orderAddressRepo;
@@ -41,13 +45,24 @@ let OrdersService = class OrdersService {
         this.offerItemRepo = offerItemRepo;
         this.settingRepo = settingRepo;
         this.stampRepo = stampRepo;
+        this.loyaltyProgramRepo = loyaltyProgramRepo;
         this.timeSlotsService = timeSlotsService;
+        this.notificationsService = notificationsService;
+        this.eventsService = eventsService;
+        this.deliveryZonesService = deliveryZonesService;
     }
     async getSetting(key, defaultValue = '0') {
         const s = await this.settingRepo.findOne({ where: { key } });
         return s?.value ?? defaultValue;
     }
-    async calculateDeliveryCharge(distanceKm) {
+    async calculateDeliveryCharge(distanceKm, destLat, destLng, branchId) {
+        if (this.deliveryZonesService && destLat != null && destLng != null) {
+            const zone = await this.deliveryZonesService.findZoneForPoint(destLat, destLng, branchId);
+            if (zone) {
+                const km = distanceKm ?? 0;
+                return Number(zone.baseCharge) + km * Number(zone.perKmCharge);
+            }
+        }
         const [freeKm, basicCharge, perKmCharge] = await Promise.all([
             this.getSetting('delivery_free_km', '0'),
             this.getSetting('delivery_basic_charge', '0'),
@@ -69,6 +84,8 @@ let OrdersService = class OrdersService {
             return { discount: 0, offerId: null };
         if (offer.endDate && offer.endDate < now)
             return { discount: 0, offerId: null };
+        if (offer.minOrderAmount && subtotal < Number(offer.minOrderAmount))
+            return { discount: 0, offerId: null };
         const offerItems = await this.offerItemRepo.find({ where: { offerId: offer.id } });
         if (offerItems.length > 0) {
             const qualifiedIds = new Set(offerItems.map((oi) => oi.itemId));
@@ -84,6 +101,9 @@ let OrdersService = class OrdersService {
         return { discount: Math.min(discount, subtotal), offerId: offer.id };
     }
     async awardLoyaltyStamps(userId, orderId, orderAmount) {
+        const program = await this.loyaltyProgramRepo.findOne({ where: { isActive: true } });
+        if (!program)
+            return;
         const [minAmountStr, stampsPerOrderStr, stampsPerAmountStr, thresholdStr] = await Promise.all([
             this.getSetting('loyalty_min_order_amount', '0'),
             this.getSetting('loyalty_stamps_per_order', '1'),
@@ -101,13 +121,16 @@ let OrdersService = class OrdersService {
         if (stamps > 0) {
             await this.stampRepo.save(this.stampRepo.create({
                 userId,
+                orderId,
                 sourceId: orderId,
+                loyaltyProgramId: program.id,
                 stampCount: stamps,
                 metadata: { source: 'order', orderId },
             }));
         }
     }
     async create(userId, dto) {
+        const resolvedUserId = (userId === 'guest' || !userId) ? null : userId;
         const orderItems = [];
         let subtotal = 0;
         let totalTax = 0;
@@ -172,7 +195,10 @@ let OrdersService = class OrdersService {
         }
         let deliveryCharge = 0;
         if (dto.orderType === enums_1.OrderType.DELIVERY) {
-            deliveryCharge = await this.calculateDeliveryCharge(dto.deliveryDistanceKm);
+            const snap = dto.deliveryAddressSnapshot;
+            const destLat = snap?.latitude ? Number(snap.latitude) : undefined;
+            const destLng = snap?.longitude ? Number(snap.longitude) : undefined;
+            deliveryCharge = await this.calculateDeliveryCharge(dto.deliveryDistanceKm, destLat, destLng, dto.branchId);
         }
         let discount = dto.discount || 0;
         if (dto.couponCode) {
@@ -183,7 +209,7 @@ let OrdersService = class OrdersService {
         const order = this.orderRepo.create({
             orderSerialNo: 'ORD-' + Date.now().toString().slice(-8),
             token: (0, uuid_1.v4)().split('-')[0].toUpperCase(),
-            userId,
+            userId: resolvedUserId,
             orderType: dto.orderType,
             paymentMethod: dto.paymentMethod,
             diningTableId: dto.diningTableId,
@@ -196,9 +222,10 @@ let OrdersService = class OrdersService {
             deliveryCharge,
             totalTax,
             total,
+            posReceivedAmount: dto.posReceivedAmount ?? 0,
         });
         const savedOrder = await this.orderRepo.save(order);
-        await this.orderItemRepo.save(orderItems.map((oi) => this.orderItemRepo.create({ ...oi, orderId: savedOrder.id })));
+        await this.orderItemRepo.save(orderItems.map((oi) => this.orderItemRepo.create({ ...oi, orderId: savedOrder.id, branchId: dto.branchId })));
         if (dto.orderType === enums_1.OrderType.DELIVERY && dto.deliveryAddressSnapshot) {
             const snap = dto.deliveryAddressSnapshot;
             await this.orderAddressRepo.save(this.orderAddressRepo.create({
@@ -211,7 +238,12 @@ let OrdersService = class OrdersService {
                 longitude: snap.longitude,
             }));
         }
-        await this.awardLoyaltyStamps(userId, savedOrder.id, total);
+        if (resolvedUserId)
+            await this.awardLoyaltyStamps(resolvedUserId, savedOrder.id, total);
+        this.notificationsService
+            .broadcastToAll('New Order', `Order #${savedOrder.orderSerialNo} has been placed`)
+            .catch(() => null);
+        this.eventsService.emit({ type: 'order:created', orderId: savedOrder.id, status: enums_1.OrderStatus.PENDING, branchId: savedOrder.branchId });
         return this.findOne(savedOrder.id);
     }
     async findAll(filters = {}) {
@@ -231,6 +263,8 @@ let OrdersService = class OrdersService {
             qb.andWhere('order.orderType = :orderType', { orderType: rest.orderType });
         if (rest.userId)
             qb.andWhere('order.userId = :userId', { userId: rest.userId });
+        if (rest.diningTableId)
+            qb.andWhere('order.diningTableId = :diningTableId', { diningTableId: rest.diningTableId });
         if (rest.search)
             qb.andWhere('order.orderSerialNo ILIKE :search', { search: `%${rest.search}%` });
         const [data, total] = await qb.getManyAndCount();
@@ -255,12 +289,18 @@ let OrdersService = class OrdersService {
         return order;
     }
     async updateStatus(id, dto) {
-        await this.findOne(id);
+        const order = await this.findOne(id);
         await this.orderRepo.update(id, {
             status: dto.status,
             cancellationReason: dto.cancellationReason,
             staffId: dto.staffId,
         });
+        if (order.userId) {
+            this.notificationsService
+                .sendOrderNotification(order.userId, order.orderSerialNo, dto.status)
+                .catch(() => null);
+        }
+        this.eventsService.emit({ type: 'order:updated', orderId: id, status: dto.status, branchId: order.branchId });
         return this.findOne(id);
     }
     async updatePaymentStatus(id, transactionId) {
@@ -286,10 +326,18 @@ let OrdersService = class OrdersService {
             qb.andWhere('order.branchId = :branchId', { branchId });
         return qb.getMany();
     }
-    async getDashboardStats() {
+    async getDashboardStats(startDate, endDate) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const [totalOrders, todayOrders, totalRevenue, pendingOrders] = await Promise.all([
+        const rangeQb = () => {
+            const qb = this.orderRepo.createQueryBuilder('order');
+            if (startDate)
+                qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+            if (endDate)
+                qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+            return qb;
+        };
+        const [totalOrders, todayOrders, totalRevenue, pendingOrders, statusBreakdown, totalDiscount, totalStamps, totalCustomers, recentOrders, topItems] = await Promise.all([
             this.orderRepo.count(),
             this.orderRepo.count({ where: { createdAt: today } }),
             this.orderRepo
@@ -298,13 +346,73 @@ let OrdersService = class OrdersService {
                 .select('SUM(order.total)', 'total')
                 .getRawOne(),
             this.orderRepo.count({ where: { status: enums_1.OrderStatus.PENDING } }),
+            rangeQb()
+                .select('order.status', 'status')
+                .addSelect('COUNT(*)', 'count')
+                .groupBy('order.status')
+                .getRawMany(),
+            rangeQb()
+                .select('SUM(order.discount)', 'total')
+                .getRawOne(),
+            this.stampRepo
+                .createQueryBuilder('stamp')
+                .select('SUM(stamp.stampCount)', 'total')
+                .getRawOne(),
+            this.orderRepo
+                .createQueryBuilder('order')
+                .select('COUNT(DISTINCT order.userId)', 'count')
+                .getRawOne(),
+            this.orderRepo.find({
+                relations: ['user'],
+                order: { createdAt: 'DESC' },
+                take: 5,
+            }),
+            this.orderItemRepo
+                .createQueryBuilder('oi')
+                .select('oi.itemId', 'itemId')
+                .addSelect('oi.itemName', 'itemName')
+                .addSelect('SUM(oi.quantity)', 'totalQty')
+                .addSelect('SUM(oi.totalPrice)', 'totalRevenue')
+                .groupBy('oi.itemId')
+                .addGroupBy('oi.itemName')
+                .orderBy('SUM(oi.quantity)', 'DESC')
+                .limit(5)
+                .getRawMany(),
         ]);
+        const byStatus = {};
+        for (const row of statusBreakdown)
+            byStatus[row.status] = parseInt(row.count, 10);
         return {
             totalOrders,
             todayOrders,
             totalRevenue: totalRevenue?.total || 0,
             pendingOrders,
+            totalCustomers: parseInt(totalCustomers?.count || '0', 10),
+            ordersByStatus: byStatus,
+            totalDiscount: totalDiscount?.total || 0,
+            loyaltyStampsIssued: totalStamps?.total || 0,
+            recentOrders,
+            topSellingItems: topItems,
         };
+    }
+    async cancelOrder(userId, orderId, reason) {
+        const order = await this.findOne(orderId);
+        if (order.userId && userId !== 'guest' && order.userId !== userId) {
+            throw new common_1.BadRequestException('You can only cancel your own orders');
+        }
+        const cancellableStatuses = [enums_1.OrderStatus.PENDING, enums_1.OrderStatus.ACCEPTED];
+        if (!cancellableStatuses.includes(order.status)) {
+            throw new common_1.BadRequestException(`Cannot cancel order in status: ${order.status}`);
+        }
+        await this.orderRepo.update(orderId, {
+            status: enums_1.OrderStatus.CANCELED,
+            cancellationReason: reason,
+        });
+        if (order.paymentStatus === enums_1.PaymentStatus.PAID) {
+            await this.userRepo.increment({ id: userId }, 'balance', Number(order.total));
+        }
+        this.eventsService.emit({ type: 'order:updated', orderId, status: enums_1.OrderStatus.CANCELED, branchId: order.branchId });
+        return this.findOne(orderId);
     }
     async assignDeliveryBoy(orderId, deliveryBoyId) {
         const order = await this.findOne(orderId);
@@ -327,9 +435,108 @@ let OrdersService = class OrdersService {
         });
         return { data, total, page, limit, pages: Math.ceil(total / limit) };
     }
+    async getOssPopularItems(branchId, limit = 6) {
+        const qb = this.orderItemRepo
+            .createQueryBuilder('oi')
+            .innerJoin('oi.order', 'order')
+            .select('oi.itemId', 'itemId')
+            .addSelect('oi.itemName', 'itemName')
+            .addSelect('oi.itemImage', 'itemImage')
+            .addSelect('SUM(oi.quantity)', 'totalQty')
+            .groupBy('oi.itemId')
+            .addGroupBy('oi.itemName')
+            .addGroupBy('oi.itemImage')
+            .orderBy('SUM(oi.quantity)', 'DESC')
+            .limit(limit);
+        if (branchId)
+            qb.andWhere('order.branchId = :branchId', { branchId });
+        return qb.getRawMany();
+    }
+    async getStaffDashboard(staffId) {
+        const [assignedOrders, totalHandled] = await Promise.all([
+            this.orderRepo.find({
+                where: { staffId },
+                relations: ['items', 'diningTable'],
+                order: { createdAt: 'DESC' },
+                take: 20,
+            }),
+            this.orderRepo.count({ where: { staffId } }),
+        ]);
+        const pendingCount = assignedOrders.filter((o) => o.status === enums_1.OrderStatus.PENDING).length;
+        const preparingCount = assignedOrders.filter((o) => o.status === enums_1.OrderStatus.PREPARING).length;
+        const preparedCount = assignedOrders.filter((o) => o.status === enums_1.OrderStatus.PREPARED).length;
+        return { assignedOrders, totalHandled, pendingCount, preparingCount, preparedCount };
+    }
     posChangeCalc(total, received) {
         const change = received - total;
         return { change: Math.max(0, change), sufficient: received >= total };
+    }
+    async changeOrderStaff(orderId, staffId) {
+        await this.findOne(orderId);
+        const staff = await this.userRepo.findOne({ where: { id: staffId } });
+        if (!staff)
+            throw new common_1.NotFoundException('Staff member not found');
+        await this.orderRepo.update(orderId, { staffId });
+        return this.findOne(orderId);
+    }
+    async changePaymentStatus(orderId, paymentStatus) {
+        await this.findOne(orderId);
+        await this.orderRepo.update(orderId, { paymentStatus });
+        return this.findOne(orderId);
+    }
+    async exportTableOrdersExcel(res) {
+        const orders = await this.orderRepo.find({
+            where: { orderType: enums_1.OrderType.DINING_TABLE },
+            relations: ['user', 'diningTable', 'items'],
+            order: { createdAt: 'DESC' },
+        });
+        const rows = orders.map((o) => [
+            o.orderSerialNo,
+            o.diningTable?.name || '',
+            o.user?.name || 'Guest',
+            o.status,
+            o.paymentStatus,
+            o.paymentMethod,
+            Number(o.total).toFixed(2),
+            o.createdAt?.toISOString().split('T')[0] || '',
+        ]);
+        const headers = ['Order #', 'Table', 'Customer', 'Status', 'Payment Status', 'Payment Method', 'Total', 'Date'];
+        const ths = headers.map((h) => `<th style="background:#f97316;color:white;padding:6px 10px;border:1px solid #ddd">${h}</th>`).join('');
+        const trs = rows.map((r) => `<tr>${r.map((c) => `<td style="padding:5px 10px;border:1px solid #ddd">${c}</td>`).join('')}</tr>`).join('');
+        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><h2>Dine-In Orders</h2><table border="1"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></body></html>`;
+        res.set({ 'Content-Type': 'application/vnd.ms-excel', 'Content-Disposition': 'attachment; filename="dining-table-orders.xls"' });
+        res.send(html);
+    }
+    async getStaffDashboardWithKds(staffId) {
+        const base = await this.getStaffDashboard(staffId);
+        const kdsOrders = await this.orderRepo.find({
+            where: { status: enums_1.OrderStatus.ACCEPTED },
+            relations: ['items', 'items.item', 'diningTable'],
+            order: { createdAt: 'ASC' },
+            take: 30,
+        });
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const [todayOrderCount, todayRevenue] = await Promise.all([
+            this.orderRepo.count({ where: { staffId, createdAt: today } }),
+            this.orderRepo
+                .createQueryBuilder('order')
+                .where('order.staffId = :staffId', { staffId })
+                .andWhere('order.createdAt BETWEEN :start AND :end', { start: today, end: tomorrow })
+                .andWhere('order.paymentStatus = :ps', { ps: enums_1.PaymentStatus.PAID })
+                .select('SUM(order.total)', 'total')
+                .getRawOne(),
+        ]);
+        return {
+            ...base,
+            kdsOrders,
+            todayStats: {
+                orderCount: todayOrderCount,
+                revenue: parseFloat(todayRevenue?.total || '0'),
+            },
+        };
     }
 };
 exports.OrdersService = OrdersService;
@@ -345,6 +552,8 @@ exports.OrdersService = OrdersService = __decorate([
     __param(7, (0, typeorm_1.InjectRepository)(offer_item_entity_1.OfferItem)),
     __param(8, (0, typeorm_1.InjectRepository)(app_setting_entity_1.AppSetting)),
     __param(9, (0, typeorm_1.InjectRepository)(loyalty_stamp_entity_1.LoyaltyStamp)),
+    __param(10, (0, typeorm_1.InjectRepository)(loyalty_program_entity_1.LoyaltyProgram)),
+    __param(14, (0, common_1.Optional)()),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
@@ -355,6 +564,10 @@ exports.OrdersService = OrdersService = __decorate([
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        time_slots_service_1.TimeSlotsService])
+        typeorm_2.Repository,
+        time_slots_service_1.TimeSlotsService,
+        notifications_service_1.NotificationsService,
+        events_service_1.EventsService,
+        delivery_zones_service_1.DeliveryZonesService])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

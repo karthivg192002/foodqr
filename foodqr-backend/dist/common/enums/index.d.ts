@@ -1,4 +1,5 @@
 export declare enum UserRole {
+    SUPER_ADMIN = "super_admin",
     ADMIN = "admin",
     CUSTOMER = "customer",
     WAITER = "waiter",
@@ -34,7 +35,8 @@ export declare enum PaymentMethod {
     MOLLIE = "mollie",
     FLUTTERWAVE = "flutterwave",
     PAYTM = "paytm",
-    BKASH = "bkash"
+    BKASH = "bkash",
+    PAYSTACK = "paystack"
 }
 export declare enum PaymentStatus {
     UNPAID = "unpaid",

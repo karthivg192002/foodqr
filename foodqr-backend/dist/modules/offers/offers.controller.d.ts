@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { OffersService } from './offers.service';
 export declare class OffersController {
     private readonly offersService;
@@ -10,6 +11,10 @@ export declare class OffersController {
     deleteOffer(id: string): Promise<{
         message: string;
     }>;
+    updateOfferImage(id: string, body: {
+        image: string;
+    }): Promise<import("./entities/offer.entity").Offer>;
+    uploadOfferImage(id: string, file: Express.Multer.File): Promise<import("./entities/offer.entity").Offer>;
     getAllBanners(): Promise<import("./entities/banner.entity").Banner[]>;
     createBanner(data: any): Promise<import("./entities/banner.entity").Banner>;
     updateBanner(id: string, data: any): Promise<import("./entities/banner.entity").Banner>;
@@ -23,4 +28,12 @@ export declare class OffersController {
     removeOfferItem(offerItemId: string): Promise<{
         message: string;
     }>;
+    getActivePromoBanners(): Promise<import("./entities/promotion-banner.entity").PromotionBanner[]>;
+    getAllPromoBanners(): Promise<import("./entities/promotion-banner.entity").PromotionBanner[]>;
+    createPromoBanner(data: any): Promise<import("./entities/promotion-banner.entity").PromotionBanner>;
+    updatePromoBanner(id: string, data: any): Promise<import("./entities/promotion-banner.entity").PromotionBanner>;
+    deletePromoBanner(id: string): Promise<{
+        message: string;
+    }>;
+    exportOffersExcel(res: Response): Promise<void>;
 }

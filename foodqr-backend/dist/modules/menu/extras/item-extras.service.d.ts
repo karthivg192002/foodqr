@@ -3,6 +3,8 @@ import { ItemExtra } from './entities/item-extra.entity';
 export declare class CreateItemExtraDto {
     name: string;
     price: number;
+    maxQuantity?: number;
+    isRequired?: boolean;
     status?: boolean;
 }
 export declare class ItemExtrasService {

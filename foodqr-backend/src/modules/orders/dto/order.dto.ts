@@ -96,6 +96,14 @@ export class CreateOrderDto {
   @ApiPropertyOptional()
   @IsOptional() @IsObject()
   deliveryAddressSnapshot?: object;
+
+  @ApiPropertyOptional()
+  @IsOptional() @IsNumber()
+  posReceivedAmount?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional() @IsString()
+  customerId?: string;
 }
 
 export class UpdateOrderStatusDto {

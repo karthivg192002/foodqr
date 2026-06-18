@@ -9,6 +9,7 @@ export declare class ItemCategory {
     parentCategory: ItemCategory;
     children: ItemCategory[];
     status: boolean;
+    variationOnly: boolean;
     sortOrder: number;
     createdAt: Date;
     updatedAt: Date;

@@ -110,6 +110,94 @@ export class AuthService {
     return { message: 'OTP verified successfully', verified: true };
   }
 
+  /** Step 1: Send OTP to phone number */
+  async sendPhoneOtp(phone: string) {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    const existing = await this.userRepo.findOne({ where: { phone } });
+    if (existing) {
+      await this.userRepo.update(existing.id, { phoneOtpCode: otp, phoneOtpExpiry: expiry });
+    } else {
+      const temp = this.userRepo.create({
+        name: phone, phone, password: 'temp',
+        phoneOtpCode: otp, phoneOtpExpiry: expiry,
+        status: UserStatus.INACTIVE,
+      });
+      await this.userRepo.save(temp);
+    }
+
+    this.smsService.send(phone, `Your FoodQR OTP is: ${otp}`).catch(() => null);
+    return { message: 'OTP sent to phone', phone };
+  }
+
+  /** Step 2: Verify phone OTP */
+  async verifyPhoneOtp(phone: string, otp: string) {
+    const user = await this.userRepo.findOne({ where: { phone } });
+    if (!user) throw new NotFoundException('Phone number not found');
+    if (user.phoneOtpCode !== otp) throw new BadRequestException('Invalid OTP');
+    if (new Date() > user.phoneOtpExpiry) throw new BadRequestException('OTP expired');
+
+    await this.userRepo.update(user.id, { phoneOtpCode: null, phoneOtpExpiry: null });
+    return { message: 'Phone verified', verified: true, isNewUser: !user.name || user.name === phone };
+  }
+
+  /** Step 3: Complete phone registration (for new users) or login (for existing) */
+  async registerViaPhone(phone: string, name?: string, password?: string) {
+    let user = await this.userRepo.findOne({ where: { phone } });
+    if (!user) throw new BadRequestException('Phone not verified');
+
+    const updates: Partial<User> = { status: UserStatus.ACTIVE };
+    if (name) updates.name = name;
+    if (password) updates.password = await bcrypt.hash(password, 12);
+    else if (!user.password || user.password === 'temp') {
+      updates.password = await bcrypt.hash(uuidv4(), 12);
+    }
+    updates.role = user.role || UserRole.CUSTOMER;
+    await this.userRepo.update(user.id, updates);
+    user = await this.userRepo.findOne({ where: { id: user.id } });
+
+    const token = this.generateToken(user);
+    const { password: _p, ...rest } = user as any;
+    return { token, user: rest };
+  }
+
+  /** Forgot password via phone OTP */
+  async forgotPasswordPhone(phone: string) {
+    const user = await this.userRepo.findOne({ where: { phone } });
+    if (!user) throw new NotFoundException('Phone number not found');
+    await this.sendPhoneOtp(phone);
+    return { message: 'OTP sent to phone for password reset' };
+  }
+
+  /** Reset password after phone OTP verification */
+  async resetPasswordPhone(phone: string, otp: string, newPassword: string) {
+    const user = await this.userRepo.findOne({ where: { phone } });
+    if (!user) throw new NotFoundException('User not found');
+    if (user.phoneOtpCode !== otp) throw new BadRequestException('Invalid OTP');
+    if (new Date() > user.phoneOtpExpiry) throw new BadRequestException('OTP expired');
+
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await this.userRepo.update(user.id, { password: hashed, phoneOtpCode: null, phoneOtpExpiry: null });
+    return { message: 'Password reset successfully' };
+  }
+
+  /** Admin impersonation — generate a short-lived token for target user */
+  async impersonate(adminId: string, targetUserId: string) {
+    const admin = await this.userRepo.findOne({ where: { id: adminId } });
+    if (!admin || admin.role !== UserRole.ADMIN) throw new UnauthorizedException('Only admins can impersonate');
+
+    const target = await this.userRepo.findOne({ where: { id: targetUserId } });
+    if (!target) throw new NotFoundException('Target user not found');
+
+    const token = this.jwtService.sign(
+      { sub: target.id, role: target.role, impersonatedBy: adminId },
+      { expiresIn: '1h' },
+    );
+    const { password, ...rest } = target as any;
+    return { token, user: rest, impersonating: true, adminId };
+  }
+
   async forgotPassword(dto: ForgotPasswordDto) {
     const user = await this.userRepo.findOne({ where: { email: dto.email } });
     if (!user) throw new NotFoundException('User not found');

@@ -86,7 +86,7 @@ export class MenuExtrasComponent implements OnInit {
 
     const itemId = this.selectedItem.id;
     const req = this.editingId
-      ? this.api.patch(`admin/items/${itemId}/extras/${this.editingId}`, this.form.value)
+      ? this.api.patch(`admin/items/extras/${this.editingId}`, this.form.value)
       : this.api.post(`admin/items/${itemId}/extras`, this.form.value);
 
     req.subscribe({
@@ -102,7 +102,7 @@ export class MenuExtrasComponent implements OnInit {
 
   delete(extraId: string): void {
     if (!this.selectedItem || !confirm('Delete this extra?')) return;
-    this.api.delete(`admin/items/${this.selectedItem.id}/extras/${extraId}`).subscribe({
+    this.api.delete(`admin/items/extras/${extraId}`).subscribe({
       next: () => {
         this.toastr.success('Extra deleted');
         this.loadExtras(this.selectedItem!.id);

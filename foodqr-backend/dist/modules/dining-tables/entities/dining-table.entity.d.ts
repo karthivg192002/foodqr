@@ -12,6 +12,7 @@ export declare class DiningTable {
     waiter: User;
     qrCode: string;
     qrImageUrl: string;
+    accessToken: string;
     status: TableStatus;
     createdAt: Date;
     updatedAt: Date;

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { LoyaltyService } from './loyalty.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -51,6 +51,27 @@ export class LoyaltyController {
   @Post('admin/loyalty/programs/:id/configurations')
   addConfiguration(@Param('id', ParseUUIDPipe) id: string, @Body() data: any) {
     return this.loyaltyService.addConfiguration(id, data);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('admin/loyalty/configurations/:id')
+  getConfiguration(@Param('id', ParseUUIDPipe) id: string) {
+    return this.loyaltyService.getConfiguration(id);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Patch('admin/loyalty/configurations/:id')
+  updateConfiguration(@Param('id', ParseUUIDPipe) id: string, @Body() data: any) {
+    return this.loyaltyService.updateConfiguration(id, data);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Delete('admin/loyalty/configurations/:id')
+  removeConfiguration(@Param('id', ParseUUIDPipe) id: string) {
+    return this.loyaltyService.removeConfiguration(id);
   }
 
   @Get('loyalty/segments')

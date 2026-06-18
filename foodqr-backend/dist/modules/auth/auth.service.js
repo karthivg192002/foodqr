@@ -20,11 +20,19 @@ const jwt_1 = require("@nestjs/jwt");
 const bcrypt = require("bcryptjs");
 const uuid_1 = require("uuid");
 const user_entity_1 = require("../users/entities/user.entity");
+const order_entity_1 = require("../orders/entities/order.entity");
+const order_item_entity_1 = require("../orders/entities/order-item.entity");
 const enums_1 = require("../../common/enums");
+const mail_service_1 = require("../mail/mail.service");
+const sms_gateways_service_1 = require("../sms-gateways/sms-gateways.service");
 let AuthService = class AuthService {
-    constructor(userRepo, jwtService) {
+    constructor(userRepo, orderRepo, orderItemRepo, jwtService, mailService, smsService) {
         this.userRepo = userRepo;
+        this.orderRepo = orderRepo;
+        this.orderItemRepo = orderItemRepo;
         this.jwtService = jwtService;
+        this.mailService = mailService;
+        this.smsService = smsService;
     }
     async login(dto) {
         const user = await this.userRepo.findOne({
@@ -57,6 +65,18 @@ let AuthService = class AuthService {
         const { password, ...userWithoutPassword } = user;
         return { token, user: userWithoutPassword };
     }
+    async guestSignup(dto) {
+        const guest = this.userRepo.create({
+            name: dto.name,
+            phone: dto.phone,
+            password: await bcrypt.hash((0, uuid_1.v4)(), 12),
+            role: enums_1.UserRole.CUSTOMER,
+            isGuest: true,
+        });
+        await this.userRepo.save(guest);
+        const token = this.generateToken(guest);
+        return { token, user: guest };
+    }
     async sendOtp(dto) {
         const user = await this.userRepo.findOne({ where: { email: dto.email } });
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -64,7 +84,15 @@ let AuthService = class AuthService {
         if (user) {
             await this.userRepo.update(user.id, { otpCode: otp, otpExpiry: expiry });
         }
-        return { message: 'OTP sent successfully', otp };
+        else {
+            const temp = this.userRepo.create({ email: dto.email, name: dto.email, password: 'temp', otpCode: otp, otpExpiry: expiry, status: enums_1.UserStatus.INACTIVE });
+            await this.userRepo.save(temp);
+        }
+        this.mailService.sendOtp(dto.email, otp).catch(() => null);
+        if (user?.phone) {
+            this.smsService.send(user.phone, `Your FoodQR OTP is: ${otp}`).catch(() => null);
+        }
+        return { message: 'OTP sent' };
     }
     async verifyOtp(dto) {
         const user = await this.userRepo.findOne({ where: { email: dto.email } });
@@ -79,7 +107,85 @@ let AuthService = class AuthService {
             otpExpiry: null,
             emailVerifiedAt: new Date(),
         });
-        return { message: 'OTP verified successfully' };
+        return { message: 'OTP verified successfully', verified: true };
+    }
+    async sendPhoneOtp(phone) {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiry = new Date(Date.now() + 10 * 60 * 1000);
+        const existing = await this.userRepo.findOne({ where: { phone } });
+        if (existing) {
+            await this.userRepo.update(existing.id, { phoneOtpCode: otp, phoneOtpExpiry: expiry });
+        }
+        else {
+            const temp = this.userRepo.create({
+                name: phone, phone, password: 'temp',
+                phoneOtpCode: otp, phoneOtpExpiry: expiry,
+                status: enums_1.UserStatus.INACTIVE,
+            });
+            await this.userRepo.save(temp);
+        }
+        this.smsService.send(phone, `Your FoodQR OTP is: ${otp}`).catch(() => null);
+        return { message: 'OTP sent to phone', phone };
+    }
+    async verifyPhoneOtp(phone, otp) {
+        const user = await this.userRepo.findOne({ where: { phone } });
+        if (!user)
+            throw new common_1.NotFoundException('Phone number not found');
+        if (user.phoneOtpCode !== otp)
+            throw new common_1.BadRequestException('Invalid OTP');
+        if (new Date() > user.phoneOtpExpiry)
+            throw new common_1.BadRequestException('OTP expired');
+        await this.userRepo.update(user.id, { phoneOtpCode: null, phoneOtpExpiry: null });
+        return { message: 'Phone verified', verified: true, isNewUser: !user.name || user.name === phone };
+    }
+    async registerViaPhone(phone, name, password) {
+        let user = await this.userRepo.findOne({ where: { phone } });
+        if (!user)
+            throw new common_1.BadRequestException('Phone not verified');
+        const updates = { status: enums_1.UserStatus.ACTIVE };
+        if (name)
+            updates.name = name;
+        if (password)
+            updates.password = await bcrypt.hash(password, 12);
+        else if (!user.password || user.password === 'temp') {
+            updates.password = await bcrypt.hash((0, uuid_1.v4)(), 12);
+        }
+        updates.role = user.role || enums_1.UserRole.CUSTOMER;
+        await this.userRepo.update(user.id, updates);
+        user = await this.userRepo.findOne({ where: { id: user.id } });
+        const token = this.generateToken(user);
+        const { password: _p, ...rest } = user;
+        return { token, user: rest };
+    }
+    async forgotPasswordPhone(phone) {
+        const user = await this.userRepo.findOne({ where: { phone } });
+        if (!user)
+            throw new common_1.NotFoundException('Phone number not found');
+        await this.sendPhoneOtp(phone);
+        return { message: 'OTP sent to phone for password reset' };
+    }
+    async resetPasswordPhone(phone, otp, newPassword) {
+        const user = await this.userRepo.findOne({ where: { phone } });
+        if (!user)
+            throw new common_1.NotFoundException('User not found');
+        if (user.phoneOtpCode !== otp)
+            throw new common_1.BadRequestException('Invalid OTP');
+        if (new Date() > user.phoneOtpExpiry)
+            throw new common_1.BadRequestException('OTP expired');
+        const hashed = await bcrypt.hash(newPassword, 12);
+        await this.userRepo.update(user.id, { password: hashed, phoneOtpCode: null, phoneOtpExpiry: null });
+        return { message: 'Password reset successfully' };
+    }
+    async impersonate(adminId, targetUserId) {
+        const admin = await this.userRepo.findOne({ where: { id: adminId } });
+        if (!admin || admin.role !== enums_1.UserRole.ADMIN)
+            throw new common_1.UnauthorizedException('Only admins can impersonate');
+        const target = await this.userRepo.findOne({ where: { id: targetUserId } });
+        if (!target)
+            throw new common_1.NotFoundException('Target user not found');
+        const token = this.jwtService.sign({ sub: target.id, role: target.role, impersonatedBy: adminId }, { expiresIn: '1h' });
+        const { password, ...rest } = target;
+        return { token, user: rest, impersonating: true, adminId };
     }
     async forgotPassword(dto) {
         const user = await this.userRepo.findOne({ where: { email: dto.email } });
@@ -91,7 +197,9 @@ let AuthService = class AuthService {
             resetPasswordToken: token,
             resetPasswordExpiry: expiry,
         });
-        return { message: 'Password reset link sent', token };
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+        this.mailService.sendPasswordReset(dto.email, token, frontendUrl).catch(() => null);
+        return { message: 'Password reset link sent to your email' };
     }
     async resetPassword(dto) {
         const user = await this.userRepo.findOne({
@@ -121,8 +229,92 @@ let AuthService = class AuthService {
         await this.userRepo.update(userId, { password: hashedPassword });
         return { message: 'Password changed successfully' };
     }
+    async storeDeviceToken(userId, type, token) {
+        const field = type === 'web' ? 'webToken' : 'deviceToken';
+        await this.userRepo.update(userId, { [field]: token });
+        return { message: 'Token stored' };
+    }
+    async deleteAccount(userId) {
+        await this.userRepo.softDelete(userId);
+        return { message: 'Account deactivated successfully' };
+    }
     async getProfile(userId) {
         return this.userRepo.findOne({ where: { id: userId }, relations: ['branch'] });
+    }
+    async getCustomerDashboard(userId) {
+        const user = await this.userRepo.findOne({ where: { id: userId }, relations: ['branch'] });
+        if (!user)
+            throw new common_1.NotFoundException('User not found');
+        const [totalVisits, spentResult, topCategoryRows, peakDayRows, peakTimeRows] = await Promise.all([
+            this.orderRepo.count({ where: { userId } }),
+            this.orderRepo
+                .createQueryBuilder('o')
+                .where('o.userId = :userId AND o.paymentStatus = :ps', { userId, ps: enums_1.PaymentStatus.PAID })
+                .select('SUM(o.total)', 'total')
+                .addSelect('AVG(o.total)', 'avg')
+                .getRawOne(),
+            this.orderItemRepo
+                .createQueryBuilder('oi')
+                .innerJoin('oi.order', 'o', 'o.userId = :userId', { userId })
+                .innerJoin('oi.item', 'item')
+                .innerJoin('item.category', 'cat')
+                .select('cat.name', 'category')
+                .addSelect('SUM(oi.quantity)', 'qty')
+                .groupBy('cat.name')
+                .orderBy('SUM(oi.quantity)', 'DESC')
+                .limit(3)
+                .getRawMany(),
+            this.orderRepo
+                .createQueryBuilder('o')
+                .where('o.userId = :userId', { userId })
+                .select("TO_CHAR(o.createdAt, 'Day')", 'day')
+                .addSelect('COUNT(*)', 'count')
+                .groupBy("TO_CHAR(o.createdAt, 'Day')")
+                .orderBy('COUNT(*)', 'DESC')
+                .limit(1)
+                .getRawMany(),
+            this.orderRepo
+                .createQueryBuilder('o')
+                .where('o.userId = :userId', { userId })
+                .select("EXTRACT(HOUR FROM o.createdAt)", 'hour')
+                .addSelect('COUNT(*)', 'count')
+                .groupBy("EXTRACT(HOUR FROM o.createdAt)")
+                .orderBy('COUNT(*)', 'DESC')
+                .limit(1)
+                .getRawMany(),
+        ]);
+        const totalSpent = Number(spentResult?.total || 0);
+        const avgOrderValue = Number(spentResult?.avg || 0);
+        const peakHour = peakTimeRows[0]?.hour;
+        const peakTime = peakHour != null ? `${String(peakHour).padStart(2, '0')}:00` : null;
+        return {
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            profileImage: user.profileImage,
+            walletBalance: Number(user.balance),
+            isGuest: user.isGuest,
+            totalVisits,
+            totalSpent,
+            avgOrderValue: Math.round(avgOrderValue * 100) / 100,
+            topCategories: topCategoryRows.map((r) => r.category),
+            peakDay: peakDayRows[0]?.day?.trim() || null,
+            peakTime,
+        };
+    }
+    async createPosCustomer(dto) {
+        const tempPassword = await bcrypt.hash((0, uuid_1.v4)(), 12);
+        const existing = dto.email ? await this.userRepo.findOne({ where: { email: dto.email } }) : null;
+        if (existing)
+            return existing;
+        const user = this.userRepo.create({
+            name: dto.name,
+            phone: dto.phone,
+            email: dto.email,
+            password: tempPassword,
+            role: enums_1.UserRole.CUSTOMER,
+        });
+        return this.userRepo.save(user);
     }
     generateToken(user) {
         return this.jwtService.sign({ sub: user.id, email: user.email, role: user.role });
@@ -132,7 +324,13 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __param(1, (0, typeorm_1.InjectRepository)(order_entity_1.Order)),
+    __param(2, (0, typeorm_1.InjectRepository)(order_item_entity_1.OrderItem)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        jwt_1.JwtService])
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        jwt_1.JwtService,
+        mail_service_1.MailService,
+        sms_gateways_service_1.SmsGatewaysService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

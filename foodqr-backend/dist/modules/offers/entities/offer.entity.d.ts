@@ -9,6 +9,7 @@ export declare class Offer {
     badgeText: string;
     badgeColor: string;
     maxDiscount: number;
+    minOrderAmount: number;
     startDate: Date;
     endDate: Date;
     status: boolean;

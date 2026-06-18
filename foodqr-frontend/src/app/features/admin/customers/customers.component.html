@@ -1,50 +1,95 @@
-<div>
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="page-title">Customers</h1>
-    <span class="badge-info">{{ total }} total</span>
+<div class="space-y-5 fade-in-up">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Customers</h1>
+      <p class="page-subtitle">Manage your registered customer base</p>
+    </div>
+    <span class="badge-info badge-plain px-3 py-1.5" style="font-size:13px">{{ total }} customers</span>
   </div>
-  <div class="card mb-5">
-    <input [(ngModel)]="search" (ngModelChange)="page=1; load()" type="text" placeholder="Search customers..." class="input-field w-64">
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="search-input-wrapper" style="width:280px">
+      <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input [(ngModel)]="search" (ngModelChange)="page=1; load()" type="text"
+        placeholder="Search by name or email…" class="input-field">
+    </div>
   </div>
-  <div class="card overflow-hidden p-0">
-    <table class="w-full text-sm">
-      <thead class="bg-gray-50 border-b">
-        <tr>
-          <th class="px-5 py-3 text-left font-semibold text-gray-600">Name</th>
-          <th class="px-5 py-3 text-left font-semibold text-gray-600">Tier</th>
-          <th class="px-5 py-3 text-left font-semibold text-gray-600">Email</th>
-          <th class="px-5 py-3 text-left font-semibold text-gray-600">Phone</th>
-          <th class="px-5 py-3 text-right font-semibold text-gray-600">Balance</th>
-          <th class="px-5 py-3 text-center font-semibold text-gray-600">Status</th>
-          <th class="px-5 py-3 text-left font-semibold text-gray-600">Joined</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let c of customers" class="border-b border-gray-50 hover:bg-gray-50">
-          <td class="px-5 py-3 font-medium text-gray-900">{{ c.name }}</td>
-          <td class="px-5 py-3">
-            <span *ngIf="loyaltyTier(c.id).label" [class]="loyaltyTier(c.id).class"
-              class="px-2 py-0.5 rounded-full text-xs font-semibold">{{ loyaltyTier(c.id).label }}</span>
-            <span *ngIf="!loyaltyTier(c.id).label" class="text-gray-300 text-xs">—</span>
-          </td>
-          <td class="px-5 py-3 text-gray-600">{{ c.email }}</td>
-          <td class="px-5 py-3 text-gray-600">{{ c.phone || '—' }}</td>
-          <td class="px-5 py-3 text-right font-semibold">${{ c.balance | number:'1.2-2' }}</td>
-          <td class="px-5 py-3 text-center">
-            <span [class]="c.status === 'active' ? 'badge-success' : 'badge-danger'">{{ c.status }}</span>
-          </td>
-          <td class="px-5 py-3 text-gray-500 text-xs">{{ c.createdAt | date:'mediumDate' }}</td>
-        </tr>
-        <tr *ngIf="!customers.length && !loading">
-          <td colspan="7" class="px-5 py-12 text-center text-gray-400">No customers found</td>
-        </tr>
-      </tbody>
-    </table>
-    <div *ngIf="pages > 1" class="flex justify-between items-center px-5 py-4 border-t">
-      <span class="text-sm text-gray-500">{{ total }} customers</span>
+
+  <!-- Table -->
+  <div class="table-container">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Tier</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th style="text-align:right">Balance</th>
+            <th style="text-align:center">Status</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of customers">
+            <td>
+              <div class="flex items-center gap-3">
+                <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#6366f1,#a78bfa)">
+                  {{ c.name?.charAt(0)?.toUpperCase() }}
+                </div>
+                <div>
+                  <p style="font-size:13.5px;font-weight:600;color:#0f172a">{{ c.name }}</p>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span *ngIf="loyaltyTier(c.id).label" [class]="loyaltyTier(c.id).class" class="px-2 py-0.5 rounded-full text-xs font-semibold">
+                {{ loyaltyTier(c.id).label }}
+              </span>
+              <span *ngIf="!loyaltyTier(c.id).label" style="color:#cbd5e1;font-size:13px">—</span>
+            </td>
+            <td style="color:#334155;font-size:13px">{{ c.email }}</td>
+            <td style="color:#64748b;font-size:13px">{{ c.phone || '—' }}</td>
+            <td style="text-align:right">
+              <span style="font-size:14px;font-weight:700;color:#0f172a">${{ c.balance | number:'1.2-2' }}</span>
+            </td>
+            <td style="text-align:center">
+              <span [class]="c.status === 'active' ? 'badge-success' : 'badge-danger'" class="capitalize">{{ c.status }}</span>
+            </td>
+            <td style="font-size:12.5px;color:#64748b">{{ c.createdAt | date:'MMM d, y' }}</td>
+          </tr>
+          <tr *ngIf="!customers.length && !loading">
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <p class="empty-state-title">No customers found</p>
+                <p class="empty-state-desc">Customers will appear here once they register on your platform.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="pages > 1" class="flex items-center justify-between px-5 py-3.5" style="border-top:1px solid #f1f5f9">
+      <p style="font-size:12.5px;color:#64748b"><strong style="color:#334155">{{ total }}</strong> customers total</p>
       <div class="flex gap-2">
-        <button (click)="page=page-1; load()" [disabled]="page===1" class="btn-secondary py-1.5 px-3 text-xs disabled:opacity-50">Prev</button>
-        <button (click)="page=page+1; load()" [disabled]="page>=pages" class="btn-secondary py-1.5 px-3 text-xs disabled:opacity-50">Next</button>
+        <button (click)="page=page-1; load()" [disabled]="page===1" class="btn-secondary btn-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          Prev
+        </button>
+        <button (click)="page=page+1; load()" [disabled]="page>=pages" class="btn-secondary btn-sm">
+          Next
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
       </div>
     </div>
   </div>

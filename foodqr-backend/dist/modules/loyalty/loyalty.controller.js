@@ -42,6 +42,18 @@ let LoyaltyController = class LoyaltyController {
     addConfiguration(id, data) {
         return this.loyaltyService.addConfiguration(id, data);
     }
+    getConfiguration(id) {
+        return this.loyaltyService.getConfiguration(id);
+    }
+    updateConfiguration(id, data) {
+        return this.loyaltyService.updateConfiguration(id, data);
+    }
+    removeConfiguration(id) {
+        return this.loyaltyService.removeConfiguration(id);
+    }
+    getSegmentsForCustomers() { return this.loyaltyService.getCustomerSegments(); }
+    getSegments() { return this.loyaltyService.getCustomerSegments(); }
+    getLeaderboard() { return this.loyaltyService.getLeaderboard(); }
 };
 exports.LoyaltyController = LoyaltyController;
 __decorate([
@@ -103,6 +115,56 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], LoyaltyController.prototype, "addConfiguration", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/loyalty/configurations/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], LoyaltyController.prototype, "getConfiguration", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    (0, common_1.Patch)('admin/loyalty/configurations/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], LoyaltyController.prototype, "updateConfiguration", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    (0, common_1.Delete)('admin/loyalty/configurations/:id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], LoyaltyController.prototype, "removeConfiguration", null);
+__decorate([
+    (0, common_1.Get)('loyalty/segments'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], LoyaltyController.prototype, "getSegmentsForCustomers", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/loyalty/segments'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], LoyaltyController.prototype, "getSegments", null);
+__decorate([
+    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/loyalty/leaderboard'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], LoyaltyController.prototype, "getLeaderboard", null);
 exports.LoyaltyController = LoyaltyController = __decorate([
     (0, swagger_1.ApiTags)('Loyalty'),
     (0, swagger_1.ApiBearerAuth)(),

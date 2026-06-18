@@ -47,8 +47,11 @@ let OrdersController = class OrdersController {
     getKdsOrders(branchId) {
         return this.ordersService.getKdsOrders(branchId);
     }
-    getDashboardStats() {
-        return this.ordersService.getDashboardStats();
+    getDashboardStats(startDate, endDate) {
+        return this.ordersService.getDashboardStats(startDate, endDate);
+    }
+    cancelOrder(id, user, body) {
+        return this.ordersService.cancelOrder(user.id, id, body.reason);
     }
     assignDeliveryBoy(id, body) {
         return this.ordersService.assignDeliveryBoy(id, body.deliveryBoyId);
@@ -56,8 +59,23 @@ let OrdersController = class OrdersController {
     getDeliveryBoyOrders(deliveryBoyId, page, limit) {
         return this.ordersService.getOrdersByDeliveryBoy(deliveryBoyId, page, limit);
     }
+    getStaffDashboard(user) {
+        return this.ordersService.getStaffDashboardWithKds(user.id);
+    }
     getPosChange(id, received) {
         return this.ordersService.findOne(id).then((order) => this.ordersService.posChangeCalc(Number(order.total), received));
+    }
+    changeOrderStaff(id, body) {
+        return this.ordersService.changeOrderStaff(id, body.staffId);
+    }
+    changePaymentStatus(id, body) {
+        return this.ordersService.changePaymentStatus(id, body.paymentStatus);
+    }
+    async exportTableOrders(res) {
+        return this.ordersService.exportTableOrdersExcel(res);
+    }
+    getPosOrders(status, search, page, limit) {
+        return this.ordersService.findAll({ status, search, page, limit, orderType: 'pos' });
     }
 };
 exports.OrdersController = OrdersController;
@@ -139,10 +157,23 @@ __decorate([
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Get)('admin/dashboard/stats'),
+    __param(0, (0, common_1.Query)('startDate')),
+    __param(1, (0, common_1.Query)('endDate')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "getDashboardStats", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)('orders/:id/cancel'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, decorators_1.CurrentUser)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_entity_1.User, Object]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "cancelOrder", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
@@ -168,6 +199,16 @@ __decorate([
 ], OrdersController.prototype, "getDeliveryBoyOrders", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.WAITER, enums_1.UserRole.CHEF, enums_1.UserRole.STAFF, enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('staff/dashboard'),
+    __param(0, (0, decorators_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.User]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "getStaffDashboard", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER, enums_1.UserRole.POS_OPERATOR, enums_1.UserRole.STAFF),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Get)('admin/orders/:id/pos-change'),
@@ -177,6 +218,51 @@ __decorate([
     __metadata("design:paramtypes", [String, Number]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "getPosChange", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER, enums_1.UserRole.WAITER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Patch)('admin/orders/:id/staff'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "changeOrderStaff", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Patch)('admin/orders/:id/payment-status'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "changePaymentStatus", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/orders/export/dining-tables'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "exportTableOrders", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER, enums_1.UserRole.POS_OPERATOR),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/pos/orders'),
+    __param(0, (0, common_1.Query)('status')),
+    __param(1, (0, common_1.Query)('search')),
+    __param(2, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
+    __param(3, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Number, Number]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "getPosOrders", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, swagger_1.ApiTags)('Orders'),
     (0, common_1.Controller)(),

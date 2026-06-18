@@ -73,6 +73,18 @@ export class User {
   @Column({ nullable: true })
   resetPasswordExpiry: Date;
 
+  @Column({ nullable: true })
+  phoneOtpCode: string;
+
+  @Column({ nullable: true })
+  phoneOtpExpiry: Date;
+
+  @Column({ type: 'simple-array', nullable: true })
+  dietaryPreferences: string[];
+
+  @Column({ type: 'simple-array', nullable: true })
+  cuisinePreferences: string[];
+
   @CreateDateColumn()
   createdAt: Date;
 

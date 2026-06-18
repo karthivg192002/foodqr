@@ -18,7 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const auth_service_1 = require("./auth.service");
 const auth_dto_1 = require("./dto/auth.dto");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
+const roles_guard_1 = require("../../common/guards/roles.guard");
 const decorators_1 = require("../../common/decorators");
+const enums_1 = require("../../common/enums");
 const user_entity_1 = require("../users/entities/user.entity");
 let AuthController = class AuthController {
     constructor(authService) {
@@ -29,6 +31,9 @@ let AuthController = class AuthController {
     }
     register(dto) {
         return this.authService.register(dto);
+    }
+    guestSignup(dto) {
+        return this.authService.guestSignup(dto);
     }
     sendOtp(dto) {
         return this.authService.sendOtp(dto);
@@ -45,8 +50,45 @@ let AuthController = class AuthController {
     getProfile(user) {
         return this.authService.getProfile(user.id);
     }
+    getCustomerDashboard(user) {
+        return this.authService.getCustomerDashboard(user.id);
+    }
     changePassword(user, dto) {
         return this.authService.changePassword(user.id, dto);
+    }
+    deleteAccount(user) {
+        return this.authService.deleteAccount(user.id);
+    }
+    createPosCustomer(dto) {
+        return this.authService.createPosCustomer(dto);
+    }
+    storeDeviceToken(user, dto) {
+        return this.authService.storeDeviceToken(user.id, dto.type, dto.token);
+    }
+    sendGuestOtp(body) {
+        return this.authService.sendPhoneOtp(body.phone);
+    }
+    async verifyGuestOtp(body) {
+        await this.authService.verifyPhoneOtp(body.phone, body.otp);
+        return this.authService.registerViaPhone(body.phone, 'Guest');
+    }
+    sendPhoneOtp(body) {
+        return this.authService.sendPhoneOtp(body.phone);
+    }
+    verifyPhoneOtp(body) {
+        return this.authService.verifyPhoneOtp(body.phone, body.otp);
+    }
+    registerViaPhone(body) {
+        return this.authService.registerViaPhone(body.phone, body.name, body.password);
+    }
+    forgotPasswordPhone(body) {
+        return this.authService.forgotPasswordPhone(body.phone);
+    }
+    resetPasswordPhone(body) {
+        return this.authService.resetPasswordPhone(body.phone, body.otp, body.password);
+    }
+    impersonate(admin, userId) {
+        return this.authService.impersonate(admin.id, userId);
     }
 };
 exports.AuthController = AuthController;
@@ -70,8 +112,17 @@ __decorate([
 ], AuthController.prototype, "register", null);
 __decorate([
     (0, decorators_1.Public)(),
+    (0, common_1.Post)('guest'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a guest user for checkout without registration' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "guestSignup", null);
+__decorate([
+    (0, decorators_1.Public)(),
     (0, common_1.Post)('otp/send'),
-    (0, swagger_1.ApiOperation)({ summary: 'Send OTP to email' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Send OTP to email (also creates inactive placeholder if new email)' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [auth_dto_1.OtpRequestDto]),
@@ -89,7 +140,7 @@ __decorate([
 __decorate([
     (0, decorators_1.Public)(),
     (0, common_1.Post)('forgot-password'),
-    (0, swagger_1.ApiOperation)({ summary: 'Request password reset link' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Request password reset link via email' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [auth_dto_1.ForgotPasswordDto]),
@@ -117,6 +168,16 @@ __decorate([
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('customer/dashboard'),
+    (0, swagger_1.ApiOperation)({ summary: 'Customer dashboard summary (wallet, name, profile)' }),
+    __param(0, (0, decorators_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.User]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "getCustomerDashboard", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Patch)('change-password'),
     (0, swagger_1.ApiOperation)({ summary: 'Change password' }),
     __param(0, (0, decorators_1.CurrentUser)()),
@@ -125,6 +186,112 @@ __decorate([
     __metadata("design:paramtypes", [user_entity_1.User, auth_dto_1.ChangePasswordDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "changePassword", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Delete)('account'),
+    (0, swagger_1.ApiOperation)({ summary: 'Deactivate / soft-delete own account' }),
+    __param(0, (0, decorators_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.User]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "deleteAccount", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)('pos/customer'),
+    (0, swagger_1.ApiOperation)({ summary: 'Quick-create a customer at POS without full registration' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "createPosCustomer", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)('device-token'),
+    (0, swagger_1.ApiOperation)({ summary: 'Store FCM/web-push device token for the current user' }),
+    __param(0, (0, decorators_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.User, Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "storeDeviceToken", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)('guest/send-otp'),
+    (0, swagger_1.ApiOperation)({ summary: 'Guest: send OTP to phone (no registration required)' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "sendGuestOtp", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)('guest/verify'),
+    (0, swagger_1.ApiOperation)({ summary: 'Guest: verify phone OTP and create guest session' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "verifyGuestOtp", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)('phone/send-otp'),
+    (0, swagger_1.ApiOperation)({ summary: 'Step 1: send OTP to phone number for signup/login' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "sendPhoneOtp", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)('phone/verify'),
+    (0, swagger_1.ApiOperation)({ summary: 'Step 2: verify phone OTP' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "verifyPhoneOtp", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)('phone/register'),
+    (0, swagger_1.ApiOperation)({ summary: 'Step 3: complete phone-based registration or login' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "registerViaPhone", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)('forgot-password/phone'),
+    (0, swagger_1.ApiOperation)({ summary: 'Request password reset via phone OTP' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "forgotPasswordPhone", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Post)('reset-password/phone'),
+    (0, swagger_1.ApiOperation)({ summary: 'Reset password after phone OTP verification' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "resetPasswordPhone", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)('impersonate/:userId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Admin: generate token to impersonate another user' }),
+    __param(0, (0, decorators_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('userId', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.User, String]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "impersonate", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('Auth'),
     (0, common_1.Controller)('auth'),

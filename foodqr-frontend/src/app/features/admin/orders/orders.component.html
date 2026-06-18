@@ -1,158 +1,233 @@
-<div>
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="page-title">Orders</h1>
-    <span class="badge-info text-sm">{{ total }} total</span>
-  </div>
+<div class="space-y-5 fade-in-up">
 
-  <!-- Filters -->
-  <div class="card mb-5">
-    <div class="flex flex-wrap gap-3">
-      <input [(ngModel)]="search" (ngModelChange)="page = 1; loadOrders()" type="text"
-        placeholder="Search order #..." class="input-field w-48">
-      <select [(ngModel)]="filterStatus" (ngModelChange)="page = 1; loadOrders()" class="input-field w-40">
-        <option value="">All Statuses</option>
-        <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
-      </select>
-      <select [(ngModel)]="filterType" (ngModelChange)="page = 1; loadOrders()" class="input-field w-40">
-        <option value="">All Types</option>
-        <option *ngFor="let t of orderTypes" [value]="t">{{ t | titlecase }}</option>
-      </select>
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Live Orders</h1>
+      <p class="page-subtitle">Monitor and manage all incoming orders in real-time</p>
+    </div>
+    <div class="page-actions">
+      <span class="badge-info badge-plain px-3 py-1.5" style="font-size:13px">
+        {{ total }} total orders
+      </span>
     </div>
   </div>
 
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="search-input-wrapper" style="width:220px">
+      <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input [(ngModel)]="search" (ngModelChange)="page=1; loadOrders()" type="text"
+        placeholder="Search order number…" class="input-field">
+    </div>
+    <select [(ngModel)]="filterStatus" (ngModelChange)="page=1; loadOrders()" class="input-field" style="width:160px">
+      <option value="">All Statuses</option>
+      <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+    </select>
+    <select [(ngModel)]="filterType" (ngModelChange)="page=1; loadOrders()" class="input-field" style="width:160px">
+      <option value="">All Types</option>
+      <option *ngFor="let t of orderTypes" [value]="t">{{ t.replace('_',' ') | titlecase }}</option>
+    </select>
+  </div>
+
   <!-- Table -->
-  <div class="card overflow-hidden p-0">
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead class="bg-gray-50 border-b border-gray-100">
+  <div class="table-container">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
           <tr>
-            <th class="px-5 py-3 text-left font-semibold text-gray-600">Order #</th>
-            <th class="px-5 py-3 text-left font-semibold text-gray-600">Customer</th>
-            <th class="px-5 py-3 text-left font-semibold text-gray-600">Type</th>
-            <th class="px-5 py-3 text-left font-semibold text-gray-600">Items</th>
-            <th class="px-5 py-3 text-right font-semibold text-gray-600">Total</th>
-            <th class="px-5 py-3 text-center font-semibold text-gray-600">Status</th>
-            <th class="px-5 py-3 text-center font-semibold text-gray-600">Payment</th>
-            <th class="px-5 py-3 text-center font-semibold text-gray-600">Actions</th>
+            <th>Order #</th>
+            <th>Customer</th>
+            <th>Type</th>
+            <th>Items</th>
+            <th style="text-align:right">Total</th>
+            <th style="text-align:center">Status</th>
+            <th style="text-align:center">Payment</th>
+            <th style="text-align:right">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of orders" class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-            <td class="px-5 py-3 font-mono font-medium text-gray-900">#{{ order.orderSerialNo }}</td>
-            <td class="px-5 py-3 text-gray-700">{{ order.user?.name || 'Guest' }}</td>
-            <td class="px-5 py-3">
-              <span class="badge-gray capitalize">{{ order.orderType?.replace('_', ' ') }}</span>
+          <tr *ngFor="let order of orders">
+            <td>
+              <span class="font-mono font-bold" style="color:#0f172a;font-size:13.5px">#{{ order.orderSerialNo }}</span>
             </td>
-            <td class="px-5 py-3 text-gray-600">{{ order.items?.length }} items</td>
-            <td class="px-5 py-3 text-right font-semibold text-gray-900">${{ order.total | number:'1.2-2' }}</td>
-            <td class="px-5 py-3 text-center"><span [class]="getStatusBadge(order.status)">{{ order.status }}</span></td>
-            <td class="px-5 py-3 text-center">
-              <span [class]="order.paymentStatus === 'paid' ? 'badge-success' : 'badge-warning'">{{ order.paymentStatus }}</span>
+            <td>
+              <div class="flex items-center gap-2.5">
+                <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#6366f1,#a78bfa);flex-shrink:0">
+                  {{ (order.user?.name || 'G').charAt(0).toUpperCase() }}
+                </div>
+                <span style="font-size:13.5px;color:#334155;font-weight:500">{{ order.user?.name || 'Guest' }}</span>
+              </div>
             </td>
-            <td class="px-5 py-3 text-center">
-              <div class="flex items-center justify-center gap-2">
-                <button (click)="selectedOrder = order" class="text-orange-600 hover:text-orange-700 font-medium text-xs">View</button>
-                <button *ngIf="order.orderType === 'delivery'" (click)="openAssignModal(order)" class="text-blue-500 hover:text-blue-600 font-medium text-xs">Assign</button>
+            <td><span class="badge-gray capitalize">{{ order.orderType?.replace('_', ' ') }}</span></td>
+            <td>
+              <span style="font-size:13px;color:#64748b">{{ order.items?.length }} item{{ order.items?.length !== 1 ? 's' : '' }}</span>
+            </td>
+            <td style="text-align:right">
+              <span style="font-size:14px;font-weight:700;color:#0f172a">${{ order.total | number:'1.2-2' }}</span>
+            </td>
+            <td style="text-align:center"><span [class]="getStatusBadge(order.status)" class="capitalize">{{ order.status }}</span></td>
+            <td style="text-align:center">
+              <span [class]="order.paymentStatus === 'paid' ? 'badge-success' : 'badge-warning'" class="capitalize">
+                {{ order.paymentStatus }}
+              </span>
+            </td>
+            <td style="text-align:right">
+              <div class="flex items-center justify-end gap-1">
+                <button (click)="selectedOrder = order" class="action-link action-link-primary">View</button>
+                <span *ngIf="order.orderType === 'delivery'" style="color:#e2e8f0">·</span>
+                <button *ngIf="order.orderType === 'delivery'" (click)="openAssignModal(order)" class="action-link action-link-blue">Assign</button>
               </div>
             </td>
           </tr>
           <tr *ngIf="!loading && !orders.length">
-            <td colspan="8" class="px-5 py-12 text-center text-gray-400">No orders found</td>
+            <td colspan="8">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+                <p class="empty-state-title">No orders found</p>
+                <p class="empty-state-desc">Orders will appear here once customers start placing them.</p>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <!-- Pagination -->
-    <div *ngIf="pages > 1" class="flex items-center justify-between px-5 py-4 border-t border-gray-100">
-      <p class="text-sm text-gray-500">Showing {{ (page-1)*limit+1 }}-{{ [page*limit, total] | min }} of {{ total }}</p>
+    <div *ngIf="pages > 1" class="flex items-center justify-between px-5 py-3.5" style="border-top:1px solid #f1f5f9">
+      <p style="font-size:12.5px;color:#64748b">
+        Showing <strong style="color:#334155">{{ (page-1)*limit+1 }}–{{ [page*limit, total] | min }}</strong> of <strong style="color:#334155">{{ total }}</strong> orders
+      </p>
       <div class="flex gap-2">
-        <button (click)="page = page - 1; loadOrders()" [disabled]="page === 1" class="btn-secondary py-1.5 px-3 text-xs disabled:opacity-50">Prev</button>
-        <button (click)="page = page + 1; loadOrders()" [disabled]="page >= pages" class="btn-secondary py-1.5 px-3 text-xs disabled:opacity-50">Next</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Delivery Boy Assignment Modal -->
-  <div *ngIf="showAssignModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
-      <div class="flex items-center justify-between p-6 border-b">
-        <h2 class="font-bold text-gray-900">Assign Delivery Boy</h2>
-        <button (click)="showAssignModal = false" class="text-gray-400 hover:text-gray-600">✕</button>
-      </div>
-      <div class="p-6 space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Select Delivery Boy</label>
-          <select [(ngModel)]="selectedDeliveryBoyId" class="input-field w-full">
-            <option value="">— Choose —</option>
-            <option *ngFor="let boy of deliveryBoys" [value]="boy.id">{{ boy.name }} ({{ boy.phone }})</option>
-          </select>
-        </div>
-        <p *ngIf="!deliveryBoys.length" class="text-sm text-gray-400">No delivery staff found. Add staff with role "delivery_boy" first.</p>
-        <div class="flex gap-3">
-          <button (click)="assignDeliveryBoy()" [disabled]="!selectedDeliveryBoyId" class="btn-primary flex-1">Assign</button>
-          <button (click)="showAssignModal = false" class="btn-secondary flex-1">Cancel</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Order Detail Modal -->
-  <div *ngIf="selectedOrder" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between p-6 border-b">
-        <h2 class="text-lg font-bold text-gray-900">Order #{{ selectedOrder.orderSerialNo }}</h2>
-        <button (click)="selectedOrder = null" class="text-gray-400 hover:text-gray-600">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
+        <button (click)="page=page-1; loadOrders()" [disabled]="page===1" class="btn-secondary btn-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          Prev
+        </button>
+        <button (click)="page=page+1; loadOrders()" [disabled]="page>=pages" class="btn-secondary btn-sm">
+          Next
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
       </div>
-      <div class="p-6">
-        <div class="grid grid-cols-2 gap-4 mb-5 text-sm">
-          <div><span class="text-gray-500">Customer:</span> <span class="font-medium">{{ selectedOrder.user?.name || 'Guest' }}</span></div>
-          <div><span class="text-gray-500">Type:</span> <span class="font-medium capitalize">{{ selectedOrder.orderType?.replace('_', ' ') }}</span></div>
-          <div><span class="text-gray-500">Payment:</span> <span class="font-medium">{{ selectedOrder.paymentMethod }}</span></div>
-          <div><span class="text-gray-500">Status:</span> <span [class]="getStatusBadge(selectedOrder.status)" class="ml-1">{{ selectedOrder.status }}</span></div>
-        </div>
+    </div>
+  </div>
+</div>
 
-        <!-- Items -->
-        <div class="border rounded-lg overflow-hidden mb-5">
-          <table class="w-full text-sm">
-            <thead class="bg-gray-50"><tr>
-              <th class="px-4 py-2 text-left text-gray-600">Item</th>
-              <th class="px-4 py-2 text-center text-gray-600">Qty</th>
-              <th class="px-4 py-2 text-right text-gray-600">Price</th>
-            </tr></thead>
+<!-- ── Assign Delivery Modal ── -->
+<div *ngIf="showAssignModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <p class="modal-header-title">Assign Delivery Staff</p>
+      <button (click)="showAssignModal=false" class="modal-close-btn">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="label">Select Delivery Staff</label>
+        <select [(ngModel)]="selectedDeliveryBoyId" class="input-field">
+          <option value="">— Choose staff member —</option>
+          <option *ngFor="let boy of deliveryBoys" [value]="boy.id">{{ boy.name }}{{ boy.phone ? ' (' + boy.phone + ')' : '' }}</option>
+        </select>
+      </div>
+      <div *ngIf="!deliveryBoys.length" class="flex items-center gap-2 p-3 rounded-lg" style="background:#fffbeb;border:1px solid #fde68a">
+        <svg class="w-4 h-4 flex-shrink-0" style="color:#d97706" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        <p style="font-size:12.5px;color:#92400e">No delivery staff found. Add staff with a delivery role first.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button (click)="showAssignModal=false" class="btn-secondary btn-sm">Cancel</button>
+      <button (click)="assignDeliveryBoy()" [disabled]="!selectedDeliveryBoyId" class="btn-primary btn-sm">Assign Driver</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Order Detail Modal ── -->
+<div *ngIf="selectedOrder" class="modal-backdrop">
+  <div class="modal-box" style="max-width:640px">
+    <div class="modal-header">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center w-8 h-8 rounded-lg" style="background:#fff7ed">
+          <svg class="w-4 h-4" style="color:#ea580c" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+        </div>
+        <p class="modal-header-title">Order #{{ selectedOrder.orderSerialNo }}</p>
+      </div>
+      <button (click)="selectedOrder=null" class="modal-close-btn">×</button>
+    </div>
+    <div class="modal-body space-y-5">
+      <!-- Meta grid -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="p-3 rounded-xl" style="background:#f8fafc;border:1px solid #f1f5f9">
+          <p style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em">Customer</p>
+          <p style="font-size:13.5px;font-weight:600;color:#0f172a;margin-top:4px">{{ selectedOrder.user?.name || 'Guest' }}</p>
+        </div>
+        <div class="p-3 rounded-xl" style="background:#f8fafc;border:1px solid #f1f5f9">
+          <p style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em">Order Type</p>
+          <p class="capitalize" style="font-size:13.5px;font-weight:600;color:#0f172a;margin-top:4px">{{ selectedOrder.orderType?.replace('_',' ') }}</p>
+        </div>
+        <div class="p-3 rounded-xl" style="background:#f8fafc;border:1px solid #f1f5f9">
+          <p style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em">Payment Method</p>
+          <p class="capitalize" style="font-size:13.5px;font-weight:600;color:#0f172a;margin-top:4px">{{ selectedOrder.paymentMethod }}</p>
+        </div>
+        <div class="p-3 rounded-xl" style="background:#f8fafc;border:1px solid #f1f5f9">
+          <p style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em">Status</p>
+          <div class="mt-1"><span [class]="getStatusBadge(selectedOrder.status)" class="capitalize">{{ selectedOrder.status }}</span></div>
+        </div>
+      </div>
+
+      <!-- Items -->
+      <div>
+        <p style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Order Items</p>
+        <div class="rounded-xl overflow-hidden" style="border:1px solid #e2e8f0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th style="text-align:center">Qty</th>
+                <th style="text-align:right">Price</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr *ngFor="let item of selectedOrder.items" class="border-t border-gray-50">
-                <td class="px-4 py-2">{{ item.itemName }} <span *ngIf="item.variationName" class="text-gray-400">({{ item.variationName }})</span></td>
-                <td class="px-4 py-2 text-center">{{ item.quantity }}</td>
-                <td class="px-4 py-2 text-right">${{ item.subtotal | number:'1.2-2' }}</td>
+              <tr *ngFor="let item of selectedOrder.items">
+                <td>
+                  {{ item.itemName }}
+                  <span *ngIf="item.variationName" style="color:#94a3b8;font-size:12px"> ({{ item.variationName }})</span>
+                </td>
+                <td style="text-align:center;color:#64748b">{{ item.quantity }}</td>
+                <td style="text-align:right;font-weight:600;color:#0f172a">${{ item.subtotal | number:'1.2-2' }}</td>
               </tr>
             </tbody>
           </table>
         </div>
+      </div>
 
-        <!-- Totals -->
-        <div class="text-sm space-y-1 border-t pt-3 mb-5">
-          <div class="flex justify-between text-gray-600"><span>Subtotal</span><span>${{ selectedOrder.subtotal | number:'1.2-2' }}</span></div>
-          <div class="flex justify-between text-gray-600"><span>Tax</span><span>${{ selectedOrder.totalTax | number:'1.2-2' }}</span></div>
-          <div class="flex justify-between font-bold text-gray-900 text-base"><span>Total</span><span>${{ selectedOrder.total | number:'1.2-2' }}</span></div>
+      <!-- Totals -->
+      <div class="rounded-xl p-4" style="background:#f8fafc;border:1px solid #f1f5f9">
+        <div class="flex justify-between py-1.5" style="font-size:13px;color:#64748b">
+          <span>Subtotal</span><span style="color:#334155">${{ selectedOrder.subtotal | number:'1.2-2' }}</span>
         </div>
+        <div class="flex justify-between py-1.5" style="font-size:13px;color:#64748b">
+          <span>Tax</span><span style="color:#334155">${{ selectedOrder.totalTax | number:'1.2-2' }}</span>
+        </div>
+        <div class="flex justify-between py-2 mt-1" style="font-size:15px;font-weight:800;color:#0f172a;border-top:1.5px solid #e2e8f0">
+          <span>Total</span><span>${{ selectedOrder.total | number:'1.2-2' }}</span>
+        </div>
+      </div>
 
-        <!-- Update status -->
-        <div class="flex gap-2 flex-wrap">
-          <button *ngFor="let s of getNextStatuses(selectedOrder.status)"
-            (click)="updateStatus(selectedOrder, s)"
-            class="btn-primary py-2 px-4 text-sm capitalize">
-            Mark as {{ s.replace('_', ' ') }}
-          </button>
-          <button *ngIf="selectedOrder.orderType === 'delivery'" (click)="openAssignModal(selectedOrder); selectedOrder = null"
-            class="btn-secondary py-2 px-4 text-sm">
-            Assign Delivery Boy
-          </button>
-        </div>
+      <!-- Actions -->
+      <div *ngIf="getNextStatuses(selectedOrder.status).length || selectedOrder.orderType==='delivery'" class="flex flex-wrap gap-2">
+        <button *ngFor="let s of getNextStatuses(selectedOrder.status)"
+          (click)="updateStatus(selectedOrder, s)"
+          class="btn-primary btn-sm capitalize">
+          Mark as {{ s.replace('_',' ') }}
+        </button>
+        <button *ngIf="selectedOrder.orderType==='delivery'"
+          (click)="openAssignModal(selectedOrder); selectedOrder=null"
+          class="btn-secondary btn-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          Assign Delivery
+        </button>
       </div>
     </div>
   </div>

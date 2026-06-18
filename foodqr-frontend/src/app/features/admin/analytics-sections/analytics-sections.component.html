@@ -1,78 +1,112 @@
-<div class="p-6">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Dashboard Widgets</h1>
-    <button (click)="openCreate()" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium">+ Add Widget</button>
+﻿<div class="space-y-5 fade-in-up">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Dashboard Widgets</h1>
+      <p class="page-subtitle">Configure KPI cards and analytics sections displayed on the main dashboard</p>
+    </div>
+    <button (click)="openCreate()" class="btn-primary btn-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Add Widget
+    </button>
   </div>
 
-  <div *ngIf="loading" class="flex justify-center py-10">
-    <div class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="spinner"></div>
   </div>
 
-  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <div *ngFor="let s of sections" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-      <div class="flex items-start justify-between">
+  <!-- Widget grid -->
+  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+    <div *ngFor="let s of sections"
+      class="card"
+      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(0,0,0,0.09)'"
+      onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div class="flex items-start justify-between mb-3">
         <div>
-          <p class="font-semibold text-gray-900">{{ s.title }}</p>
-          <p class="text-xs text-gray-500 mt-0.5">{{ widgetLabel(s.widgetType) }} · {{ metricLabel(s.metricKey) }}</p>
+          <p style="font-size:14px;font-weight:700;color:#0f172a">{{ s.title }}</p>
+          <p style="font-size:12px;color:#94a3b8;margin-top:3px">
+            {{ widgetLabel(s.widgetType) }} &middot; {{ metricLabel(s.metricKey) }}
+          </p>
         </div>
-        <div class="flex items-center gap-2">
-          <button (click)="toggle(s)"
-            [class]="s.isVisible ? 'text-green-600' : 'text-gray-400'"
-            class="text-xs font-medium">{{ s.isVisible ? 'Visible' : 'Hidden' }}</button>
-        </div>
+        <button (click)="toggle(s)"
+          class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors"
+          [style.background]="s.isVisible ? '#f0fdf4' : '#f8fafc'"
+          [style.color]="s.isVisible ? '#16a34a' : '#94a3b8'"
+          style="font-size:11.5px;font-weight:600;border:1px solid;outline:none"
+          [style.borderColor]="s.isVisible ? '#bbf7d0' : '#e2e8f0'">
+          <span style="width:6px;height:6px;border-radius:50%;display:inline-block"
+            [style.background]="s.isVisible ? '#22c55e' : '#cbd5e1'"></span>
+          {{ s.isVisible ? 'Visible' : 'Hidden' }}
+        </button>
       </div>
-      <div class="flex gap-2 mt-4">
-        <button (click)="openEdit(s)" class="text-xs text-blue-600 font-medium hover:underline">Edit</button>
-        <button (click)="remove(s.id)" class="text-xs text-red-500 font-medium hover:underline">Delete</button>
+      <div class="flex items-center justify-between mt-4 pt-3"
+        style="border-top:1px solid #f1f5f9">
+        <span style="font-size:11.5px;color:#94a3b8">Order: {{ s.sortOrder ?? 0 }}</span>
+        <div class="flex gap-1">
+          <button (click)="openEdit(s)" class="action-link action-link-blue">Edit</button>
+          <button (click)="remove(s.id)" class="action-link action-link-danger">Delete</button>
+        </div>
       </div>
     </div>
 
-    <div *ngIf="!sections.length" class="col-span-3 text-center py-16 text-gray-400">
-      <p class="text-4xl mb-3">📊</p>
-      <p class="font-medium">No dashboard widgets configured yet</p>
-      <p class="text-sm mt-1">Click "Add Widget" to create your first KPI card</p>
+    <!-- Empty state -->
+    <div *ngIf="!sections.length" class="col-span-3">
+      <div class="empty-state card py-20">
+        <div class="empty-state-icon">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <p class="empty-state-title">No widgets configured</p>
+        <p class="empty-state-desc">Add KPI cards and chart widgets to power up your main dashboard.</p>
+        <button (click)="openCreate()" class="btn-primary btn-sm">Add First Widget</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Modal -->
-<div *ngIf="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-    <h2 class="text-lg font-bold mb-4">{{ editing ? 'Edit Widget' : 'New Widget' }}</h2>
-
-    <div class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-        <input [(ngModel)]="form.title" placeholder="e.g. Total Revenue"
-          class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-400">
+<!-- Widget Form Modal -->
+<div *ngIf="showModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editing ? 'Edit Widget' : 'New Widget' }}</p>
+      <button (click)="showModal=false" class="modal-close-btn">x</button>
+    </div>
+    <div class="modal-body space-y-4">
+      <div class="form-group">
+        <label class="label">Title</label>
+        <input [(ngModel)]="form.title" class="input-field" placeholder="e.g. Total Revenue">
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Widget Type</label>
-        <select [(ngModel)]="form.widgetType" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm">
+      <div class="form-group">
+        <label class="label">Widget Type</label>
+        <select [(ngModel)]="form.widgetType" class="input-field">
           <option *ngFor="let w of widgetTypes" [value]="w.value">{{ w.label }}</option>
         </select>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Metric</label>
-        <select [(ngModel)]="form.metricKey" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm">
+      <div class="form-group">
+        <label class="label">Metric</label>
+        <select [(ngModel)]="form.metricKey" class="input-field">
           <option value="">-- Select metric --</option>
           <option *ngFor="let m of metricKeys" [value]="m.value">{{ m.label }}</option>
         </select>
       </div>
-      <div class="flex items-center gap-2">
-        <input type="checkbox" [(ngModel)]="form.isVisible" id="visible" class="w-4 h-4 accent-orange-500">
-        <label for="visible" class="text-sm text-gray-700">Visible on dashboard</label>
+      <div class="form-group">
+        <label class="label">Sort Order</label>
+        <input type="number" [(ngModel)]="form.sortOrder" min="0" class="input-field" placeholder="0">
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
-        <input type="number" [(ngModel)]="form.sortOrder" min="0"
-          class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm">
+      <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+        <input type="checkbox" [(ngModel)]="form.isVisible" id="visible" class="w-4 h-4">
+        <label for="visible" style="font-size:13.5px;font-weight:500;color:#334155;cursor:pointer">Visible on dashboard</label>
       </div>
     </div>
-
-    <div class="flex gap-3 mt-6">
-      <button (click)="save()" class="flex-1 btn-primary py-2.5 rounded-xl text-sm font-medium">Save</button>
-      <button (click)="showModal = false" class="flex-1 border border-gray-300 py-2.5 rounded-xl text-sm font-medium text-gray-700">Cancel</button>
+    <div class="modal-footer">
+      <button (click)="showModal=false" class="btn-secondary btn-sm">Cancel</button>
+      <button (click)="save()" class="btn-primary btn-sm">
+        {{ editing ? 'Update Widget' : 'Add Widget' }}
+      </button>
     </div>
   </div>
 </div>

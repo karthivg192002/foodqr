@@ -60,6 +60,10 @@ __decorate([
     __metadata("design:type", String)
 ], DiningTable.prototype, "qrImageUrl", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], DiningTable.prototype, "accessToken", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'enum', enum: enums_1.TableStatus, default: enums_1.TableStatus.AVAILABLE }),
     __metadata("design:type", String)
 ], DiningTable.prototype, "status", void 0);

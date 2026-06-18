@@ -21,10 +21,12 @@ const config_1 = require("@nestjs/config");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 const user_entity_1 = require("../users/entities/user.entity");
+const sms_gateways_service_1 = require("../sms-gateways/sms-gateways.service");
 let NotificationsService = NotificationsService_1 = class NotificationsService {
-    constructor(userRepo, configService) {
+    constructor(userRepo, configService, smsService) {
         this.userRepo = userRepo;
         this.configService = configService;
+        this.smsService = smsService;
         this.logger = new common_1.Logger(NotificationsService_1.name);
         this.firebaseInitialized = false;
         this.initFirebase();
@@ -83,6 +85,9 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
         if (user.email) {
             await this.sendEmail(user.email, title, `<p>${body}</p>`);
         }
+        if (user.phone) {
+            this.smsService.send(user.phone, `FoodQR: Your order #${orderSerial} is now ${status}.`).catch(() => null);
+        }
     }
     async sendEmail(to, subject, html) {
         try {
@@ -124,6 +129,7 @@ exports.NotificationsService = NotificationsService = NotificationsService_1 = _
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        sms_gateways_service_1.SmsGatewaysService])
 ], NotificationsService);
 //# sourceMappingURL=notifications.service.js.map

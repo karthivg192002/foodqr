@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { TenantMiddleware } from './modules/tenants/tenant.middleware';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
@@ -37,6 +38,13 @@ import { DeliveryZonesModule } from './modules/delivery-zones/delivery-zones.mod
 import { LanguagesModule } from './modules/languages/languages.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { NewsletterModule } from './modules/newsletter/newsletter.module';
+import { NavMenusModule } from './modules/nav-menus/nav-menus.module';
+import { RoleDefinitionsModule } from './modules/role-definitions/role-definitions.module';
+import { MenuTemplatesModule } from './modules/menu-templates/menu-templates.module';
+import { LicenseModule } from './modules/license/license.module';
+import { DefaultAccessModule } from './modules/default-access/default-access.module';
+import { InstallerModule } from './modules/installer/installer.module';
+import { TenantsModule } from './modules/tenants/tenants.module';
 
 @Module({
   imports: [
@@ -98,6 +106,17 @@ import { NewsletterModule } from './modules/newsletter/newsletter.module';
     LanguagesModule,
     SubscriptionsModule,
     NewsletterModule,
+    NavMenusModule,
+    RoleDefinitionsModule,
+    MenuTemplatesModule,
+    LicenseModule,
+    DefaultAccessModule,
+    InstallerModule,
+    TenantsModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TenantMiddleware).forRoutes('*');
+  }
+}

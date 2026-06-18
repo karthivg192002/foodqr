@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationChannel = exports.TableStatus = exports.UserStatus = exports.LoyaltyPeriodType = exports.LoyaltyRewardType = exports.LoyaltyStampCalculationType = exports.ItemType = exports.PaymentStatus = exports.PaymentMethod = exports.OrderStatus = exports.OrderType = exports.UserRole = void 0;
 var UserRole;
 (function (UserRole) {
+    UserRole["SUPER_ADMIN"] = "super_admin";
     UserRole["ADMIN"] = "admin";
     UserRole["CUSTOMER"] = "customer";
     UserRole["WAITER"] = "waiter";
@@ -42,6 +43,7 @@ var PaymentMethod;
     PaymentMethod["FLUTTERWAVE"] = "flutterwave";
     PaymentMethod["PAYTM"] = "paytm";
     PaymentMethod["BKASH"] = "bkash";
+    PaymentMethod["PAYSTACK"] = "paystack";
 })(PaymentMethod || (exports.PaymentMethod = PaymentMethod = {}));
 var PaymentStatus;
 (function (PaymentStatus) {

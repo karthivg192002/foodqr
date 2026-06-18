@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Order, OrderStatus, PaginatedResponse } from '../../../core/models';
 
 @Component({
@@ -26,11 +27,13 @@ export class OrdersComponent implements OnInit {
   assignOrderId = '';
   selectedDeliveryBoyId = '';
 
-  constructor(private api: ApiService, private toastr: ToastrService) {}
+  constructor(private api: ApiService, private toastr: ToastrService, private auth: AuthService) {}
 
   ngOnInit(): void {
     this.loadOrders();
-    this.loadDeliveryBoys();
+    if (!this.auth.isWaiter) {
+      this.loadDeliveryBoys();
+    }
   }
 
   loadDeliveryBoys(): void {
@@ -46,8 +49,8 @@ export class OrdersComponent implements OnInit {
     if (this.filterType) params.orderType = this.filterType;
     if (this.search) params.search = this.search;
 
-    this.api.get<PaginatedResponse<Order>>('admin/orders', params).subscribe({
-      next: (res) => { this.orders = res.data; this.total = res.total; this.loading = false; },
+    this.api.getPaginated<PaginatedResponse<Order>>('admin/orders', params).subscribe({
+      next: (res) => { this.orders = res.data ?? []; this.total = res.total ?? 0; this.loading = false; },
       error: () => { this.loading = false; },
     });
   }

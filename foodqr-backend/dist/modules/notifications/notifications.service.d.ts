@@ -1,13 +1,15 @@
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../users/entities/user.entity';
+import { SmsGatewaysService } from '../sms-gateways/sms-gateways.service';
 export declare class NotificationsService {
     private userRepo;
     private configService;
+    private smsService;
     private readonly logger;
     private firebaseInitialized;
     private transporter;
-    constructor(userRepo: Repository<User>, configService: ConfigService);
+    constructor(userRepo: Repository<User>, configService: ConfigService, smsService: SmsGatewaysService);
     private initFirebase;
     private initEmail;
     sendPushNotification(token: string, title: string, body: string, data?: Record<string, string>): Promise<void>;

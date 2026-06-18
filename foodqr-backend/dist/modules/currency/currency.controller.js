@@ -25,6 +25,9 @@ let CurrencyController = class CurrencyController {
         this.currencyService = currencyService;
     }
     findActive() { return this.currencyService.findActive(); }
+    convert(amount, to) {
+        return this.currencyService.convertAmount(parseFloat(amount) || 0, to);
+    }
     findAll() { return this.currencyService.findAll(); }
     create(dto) { return this.currencyService.create(dto); }
     update(id, dto) { return this.currencyService.update(id, dto); }
@@ -41,6 +44,15 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], CurrencyController.prototype, "findActive", null);
+__decorate([
+    (0, decorators_1.Public)(),
+    (0, common_1.Get)('frontend/currencies/convert'),
+    __param(0, (0, common_1.Query)('amount')),
+    __param(1, (0, common_1.Query)('to')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], CurrencyController.prototype, "convert", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),

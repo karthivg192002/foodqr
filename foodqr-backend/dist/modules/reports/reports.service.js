@@ -170,6 +170,147 @@ let ReportsService = class ReportsService {
         ]);
         return { salesByDay, revenueByType, topItems, newCustomers };
     }
+    async getCategoryWiseSales(startDate, endDate) {
+        const qb = this.orderItemRepo.createQueryBuilder('oi')
+            .leftJoin('oi.item', 'item')
+            .leftJoin('oi.order', 'order')
+            .leftJoin('item.category', 'category')
+            .select('category.name', 'categoryName')
+            .addSelect('category.id', 'categoryId')
+            .addSelect('SUM(oi.quantity)', 'totalQty')
+            .addSelect('SUM(oi.totalPrice)', 'totalRevenue')
+            .addSelect('COUNT(DISTINCT order.id)', 'orderCount')
+            .where('order.paymentStatus = :ps', { ps: enums_1.PaymentStatus.PAID })
+            .groupBy('category.id')
+            .addGroupBy('category.name')
+            .orderBy('SUM(oi.totalPrice)', 'DESC');
+        if (startDate)
+            qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+        if (endDate)
+            qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+        return qb.getRawMany();
+    }
+    async getHourlyPeakOrders(startDate, endDate) {
+        const qb = this.orderRepo.createQueryBuilder('order')
+            .select('EXTRACT(HOUR FROM order.createdAt)', 'hour')
+            .addSelect('COUNT(order.id)', 'orderCount')
+            .addSelect('SUM(order.total)', 'revenue')
+            .groupBy('EXTRACT(HOUR FROM order.createdAt)')
+            .orderBy('EXTRACT(HOUR FROM order.createdAt)', 'ASC');
+        if (startDate)
+            qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+        if (endDate)
+            qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+        return qb.getRawMany();
+    }
+    async getStaffLeaderboard(startDate, endDate) {
+        const qb = this.orderRepo.createQueryBuilder('order')
+            .leftJoin('order.staff', 'staff')
+            .where('order.staffId IS NOT NULL')
+            .andWhere('order.status = :s', { s: enums_1.OrderStatus.DELIVERED })
+            .select('staff.id', 'staffId')
+            .addSelect('staff.name', 'staffName')
+            .addSelect('staff.role', 'role')
+            .addSelect('COUNT(order.id)', 'ordersHandled')
+            .addSelect('SUM(order.total)', 'totalRevenue')
+            .groupBy('staff.id')
+            .addGroupBy('staff.name')
+            .addGroupBy('staff.role')
+            .orderBy('COUNT(order.id)', 'DESC')
+            .limit(10);
+        if (startDate)
+            qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+        if (endDate)
+            qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+        return qb.getRawMany();
+    }
+    async getSalesOverview(startDate, endDate) {
+        const start = startDate ? new Date(startDate) : new Date('2000-01-01');
+        const end = endDate ? new Date(endDate) : new Date();
+        end.setHours(23, 59, 59, 999);
+        const [totalOrders, paidOrders, totalRevenue, avgOrder, topItem] = await Promise.all([
+            this.orderRepo.createQueryBuilder('o').where('o.createdAt BETWEEN :start AND :end', { start, end }).getCount(),
+            this.orderRepo.createQueryBuilder('o').where('o.paymentStatus = :ps', { ps: enums_1.PaymentStatus.PAID }).andWhere('o.createdAt BETWEEN :start AND :end', { start, end }).getCount(),
+            this.transactionRepo.createQueryBuilder('tx').where('tx.status = :s', { s: enums_1.PaymentStatus.PAID }).andWhere('tx.createdAt BETWEEN :start AND :end', { start, end }).select('SUM(tx.amount)', 'total').getRawOne(),
+            this.transactionRepo.createQueryBuilder('tx').where('tx.status = :s', { s: enums_1.PaymentStatus.PAID }).andWhere('tx.createdAt BETWEEN :start AND :end', { start, end }).select('AVG(tx.amount)', 'avg').getRawOne(),
+            this.orderItemRepo.createQueryBuilder('oi')
+                .leftJoin('oi.item', 'item')
+                .where('oi.createdAt BETWEEN :start AND :end', { start, end })
+                .select('item.name', 'itemName')
+                .addSelect('SUM(oi.quantity)', 'qty')
+                .groupBy('item.name').orderBy('qty', 'DESC').limit(1).getRawOne(),
+        ]);
+        const revenue = parseFloat(totalRevenue?.total || '0');
+        return {
+            period: { startDate: start.toISOString().split('T')[0], endDate: end.toISOString().split('T')[0] },
+            totalOrders, paidOrders, unpaidOrders: totalOrders - paidOrders,
+            totalRevenue: revenue,
+            avgOrderValue: parseFloat(avgOrder?.avg || '0'),
+            topSellingItem: topItem?.itemName || null,
+        };
+    }
+    async getQrRevenueSummary(startDate, endDate) {
+        const qb = this.orderRepo.createQueryBuilder('order')
+            .where('order.paymentStatus = :ps', { ps: enums_1.PaymentStatus.PAID })
+            .select('order.orderType', 'orderType')
+            .addSelect('COUNT(order.id)', 'orderCount')
+            .addSelect('SUM(order.total)', 'revenue')
+            .addSelect('AVG(order.total)', 'avgOrderValue')
+            .groupBy('order.orderType');
+        if (startDate)
+            qb.andWhere('order.createdAt >= :start', { start: new Date(startDate) });
+        if (endDate)
+            qb.andWhere('order.createdAt <= :end', { end: new Date(endDate) });
+        return qb.getRawMany();
+    }
+    async getCustomerStates(startDate, endDate) {
+        const [totalCustomers, newCustomers, returningCustomers, guestCustomers, byRole] = await Promise.all([
+            this.userRepo.count({ where: { role: enums_1.UserRole.CUSTOMER } }),
+            this.userRepo.createQueryBuilder('u')
+                .where('u.role = :role', { role: enums_1.UserRole.CUSTOMER })
+                .andWhere(startDate ? 'u.createdAt >= :start' : '1=1', { start: startDate ? new Date(startDate) : undefined })
+                .andWhere(endDate ? 'u.createdAt <= :end' : '1=1', { end: endDate ? new Date(endDate) : undefined })
+                .getCount(),
+            this.orderRepo.createQueryBuilder('o')
+                .innerJoin('o.user', 'u')
+                .where('u.role = :role', { role: enums_1.UserRole.CUSTOMER })
+                .select('COUNT(DISTINCT o.userId)', 'count')
+                .getRawOne(),
+            this.userRepo.count({ where: { isGuest: true } }),
+            this.userRepo.createQueryBuilder('u')
+                .select('u.role', 'role')
+                .addSelect('COUNT(u.id)', 'count')
+                .groupBy('u.role')
+                .getRawMany(),
+        ]);
+        return {
+            totalCustomers,
+            newCustomers,
+            returningCustomers: parseInt(returningCustomers?.count || '0', 10),
+            guestCustomers,
+            byRole,
+        };
+    }
+    async getPeakOrdersBarChart(startDate, endDate) {
+        const hourly = await this.getHourlyPeakOrders(startDate, endDate);
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const byDayOfWeek = await this.orderRepo.createQueryBuilder('order')
+            .select('EXTRACT(DOW FROM order.createdAt)', 'dayOfWeek')
+            .addSelect('COUNT(order.id)', 'orderCount')
+            .addSelect('SUM(order.total)', 'revenue')
+            .groupBy('EXTRACT(DOW FROM order.createdAt)')
+            .orderBy('dayOfWeek', 'ASC')
+            .getRawMany();
+        const allHours = Array.from({ length: 24 }, (_, i) => {
+            const row = hourly.find((r) => parseInt(r.hour) === i);
+            return { hour: i, label: `${i}:00`, orderCount: parseInt(row?.ordercount || '0'), revenue: parseFloat(row?.revenue || '0') };
+        });
+        const allDays = days.map((name, i) => {
+            const row = byDayOfWeek.find((r) => parseInt(r.dayofweek) === i);
+            return { dayOfWeek: i, label: name, orderCount: parseInt(row?.ordercount || '0'), revenue: parseFloat(row?.revenue || '0') };
+        });
+        return { hourly: allHours, daily: allDays };
+    }
     async getCustomerStats() {
         const [total, newThisMonth, topCustomers] = await Promise.all([
             this.userRepo.count({ where: { role: enums_1.UserRole.CUSTOMER } }),

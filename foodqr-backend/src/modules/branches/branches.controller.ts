@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ParseUUIDPipe, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { BranchesService, CreateBranchDto } from './branches.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -50,4 +51,13 @@ export class BranchesController {
   @ApiBearerAuth()
   @Delete('admin/branches/:id')
   remove(@Param('id', ParseUUIDPipe) id: string) { return this.branchesService.remove(id); }
+
+  /** Export branches to Excel */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @Get('admin/branches/export/excel')
+  async exportExcel(@Res() res: Response) {
+    return this.branchesService.exportExcel(res);
+  }
 }

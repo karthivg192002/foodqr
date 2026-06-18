@@ -20,4 +20,10 @@ export declare class DiningTablesService {
     }>;
     regenerateQr(id: string, frontendUrl: string): Promise<DiningTable>;
     updateStatus(id: string, status: TableStatus): Promise<DiningTable>;
+    regenerateToken(id: string): Promise<{
+        id: string;
+        accessToken: string;
+        message: string;
+    }>;
+    exportExcel(branchId: string, res: any): Promise<void>;
 }

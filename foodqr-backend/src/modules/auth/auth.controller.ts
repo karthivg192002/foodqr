@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Delete, Body, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Patch, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
@@ -6,7 +6,9 @@ import {
   ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto,
 } from './dto/auth.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser, Public } from '../../common/decorators';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { CurrentUser, Public, Roles } from '../../common/decorators';
+import { UserRole } from '../../common/enums';
 import { User } from '../users/entities/user.entity';
 
 @ApiTags('Auth')
@@ -112,5 +114,72 @@ export class AuthController {
     @Body() dto: { type: 'web' | 'mobile'; token: string },
   ) {
     return this.authService.storeDeviceToken(user.id, dto.type, dto.token);
+  }
+
+  /** Guest phone OTP signup — send OTP without account creation */
+  @Public()
+  @Post('guest/send-otp')
+  @ApiOperation({ summary: 'Guest: send OTP to phone (no registration required)' })
+  sendGuestOtp(@Body() body: { phone: string }) {
+    return this.authService.sendPhoneOtp(body.phone);
+  }
+
+  /** Guest phone OTP signup — verify and create a guest session */
+  @Public()
+  @Post('guest/verify')
+  @ApiOperation({ summary: 'Guest: verify phone OTP and create guest session' })
+  async verifyGuestOtp(@Body() body: { phone: string; otp: string }) {
+    await this.authService.verifyPhoneOtp(body.phone, body.otp);
+    return this.authService.registerViaPhone(body.phone, 'Guest');
+  }
+
+  /** Phone OTP signup — step 1: send OTP */
+  @Public()
+  @Post('phone/send-otp')
+  @ApiOperation({ summary: 'Step 1: send OTP to phone number for signup/login' })
+  sendPhoneOtp(@Body() body: { phone: string }) {
+    return this.authService.sendPhoneOtp(body.phone);
+  }
+
+  /** Phone OTP signup — step 2: verify OTP */
+  @Public()
+  @Post('phone/verify')
+  @ApiOperation({ summary: 'Step 2: verify phone OTP' })
+  verifyPhoneOtp(@Body() body: { phone: string; otp: string }) {
+    return this.authService.verifyPhoneOtp(body.phone, body.otp);
+  }
+
+  /** Phone OTP signup — step 3: complete registration or login */
+  @Public()
+  @Post('phone/register')
+  @ApiOperation({ summary: 'Step 3: complete phone-based registration or login' })
+  registerViaPhone(@Body() body: { phone: string; name?: string; password?: string }) {
+    return this.authService.registerViaPhone(body.phone, body.name, body.password);
+  }
+
+  /** Forgot password via phone OTP */
+  @Public()
+  @Post('forgot-password/phone')
+  @ApiOperation({ summary: 'Request password reset via phone OTP' })
+  forgotPasswordPhone(@Body() body: { phone: string }) {
+    return this.authService.forgotPasswordPhone(body.phone);
+  }
+
+  /** Reset password after phone OTP verification */
+  @Public()
+  @Post('reset-password/phone')
+  @ApiOperation({ summary: 'Reset password after phone OTP verification' })
+  resetPasswordPhone(@Body() body: { phone: string; otp: string; password: string }) {
+    return this.authService.resetPasswordPhone(body.phone, body.otp, body.password);
+  }
+
+  /** Admin impersonation — get a token for any user */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @Post('impersonate/:userId')
+  @ApiOperation({ summary: 'Admin: generate token to impersonate another user' })
+  impersonate(@CurrentUser() admin: User, @Param('userId', ParseUUIDPipe) userId: string) {
+    return this.authService.impersonate(admin.id, userId);
   }
 }

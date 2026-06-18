@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const tenant_middleware_1 = require("./modules/tenants/tenant.middleware");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const auth_module_1 = require("./modules/auth/auth.module");
@@ -38,7 +39,25 @@ const sms_gateways_module_1 = require("./modules/sms-gateways/sms-gateways.modul
 const pages_module_1 = require("./modules/pages/pages.module");
 const messaging_module_1 = require("./modules/messaging/messaging.module");
 const push_notifications_module_1 = require("./modules/push-notifications/push-notifications.module");
+const mail_module_1 = require("./modules/mail/mail.module");
+const menu_sections_module_1 = require("./modules/menu-sections/menu-sections.module");
+const analytics_sections_module_1 = require("./modules/analytics-sections/analytics-sections.module");
+const events_module_1 = require("./modules/events/events.module");
+const delivery_zones_module_1 = require("./modules/delivery-zones/delivery-zones.module");
+const languages_module_1 = require("./modules/languages/languages.module");
+const subscriptions_module_1 = require("./modules/subscriptions/subscriptions.module");
+const newsletter_module_1 = require("./modules/newsletter/newsletter.module");
+const nav_menus_module_1 = require("./modules/nav-menus/nav-menus.module");
+const role_definitions_module_1 = require("./modules/role-definitions/role-definitions.module");
+const menu_templates_module_1 = require("./modules/menu-templates/menu-templates.module");
+const license_module_1 = require("./modules/license/license.module");
+const default_access_module_1 = require("./modules/default-access/default-access.module");
+const installer_module_1 = require("./modules/installer/installer.module");
+const tenants_module_1 = require("./modules/tenants/tenants.module");
 let AppModule = class AppModule {
+    configure(consumer) {
+        consumer.apply(tenant_middleware_1.TenantMiddleware).forRoutes('*');
+    }
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
@@ -94,6 +113,21 @@ exports.AppModule = AppModule = __decorate([
             pages_module_1.PagesModule,
             messaging_module_1.MessagingModule,
             push_notifications_module_1.PushNotificationsModule,
+            mail_module_1.MailModule,
+            menu_sections_module_1.MenuSectionsModule,
+            analytics_sections_module_1.AnalyticsSectionsModule,
+            events_module_1.EventsModule,
+            delivery_zones_module_1.DeliveryZonesModule,
+            languages_module_1.LanguagesModule,
+            subscriptions_module_1.SubscriptionsModule,
+            newsletter_module_1.NewsletterModule,
+            nav_menus_module_1.NavMenusModule,
+            role_definitions_module_1.RoleDefinitionsModule,
+            menu_templates_module_1.MenuTemplatesModule,
+            license_module_1.LicenseModule,
+            default_access_module_1.DefaultAccessModule,
+            installer_module_1.InstallerModule,
+            tenants_module_1.TenantsModule,
         ],
     })
 ], AppModule);

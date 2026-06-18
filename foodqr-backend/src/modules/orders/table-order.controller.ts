@@ -38,7 +38,7 @@ export class TableOrderController {
   @Public()
   @Post('orders')
   @HttpCode(HttpStatus.CREATED)
-  placeTableOrder(@Body() dto: CreateOrderDto & { guestName?: string }) {
+  placeTableOrder(@Body() dto: CreateOrderDto & { guestName?: string; userId?: string }) {
     const payload: CreateOrderDto = { ...dto, orderType: OrderType.DINING_TABLE };
     return this.ordersService.create(dto.userId || 'guest', payload);
   }

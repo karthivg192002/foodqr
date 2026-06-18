@@ -1,84 +1,177 @@
-<div class="p-6 max-w-7xl mx-auto">
-  <div class="flex items-center justify-between mb-6">
+﻿<div class="space-y-5 fade-in-up">
+
+  <!-- Page header -->
+  <div class="page-header">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">My Dashboard</h1>
-      <p class="text-gray-500 text-sm mt-0.5">Your assigned orders · auto-refreshes every 30s</p>
+      <h1 class="page-title">Waiter Dashboard</h1>
+      <p class="page-subtitle">Your active orders — refreshes automatically every 30 seconds</p>
     </div>
-    <button (click)="load()" class="text-sm text-orange-500 hover:text-orange-700 font-medium">Refresh</button>
+    <button (click)="load()" class="btn-secondary btn-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      Refresh
+    </button>
   </div>
 
-  <!-- KPI counters -->
-  <div *ngIf="data" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
-      <p class="text-3xl font-bold text-gray-900">{{ data.totalHandled }}</p>
-      <p class="text-xs text-gray-500 uppercase mt-1">Total Handled</p>
+  <!-- KPI cards -->
+  <div *ngIf="data" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:linear-gradient(90deg,#6366f1,#818cf8)"></div>
+      <p class="stat-card-label">Total Handled</p>
+      <p class="stat-card-value">{{ data.totalHandled }}</p>
     </div>
-    <div class="bg-yellow-50 rounded-2xl p-4 shadow-sm border border-yellow-100 text-center">
-      <p class="text-3xl font-bold text-yellow-600">{{ data.pendingCount }}</p>
-      <p class="text-xs text-gray-500 uppercase mt-1">Pending</p>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
+      <p class="stat-card-label">Pending</p>
+      <p class="stat-card-value" style="color:#d97706">{{ data.pendingCount }}</p>
     </div>
-    <div class="bg-orange-50 rounded-2xl p-4 shadow-sm border border-orange-100 text-center">
-      <p class="text-3xl font-bold text-orange-600">{{ data.preparingCount }}</p>
-      <p class="text-xs text-gray-500 uppercase mt-1">Preparing</p>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:linear-gradient(90deg,#ea580c,#f97316)"></div>
+      <p class="stat-card-label">Preparing</p>
+      <p class="stat-card-value" style="color:#ea580c">{{ data.preparingCount }}</p>
     </div>
-    <div class="bg-green-50 rounded-2xl p-4 shadow-sm border border-green-100 text-center">
-      <p class="text-3xl font-bold text-green-600">{{ data.preparedCount }}</p>
-      <p class="text-xs text-gray-500 uppercase mt-1">Ready</p>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:linear-gradient(90deg,#22c55e,#4ade80)"></div>
+      <p class="stat-card-label">Ready to Serve</p>
+      <p class="stat-card-value" style="color:#16a34a">{{ data.preparedCount }}</p>
     </div>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="flex justify-center py-16">
-    <div class="animate-spin w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="spinner"></div>
   </div>
 
-  <!-- No orders -->
-  <div *ngIf="!loading && data && !data.assignedOrders.length" class="text-center py-16">
-    <p class="text-5xl mb-3">✅</p>
-    <p class="text-gray-500 font-medium">No orders assigned to you right now.</p>
+  <!-- Empty state -->
+  <div *ngIf="!loading && data && !data.assignedOrders.length"
+    class="empty-state card py-16">
+    <div class="empty-state-icon" style="background:#f0fdf4">
+      <svg class="w-7 h-7" style="color:#22c55e" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <p class="empty-state-title">All caught up!</p>
+    <p class="empty-state-desc">No orders are assigned to you right now. Check back shortly.</p>
   </div>
 
-  <!-- Orders grid -->
-  <div *ngIf="!loading && data" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-    <div *ngFor="let order of data.assignedOrders"
-      class="bg-white rounded-2xl border shadow-sm p-4 flex flex-col gap-3"
-      [ngClass]="statusColor(order.status)">
+  <!-- Orders table -->
+  <div *ngIf="!loading && data && data.assignedOrders.length" class="table-container">
+    <div class="flex items-center justify-between px-5 py-3.5" style="border-bottom:1px solid #f1f5f9">
+      <h2 style="font-size:14px;font-weight:700;color:#0f172a">
+        Active Orders
+        <span class="ml-2 badge-orange badge-plain" style="font-size:11px">{{ data.assignedOrders.length }}</span>
+      </h2>
+    </div>
 
-      <div class="flex items-center justify-between">
-        <span class="font-bold text-lg">#{{ order.orderSerialNo }}</span>
-        <span class="text-xs uppercase font-semibold px-2 py-1 rounded-full bg-white/70">
-          {{ statusLabel(order.status) }}
-        </span>
-      </div>
+    <!-- Desktop table -->
+    <div class="hidden md:block overflow-x-auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Table / Type</th>
+            <th>Items</th>
+            <th>Time</th>
+            <th style="text-align:center">Status</th>
+            <th style="text-align:right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of data.assignedOrders">
+            <td>
+              <span class="font-mono font-bold" style="color:#0f172a">#{{ order.orderSerialNo }}</span>
+            </td>
+            <td>
+              <div *ngIf="order.diningTable" class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" style="color:#94a3b8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18M10 3v18M14 3v18"/>
+                </svg>
+                <span style="font-size:13px;color:#334155">{{ order.diningTable.name }}</span>
+              </div>
+              <span *ngIf="!order.diningTable" class="badge-gray capitalize">{{ order.orderType }}</span>
+            </td>
+            <td>
+              <div class="space-y-0.5">
+                <p *ngFor="let item of (order.items || []) | slice:0:2" style="font-size:12.5px;color:#334155">
+                  {{ item.itemName }} <span style="color:#94a3b8">×{{ item.quantity }}</span>
+                </p>
+                <p *ngIf="(order.items?.length || 0) > 2" style="font-size:11.5px;color:#94a3b8">
+                  +{{ (order.items?.length || 0) - 2 }} more
+                </p>
+              </div>
+            </td>
+            <td style="font-size:12px;color:#64748b;white-space:nowrap">{{ order.createdAt | date:'h:mm a' }}</td>
+            <td style="text-align:center">
+              <span [ngClass]="{
+                'badge-warning': order.status==='pending',
+                'badge-info': order.status==='accepted',
+                'badge-orange': order.status==='preparing',
+                'badge-success': order.status==='prepared'
+              }" class="capitalize">{{ statusLabel(order.status) }}</span>
+            </td>
+            <td style="text-align:right">
+              <button *ngIf="order.status===OrderStatus.PENDING"
+                (click)="updateStatus(order.id, OrderStatus.ACCEPTED)"
+                class="btn-sm" style="background:#3b82f6;color:white;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;border:none">
+                Accept
+              </button>
+              <button *ngIf="order.status===OrderStatus.ACCEPTED"
+                (click)="updateStatus(order.id, OrderStatus.PREPARING)"
+                class="btn-sm" style="background:#ea580c;color:white;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;border:none">
+                Preparing
+              </button>
+              <button *ngIf="order.status===OrderStatus.PREPARING"
+                (click)="updateStatus(order.id, OrderStatus.PREPARED)"
+                class="btn-sm" style="background:#22c55e;color:white;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;border:none">
+                Mark Ready
+              </button>
+              <span *ngIf="order.status===OrderStatus.PREPARED" style="font-size:12px;color:#16a34a;font-weight:600">✓ Ready</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-      <p class="text-xs text-gray-500">
-        {{ order.orderType | uppercase }} · {{ order.createdAt | date:'h:mm a' }}
-        <span *ngIf="order.diningTable"> · {{ order.diningTable.name }}</span>
-      </p>
-
-      <!-- Items -->
-      <div class="flex-1 space-y-1">
-        <div *ngFor="let item of order.items" class="flex justify-between text-sm">
-          <span class="font-medium text-gray-800">{{ item.itemName }}</span>
-          <span class="font-bold text-gray-900">x{{ item.quantity }}</span>
+    <!-- Mobile cards -->
+    <div class="md:hidden divide-y" style="border-color:#f1f5f9">
+      <div *ngFor="let order of data.assignedOrders" class="p-4">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <span class="font-mono font-bold" style="color:#0f172a">#{{ order.orderSerialNo }}</span>
+            <p *ngIf="order.diningTable" style="font-size:12px;color:#64748b;margin-top:2px">Table: {{ order.diningTable.name }}</p>
+            <p style="font-size:11.5px;color:#94a3b8">{{ order.createdAt | date:'h:mm a' }}</p>
+          </div>
+          <span [ngClass]="{
+            'badge-warning': order.status==='pending',
+            'badge-info': order.status==='accepted',
+            'badge-orange': order.status==='preparing',
+            'badge-success': order.status==='prepared'
+          }" class="capitalize">{{ statusLabel(order.status) }}</span>
         </div>
-      </div>
-
-      <div *ngIf="order.orderNote" class="text-xs italic text-gray-600 bg-gray-50 rounded-lg p-2">
-        📝 {{ order.orderNote }}
-      </div>
-
-      <!-- Action buttons -->
-      <div class="flex gap-2">
-        <button *ngIf="order.status === OrderStatus.PENDING"
-          (click)="updateStatus(order.id, OrderStatus.ACCEPTED)"
-          class="flex-1 bg-blue-500 text-white text-sm font-semibold py-2 rounded-xl">Accept</button>
-        <button *ngIf="order.status === OrderStatus.ACCEPTED"
-          (click)="updateStatus(order.id, OrderStatus.PREPARING)"
-          class="flex-1 bg-orange-500 text-white text-sm font-semibold py-2 rounded-xl">Start Preparing</button>
-        <button *ngIf="order.status === OrderStatus.PREPARING"
-          (click)="updateStatus(order.id, OrderStatus.PREPARED)"
-          class="flex-1 bg-green-500 text-white text-sm font-semibold py-2 rounded-xl">Mark Ready</button>
+        <div class="space-y-1 mb-3">
+          <p *ngFor="let item of order.items" style="font-size:13px;color:#334155">
+            {{ item.itemName }} <span style="color:#94a3b8;font-weight:500">×{{ item.quantity }}</span>
+          </p>
+        </div>
+        <div *ngIf="order.orderNote" class="px-3 py-2 rounded-lg mb-3"
+          style="font-size:12px;color:#64748b;font-style:italic;background:#f8fafc;border:1px solid #f1f5f9">
+          Note: {{ order.orderNote }}
+        </div>
+        <div class="flex gap-2">
+          <button *ngIf="order.status===OrderStatus.PENDING"
+            (click)="updateStatus(order.id, OrderStatus.ACCEPTED)"
+            class="flex-1 py-2 text-white text-xs font-semibold rounded-xl"
+            style="background:#3b82f6">Accept</button>
+          <button *ngIf="order.status===OrderStatus.ACCEPTED"
+            (click)="updateStatus(order.id, OrderStatus.PREPARING)"
+            class="flex-1 py-2 text-white text-xs font-semibold rounded-xl"
+            style="background:#ea580c">Start Preparing</button>
+          <button *ngIf="order.status===OrderStatus.PREPARING"
+            (click)="updateStatus(order.id, OrderStatus.PREPARED)"
+            class="flex-1 py-2 text-white text-xs font-semibold rounded-xl"
+            style="background:#22c55e">Mark Ready</button>
+        </div>
       </div>
     </div>
   </div>

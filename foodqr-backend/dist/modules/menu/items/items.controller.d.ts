@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { ItemsService, CreateItemDto } from './items.service';
 export declare class ItemsController {
     private readonly itemsService;
@@ -25,5 +26,19 @@ export declare class ItemsController {
     toggleFeatured(id: string): Promise<import("./entities/item.entity").Item>;
     remove(id: string): Promise<{
         message: string;
+    }>;
+    restore(id: string): Promise<import("./entities/item.entity").Item>;
+    findArchived(search?: string, categoryId?: string, page?: number, limit?: number): Promise<{
+        data: import("./entities/item.entity").Item[];
+        total: number;
+        page: number;
+        limit: number;
+        pages: number;
+    }>;
+    exportExcel(res: Response): Promise<void>;
+    downloadSample(res: Response): void;
+    importCsv(file: Express.Multer.File): Promise<{
+        imported: number;
+        errors: string[];
     }>;
 }

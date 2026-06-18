@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../../core/services/api.service';
-import { Item, ItemCategory, PaginatedResponse } from '../../../../core/models';
+import { Item, ItemCategory } from '../../../../core/models';
 
 @Component({ selector: 'app-menu-items', templateUrl: './menu-items.component.html' })
 export class MenuItemsComponent implements OnInit {
@@ -19,7 +19,14 @@ export class MenuItemsComponent implements OnInit {
   search = '';
   filterCategory = '';
   form: FormGroup;
-  itemTypes = ['veg', 'non_veg', 'vegan', 'beverage'];
+  itemTypes = [
+    { value: 'veg', label: 'Veg' },
+    { value: 'non_veg', label: 'Non Veg' },
+    { value: 'vegan', label: 'Vegan' },
+    { value: 'beverage', label: 'Beverage' },
+  ];
+
+  uploadingImage = false;
 
   constructor(private api: ApiService, private toastr: ToastrService, private fb: FormBuilder) {
     this.form = this.fb.group({
@@ -32,7 +39,18 @@ export class MenuItemsComponent implements OnInit {
       taxRate: [0],
       isFeatured: [false],
       status: [true],
+      thumbImage: [''],
       calories: [''], protein: [''], carbs: [''], fat: [''],
+    });
+  }
+
+  onImageSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadingImage = true;
+    this.api.upload('upload/image', file).subscribe({
+      next: (res) => { this.form.patchValue({ thumbImage: res.url }); this.uploadingImage = false; },
+      error: () => { this.toastr.error('Image upload failed'); this.uploadingImage = false; },
     });
   }
 
@@ -52,13 +70,17 @@ export class MenuItemsComponent implements OnInit {
     const params: any = { page: this.page, limit: this.limit };
     if (this.search) params.search = this.search;
     if (this.filterCategory) params.categoryId = this.filterCategory;
-    this.api.get<PaginatedResponse<Item>>('admin/items', params).subscribe({
-      next: (res) => { this.items = res.data; this.total = res.total; this.loading = false; },
+    this.api.get<any>('admin/items', params).subscribe({
+      next: (res) => {
+        this.items = Array.isArray(res) ? res : (res?.data || []);
+        this.total = Array.isArray(res) ? res.length : (res?.total || 0);
+        this.loading = false;
+      },
       error: () => { this.loading = false; },
     });
   }
 
-  openCreate(): void { this.editingId = null; this.form.reset({ status: true, itemType: 'veg', price: 0, taxRate: 0 }); this.showForm = true; }
+  openCreate(): void { this.editingId = null; this.form.reset({ status: true, itemType: 'veg', price: 0, taxRate: 0, thumbImage: '' }); this.showForm = true; }
 
   openEdit(item: Item): void {
     this.editingId = item.id;

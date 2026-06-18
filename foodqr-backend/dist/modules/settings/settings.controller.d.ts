@@ -1,7 +1,9 @@
 import { SettingsService } from './settings.service';
+import { UploadService } from '../upload/upload.service';
 export declare class SettingsController {
     private readonly settingsService;
-    constructor(settingsService: SettingsService);
+    private readonly uploadService;
+    constructor(settingsService: SettingsService, uploadService: UploadService);
     getAll(group?: string): Promise<{}>;
     getCompany(): Promise<{}>;
     setCompany(settings: Record<string, string>): Promise<{}>;
@@ -25,5 +27,15 @@ export declare class SettingsController {
     setSocialMedia(settings: Record<string, string>): Promise<{}>;
     getTheme(): Promise<{}>;
     setTheme(settings: Record<string, string>): Promise<{}>;
+    getOtp(): Promise<{}>;
+    setOtp(settings: Record<string, string>): Promise<{}>;
+    getFirebase(): Promise<{}>;
+    setFirebase(settings: Record<string, string>): Promise<{}>;
+    uploadLogo(file: Express.Multer.File): Promise<{
+        url: string;
+    }>;
+    uploadFavicon(file: Express.Multer.File): Promise<{
+        url: string;
+    }>;
     getPublic(): Promise<{}>;
 }

@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { DiningTablesService, CreateDiningTableDto } from './dining-tables.service';
 import { TableStatus } from '../../common/enums';
@@ -15,4 +16,11 @@ export declare class DiningTablesController {
     remove(id: string): Promise<{
         message: string;
     }>;
+    regenerateToken(id: string): Promise<{
+        id: string;
+        accessToken: string;
+        message: string;
+    }>;
+    assignWaiter(id: string, waiterId: string): Promise<import("./entities/dining-table.entity").DiningTable>;
+    exportExcel(branchId: string, res: Response): Promise<void>;
 }

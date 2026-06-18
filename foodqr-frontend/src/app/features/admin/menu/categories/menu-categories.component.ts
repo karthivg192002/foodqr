@@ -13,8 +13,20 @@ export class MenuCategoriesComponent implements OnInit {
   saving = false;
   form: FormGroup;
 
+  uploadingImage = false;
+
   constructor(private api: ApiService, private toastr: ToastrService, private fb: FormBuilder) {
-    this.form = this.fb.group({ name: ['', Validators.required], description: [''], icon: [''], status: [true] });
+    this.form = this.fb.group({ name: ['', Validators.required], description: [''], icon: [''], image: [''], status: [true] });
+  }
+
+  onImageSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadingImage = true;
+    this.api.upload('upload/image', file).subscribe({
+      next: (res) => { this.form.patchValue({ image: res.url }); this.uploadingImage = false; },
+      error: () => { this.toastr.error('Image upload failed'); this.uploadingImage = false; },
+    });
   }
 
   ngOnInit(): void { this.load(); }
@@ -27,7 +39,7 @@ export class MenuCategoriesComponent implements OnInit {
     });
   }
 
-  openCreate(): void { this.editingId = null; this.form.reset({ status: true }); this.showForm = true; }
+  openCreate(): void { this.editingId = null; this.form.reset({ status: true, image: '' }); this.showForm = true; }
 
   openEdit(cat: ItemCategory): void {
     this.editingId = cat.id;

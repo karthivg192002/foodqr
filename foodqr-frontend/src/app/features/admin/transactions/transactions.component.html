@@ -1,117 +1,128 @@
-<div>
+﻿<div class="space-y-5 fade-in-up">
+
   <!-- Page header -->
-  <div class="flex items-center justify-between mb-6">
+  <div class="page-header">
     <div>
       <h1 class="page-title">Transactions</h1>
-      <p class="text-sm text-gray-500 mt-1">View and audit all payment transactions</p>
+      <p class="page-subtitle">View and audit all payment transactions across the platform</p>
     </div>
-    <button (click)="exportTransactions()" class="btn-secondary flex items-center gap-2">
+    <button (click)="exportTransactions()" class="btn-secondary">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
       </svg>
-      Export
+      Export CSV
     </button>
   </div>
 
-  <!-- Summary cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Total Transactions</p>
-      <p class="text-2xl font-bold text-gray-900">{{ filtered.length }}</p>
+  <!-- KPI summary -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:linear-gradient(90deg,#6366f1,#818cf8)"></div>
+      <p class="stat-card-label">Total Transactions</p>
+      <p class="stat-card-value">{{ filtered.length }}</p>
     </div>
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Completed Revenue</p>
-      <p class="text-2xl font-bold text-green-600">{{ totalAmount | number:'1.2-2' }}</p>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:linear-gradient(90deg,#22c55e,#4ade80)"></div>
+      <p class="stat-card-label">Completed Revenue</p>
+      <p class="stat-card-value" style="color:#16a34a">${{ totalAmount | number:'1.2-2' }}</p>
     </div>
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Failed / Cancelled</p>
-      <p class="text-2xl font-bold text-red-500">{{ failedCount }}</p>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:linear-gradient(90deg,#ef4444,#f87171)"></div>
+      <p class="stat-card-label">Failed / Cancelled</p>
+      <p class="stat-card-value" style="color:#dc2626">{{ failedCount }}</p>
     </div>
   </div>
 
   <!-- Filter bar -->
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-5">
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 items-end">
-      <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
-        <select [(ngModel)]="filterStatus" (change)="applyFilters()" class="input-field text-sm py-2">
-          <option value="">All Statuses</option>
-          <option *ngFor="let s of statusOptions" [value]="s" class="capitalize">{{ s }}</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">Payment Method</label>
-        <select [(ngModel)]="filterMethod" (change)="applyFilters()" class="input-field text-sm py-2">
-          <option value="">All Methods</option>
-          <option *ngFor="let m of methodOptions" [value]="m" class="capitalize">{{ m }}</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">From Date</label>
-        <input type="date" [(ngModel)]="filterDateFrom" class="input-field text-sm py-2">
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">To Date</label>
-        <input type="date" [(ngModel)]="filterDateTo" class="input-field text-sm py-2">
-      </div>
-      <div class="flex gap-2">
-        <button (click)="load()" class="btn-primary text-sm flex-1">Apply</button>
-        <button (click)="resetFilters()" class="btn-secondary text-sm px-3">Reset</button>
-      </div>
+  <div class="filter-bar flex-wrap gap-3">
+    <div>
+      <label class="block mb-1" style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase">Status</label>
+      <select [(ngModel)]="filterStatus" (change)="applyFilters()" class="input-field" style="width:150px">
+        <option value="">All Statuses</option>
+        <option *ngFor="let s of statusOptions" [value]="s" class="capitalize">{{ s }}</option>
+      </select>
+    </div>
+    <div>
+      <label class="block mb-1" style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase">Method</label>
+      <select [(ngModel)]="filterMethod" (change)="applyFilters()" class="input-field" style="width:150px">
+        <option value="">All Methods</option>
+        <option *ngFor="let m of methodOptions" [value]="m" class="capitalize">{{ m }}</option>
+      </select>
+    </div>
+    <div>
+      <label class="block mb-1" style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase">From</label>
+      <input type="date" [(ngModel)]="filterDateFrom" class="input-field">
+    </div>
+    <div>
+      <label class="block mb-1" style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase">To</label>
+      <input type="date" [(ngModel)]="filterDateTo" class="input-field">
+    </div>
+    <div class="flex items-end gap-2">
+      <button (click)="load()" class="btn-primary btn-sm">Apply</button>
+      <button (click)="resetFilters()" class="btn-secondary btn-sm">Reset</button>
     </div>
   </div>
 
   <!-- Loading -->
   <div *ngIf="loading" class="flex items-center justify-center py-20">
-    <div class="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    <div class="spinner"></div>
   </div>
 
-  <!-- Table -->
-  <div *ngIf="!loading" class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
-    <table class="w-full">
-      <thead class="bg-gray-50 border-b border-gray-200">
+  <!-- Transactions table -->
+  <div *ngIf="!loading" class="table-container">
+    <table class="data-table">
+      <thead>
         <tr>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Transaction ID</th>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Method</th>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+          <th>Transaction ID</th>
+          <th>Customer</th>
+          <th>Order</th>
+          <th style="text-align:right">Amount</th>
+          <th>Method</th>
+          <th style="text-align:center">Status</th>
+          <th>Date</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100">
-        <tr *ngFor="let txn of filtered" class="hover:bg-gray-50 transition-colors">
-          <td class="px-6 py-4">
-            <span class="font-mono text-sm font-semibold text-gray-800">{{ shortId(txn.id) }}</span>
+      <tbody>
+        <tr *ngFor="let txn of filtered">
+          <td>
+            <span class="font-mono font-bold" style="font-size:12.5px;color:#0f172a">{{ shortId(txn.id) }}</span>
           </td>
-          <td class="px-6 py-4">
-            <p class="text-sm font-medium text-gray-900">{{ txn.user?.name ?? 'Guest' }}</p>
-            <p class="text-xs text-gray-400">{{ txn.user?.email }}</p>
+          <td>
+            <div class="flex items-center gap-2.5">
+              <div class="avatar avatar-sm flex-shrink-0" style="background:linear-gradient(135deg,#6366f1,#a78bfa)">
+                {{ (txn.user?.name || 'G').charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <p style="font-size:13px;font-weight:600;color:#0f172a">{{ txn.user?.name ?? 'Guest' }}</p>
+                <p style="font-size:11.5px;color:#94a3b8">{{ txn.user?.email }}</p>
+              </div>
+            </div>
           </td>
-          <td class="px-6 py-4">
-            <span class="text-sm text-gray-600 font-mono">{{ txn.order?.orderSerialNo ?? '-' }}</span>
+          <td>
+            <span class="font-mono" style="font-size:13px;color:#64748b">{{ txn.order?.orderSerialNo ?? '—' }}</span>
           </td>
-          <td class="px-6 py-4">
-            <span class="text-sm font-bold text-gray-900">{{ txn.currency ?? '' }} {{ txn.amount | number:'1.2-2' }}</span>
+          <td style="text-align:right;font-size:14px;font-weight:700;color:#0f172a">
+            {{ txn.currency ?? '' }} {{ txn.amount | number:'1.2-2' }}
           </td>
-          <td class="px-6 py-4">
+          <td>
             <span class="badge-gray capitalize">{{ txn.paymentMethod }}</span>
           </td>
-          <td class="px-6 py-4">
+          <td style="text-align:center">
             <span [class]="statusClass(txn.status)" class="capitalize">{{ txn.status }}</span>
           </td>
-          <td class="px-6 py-4 text-xs text-gray-500 whitespace-nowrap">
+          <td style="font-size:12px;color:#64748b;white-space:nowrap">
             {{ txn.createdAt | date:'dd MMM yyyy, HH:mm' }}
           </td>
         </tr>
-        <tr *ngIf="filtered.length === 0">
-          <td colspan="7" class="px-6 py-16 text-center text-gray-400">
-            <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-            </svg>
-            <p class="text-sm font-medium">No transactions found</p>
-            <p class="text-xs mt-1">Try adjusting your filters</p>
+        <tr *ngIf="filtered.length===0">
+          <td colspan="7">
+            <div class="empty-state">
+              <div class="empty-state-icon">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+              </div>
+              <p class="empty-state-title">No transactions found</p>
+              <p class="empty-state-desc">Try adjusting the date range or filter criteria.</p>
+            </div>
           </td>
         </tr>
       </tbody>

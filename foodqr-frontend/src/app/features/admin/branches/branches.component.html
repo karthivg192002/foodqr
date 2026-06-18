@@ -1,90 +1,81 @@
-<div>
+<div class="space-y-5 fade-in-up">
+
   <!-- Page header -->
-  <div class="flex items-center justify-between mb-6">
+  <div class="page-header">
     <div>
       <h1 class="page-title">Branches</h1>
-      <p class="text-sm text-gray-500 mt-1">Manage restaurant locations and branches</p>
+      <p class="page-subtitle">Manage your restaurant locations and operational settings</p>
     </div>
-    <button (click)="openCreate()" class="btn-primary flex items-center gap-2">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-      </svg>
+    <button (click)="openCreate()" class="btn-primary">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       Add Branch
     </button>
   </div>
 
   <!-- Loading -->
   <div *ngIf="loading" class="flex items-center justify-center py-20">
-    <div class="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    <div class="spinner"></div>
   </div>
 
   <!-- Table -->
-  <div *ngIf="!loading" class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
-    <table class="w-full">
-      <thead class="bg-gray-50 border-b border-gray-200">
+  <div *ngIf="!loading" class="table-container">
+    <table class="data-table">
+      <thead>
         <tr>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Branch</th>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
-          <th class="text-left px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-          <th class="text-right px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+          <th>Branch</th>
+          <th>Location</th>
+          <th>Contact</th>
+          <th style="text-align:center">Status</th>
+          <th style="text-align:right">Actions</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100">
-        <tr *ngFor="let branch of branches" class="hover:bg-gray-50 transition-colors">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <tbody>
+        <tr *ngFor="let branch of branches">
+          <td>
+            <div class="flex items-center gap-3.5">
+              <div class="flex items-center justify-center rounded-xl flex-shrink-0" style="width:40px;height:40px;background:#fff7ed;border:1px solid #fed7aa">
+                <svg class="w-4.5 h-4.5" style="color:#ea580c" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <p class="font-semibold text-gray-900 text-sm">{{ branch.name }}</p>
-                  <span *ngIf="branch.isDefault" class="badge-info">Default</span>
+                  <p style="font-size:14px;font-weight:600;color:#0f172a">{{ branch.name }}</p>
+                  <span *ngIf="branch.isDefault" class="badge-orange badge-plain" style="font-size:10.5px">Default</span>
                 </div>
-                <p class="text-xs text-gray-400">{{ branch.id | slice:0:8 }}...</p>
+                <p class="font-mono" style="font-size:11px;color:#94a3b8;margin-top:2px">{{ branch.id | slice:0:12 }}…</p>
               </div>
             </div>
           </td>
-          <td class="px-6 py-4 text-sm text-gray-600">
-            <p>{{ branch.address }}</p>
-            <p *ngIf="branch.city" class="text-gray-400 text-xs">{{ branch.city }}</p>
+          <td>
+            <p style="font-size:13.5px;color:#334155">{{ branch.address || '—' }}</p>
+            <p *ngIf="branch.city" style="font-size:12px;color:#94a3b8;margin-top:2px">{{ branch.city }}{{ branch.state ? ', ' + branch.state : '' }}</p>
           </td>
-          <td class="px-6 py-4 text-sm text-gray-600">
-            <p>{{ branch.phone }}</p>
-            <p class="text-gray-400 text-xs">{{ branch.email }}</p>
+          <td>
+            <p style="font-size:13.5px;color:#334155">{{ branch.phone || '—' }}</p>
+            <p style="font-size:12px;color:#94a3b8;margin-top:2px">{{ branch.email || '—' }}</p>
           </td>
-          <td class="px-6 py-4">
-            <span [class]="branch.status ? 'badge-success' : 'badge-danger'">
-              {{ branch.status ? 'Active' : 'Inactive' }}
-            </span>
+          <td style="text-align:center">
+            <span [class]="branch.status ? 'badge-success' : 'badge-danger'">{{ branch.status ? 'Active' : 'Inactive' }}</span>
           </td>
-          <td class="px-6 py-4">
-            <div class="flex items-center justify-end gap-2">
-              <button *ngIf="!branch.isDefault" (click)="setDefault(branch.id)"
-                class="text-xs text-blue-600 hover:text-blue-800 font-medium px-2.5 py-1 rounded-lg hover:bg-blue-50 transition-colors">
-                Set Default
-              </button>
-              <button (click)="openEdit(branch)"
-                class="text-xs text-gray-600 hover:text-gray-900 font-medium px-2.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">
-                Edit
-              </button>
-              <button (click)="delete(branch.id)"
-                class="text-xs text-red-600 hover:text-red-800 font-medium px-2.5 py-1 rounded-lg hover:bg-red-50 transition-colors">
-                Delete
-              </button>
+          <td style="text-align:right">
+            <div class="flex items-center justify-end gap-1">
+              <button *ngIf="!branch.isDefault" (click)="setDefault(branch.id)" class="action-link action-link-blue">Set Default</button>
+              <button (click)="openEdit(branch)" class="action-link action-link-gray">Edit</button>
+              <button (click)="delete(branch.id)" class="action-link action-link-danger">Delete</button>
             </div>
           </td>
         </tr>
-        <tr *ngIf="branches.length === 0">
-          <td colspan="5" class="px-6 py-16 text-center text-gray-400">
-            <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
-            <p class="text-sm font-medium">No branches found</p>
-            <p class="text-xs mt-1">Add your first branch to get started</p>
+        <tr *ngIf="branches.length===0">
+          <td colspan="5">
+            <div class="empty-state">
+              <div class="empty-state-icon">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+              </div>
+              <p class="empty-state-title">No branches yet</p>
+              <p class="empty-state-desc">Add your first branch to start managing restaurant locations.</p>
+              <button (click)="openCreate()" class="btn-primary btn-sm">Add First Branch</button>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -92,66 +83,64 @@
   </div>
 </div>
 
-<!-- ═══ Modal ═══ -->
-<div *ngIf="showModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg">
-    <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-      <h2 class="text-lg font-bold text-gray-900">{{ editingId ? 'Edit Branch' : 'Add New Branch' }}</h2>
-      <button (click)="showModal = false" class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
+<!-- ── Branch Modal ── -->
+<div *ngIf="showModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingId ? 'Edit Branch' : 'Add New Branch' }}</p>
+      <button (click)="showModal=false" class="modal-close-btn">×</button>
     </div>
-    <form [formGroup]="form" (ngSubmit)="save()" class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Branch Name *</label>
-          <input formControlName="name" class="input-field" placeholder="Main Branch">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="modal-body space-y-4 max-h-[65vh] overflow-y-auto">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Branch Name <span style="color:#dc2626">*</span></label>
+            <input formControlName="name" class="input-field" placeholder="e.g. Downtown Branch">
+          </div>
+          <div class="form-group">
+            <label class="label">Slug <span style="color:#dc2626">*</span></label>
+            <input formControlName="slug" class="input-field" placeholder="downtown-branch">
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
-          <input formControlName="slug" class="input-field" placeholder="main-branch">
+        <div class="form-group">
+          <label class="label">Street Address</label>
+          <input formControlName="address" class="input-field" placeholder="123 Main Street">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">City</label>
+            <input formControlName="city" class="input-field" placeholder="New York">
+          </div>
+          <div class="form-group">
+            <label class="label">State</label>
+            <input formControlName="state" class="input-field" placeholder="NY">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label">Country</label>
+          <input formControlName="country" class="input-field" placeholder="United States">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Phone</label>
+            <input formControlName="phone" class="input-field" placeholder="+1 234 567 8900">
+          </div>
+          <div class="form-group">
+            <label class="label">Email</label>
+            <input formControlName="email" type="email" class="input-field" placeholder="branch@example.com">
+          </div>
+        </div>
+        <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+          <input type="checkbox" formControlName="status" id="branch-active" class="w-4 h-4">
+          <label for="branch-active" style="font-size:13.5px;font-weight:500;color:#334155;cursor:pointer">Branch is active and accepting orders</label>
         </div>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-        <input formControlName="address" class="input-field" placeholder="Street address">
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
-          <input formControlName="city" class="input-field" placeholder="City">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
-          <input formControlName="state" class="input-field" placeholder="State">
-        </div>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
-        <input formControlName="country" class="input-field" placeholder="Country">
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-          <input formControlName="phone" class="input-field" placeholder="+1 234 567 8900">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input formControlName="email" type="email" class="input-field" placeholder="branch@example.com">
-        </div>
-      </div>
-      <div class="flex items-center gap-3">
-        <input type="checkbox" formControlName="status" id="branch-status" class="w-4 h-4 accent-orange-500">
-        <label for="branch-status" class="text-sm font-medium text-gray-700">Branch is Active</label>
+      <div class="modal-footer">
+        <button type="button" (click)="showModal=false" class="btn-secondary btn-sm">Cancel</button>
+        <button type="submit" [disabled]="saving || form.invalid" class="btn-primary btn-sm">
+          {{ saving ? 'Saving…' : (editingId ? 'Update Branch' : 'Create Branch') }}
+        </button>
       </div>
     </form>
-    <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100">
-      <button (click)="showModal = false" class="btn-secondary">Cancel</button>
-      <button (click)="save()" [disabled]="saving" class="btn-primary">
-        {{ saving ? 'Saving...' : (editingId ? 'Update Branch' : 'Create Branch') }}
-      </button>
-    </div>
   </div>
 </div>
