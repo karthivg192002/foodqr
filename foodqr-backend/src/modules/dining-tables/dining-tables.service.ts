@@ -79,6 +79,21 @@ export class DiningTablesService {
     return this.findOne(id);
   }
 
+  async downloadQr(id: string, res: any) {
+    const table = await this.findOne(id);
+    if (!table.qrCode) throw new NotFoundException('QR code not generated');
+    
+    // Convert data URL to buffer
+    const base64Data = table.qrCode.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    res.set({
+      'Content-Type': 'image/png',
+      'Content-Disposition': `attachment; filename="table-${table.name.replace(/\s+/g, '-')}-qr.png"`,
+    });
+    res.send(buffer);
+  }
+
   async updateStatus(id: string, status: TableStatus) {
     await this.tableRepo.update(id, { status });
     return this.findOne(id);

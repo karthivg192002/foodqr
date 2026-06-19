@@ -92,7 +92,7 @@ __decorate([
     (0, common_1.Post)('admin/loyalty/programs'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [loyalty_service_1.CreateLoyaltyProgramDto]),
     __metadata("design:returntype", void 0)
 ], LoyaltyController.prototype, "createProgram", null);
 __decorate([
@@ -112,7 +112,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, loyalty_service_1.CreateLoyaltyConfigurationDto]),
     __metadata("design:returntype", void 0)
 ], LoyaltyController.prototype, "addConfiguration", null);
 __decorate([

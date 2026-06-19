@@ -1,4 +1,4 @@
-import { LoyaltyService } from './loyalty.service';
+import { LoyaltyService, CreateLoyaltyProgramDto, CreateLoyaltyConfigurationDto } from './loyalty.service';
 import { User } from '../users/entities/user.entity';
 export declare class LoyaltyController {
     private readonly loyaltyService;
@@ -25,11 +25,11 @@ export declare class LoyaltyController {
         message: string;
     }>;
     getPrograms(): Promise<import("./entities/loyalty-program.entity").LoyaltyProgram[]>;
-    createProgram(data: any): Promise<import("./entities/loyalty-program.entity").LoyaltyProgram>;
-    updateProgram(id: string, data: any): Promise<import("./entities/loyalty-program.entity").LoyaltyProgram>;
-    addConfiguration(id: string, data: any): Promise<import("./entities/loyalty-configuration.entity").LoyaltyConfiguration>;
+    createProgram(data: CreateLoyaltyProgramDto): Promise<import("./entities/loyalty-program.entity").LoyaltyProgram>;
+    updateProgram(id: string, data: Partial<CreateLoyaltyProgramDto>): Promise<import("./entities/loyalty-program.entity").LoyaltyProgram>;
+    addConfiguration(id: string, data: CreateLoyaltyConfigurationDto): Promise<import("./entities/loyalty-configuration.entity").LoyaltyConfiguration>;
     getConfiguration(id: string): Promise<import("./entities/loyalty-configuration.entity").LoyaltyConfiguration>;
-    updateConfiguration(id: string, data: any): Promise<import("./entities/loyalty-configuration.entity").LoyaltyConfiguration>;
+    updateConfiguration(id: string, data: Partial<CreateLoyaltyConfigurationDto>): Promise<import("./entities/loyalty-configuration.entity").LoyaltyConfiguration>;
     removeConfiguration(id: string): Promise<{
         message: string;
     }>;

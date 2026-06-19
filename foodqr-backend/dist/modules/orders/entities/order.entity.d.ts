@@ -21,6 +21,7 @@ export declare class Order {
     paymentMethod: PaymentMethod;
     paymentStatus: PaymentStatus;
     paymentTransactionId: string;
+    paymentGateway: string;
     subtotal: number;
     discount: number;
     deliveryCharge: number;

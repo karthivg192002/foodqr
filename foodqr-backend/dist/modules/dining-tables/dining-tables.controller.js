@@ -58,6 +58,9 @@ let DiningTablesController = class DiningTablesController {
     assignWaiter(id, waiterId) {
         return this.diningTablesService.update(id, { waiterId });
     }
+    async downloadQr(id, res) {
+        return this.diningTablesService.downloadQr(id, res);
+    }
     async exportExcel(branchId, res) {
         return this.diningTablesService.exportExcel(branchId, res);
     }
@@ -162,6 +165,17 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], DiningTablesController.prototype, "assignWaiter", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Get)('admin/dining-tables/:id/qr/download'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], DiningTablesController.prototype, "downloadQr", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),

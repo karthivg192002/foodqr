@@ -12,6 +12,7 @@ export declare class LoyaltyConfiguration {
     rewardValue: number;
     periodType: LoyaltyPeriodType;
     periodLimit: number;
+    maxStampsPerPeriod: number;
     createdAt: Date;
     updatedAt: Date;
 }

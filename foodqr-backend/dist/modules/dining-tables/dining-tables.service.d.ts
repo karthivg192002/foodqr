@@ -19,6 +19,7 @@ export declare class DiningTablesService {
         message: string;
     }>;
     regenerateQr(id: string, frontendUrl: string): Promise<DiningTable>;
+    downloadQr(id: string, res: any): Promise<void>;
     updateStatus(id: string, status: TableStatus): Promise<DiningTable>;
     regenerateToken(id: string): Promise<{
         id: string;

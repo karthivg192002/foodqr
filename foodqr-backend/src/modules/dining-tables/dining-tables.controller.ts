@@ -100,6 +100,14 @@ export class DiningTablesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
   @ApiBearerAuth()
+  @Get('admin/dining-tables/:id/qr/download')
+  async downloadQr(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    return this.diningTablesService.downloadQr(id, res);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
+  @ApiBearerAuth()
   @Get('admin/dining-tables/export/excel')
   async exportExcel(@Query('branchId') branchId: string, @Res() res: Response) {
     return this.diningTablesService.exportExcel(branchId, res);

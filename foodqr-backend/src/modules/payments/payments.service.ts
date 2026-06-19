@@ -2,10 +2,12 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import { createHmac } from 'crypto';
 import Stripe from 'stripe';
 import { Transaction } from './entities/transaction.entity';
 import { Order } from '../orders/entities/order.entity';
 import { User } from '../users/entities/user.entity';
+import { PaymentGateway } from '../payment-gateways/entities/payment-gateway.entity';
 import { PaymentMethod, PaymentStatus } from '../../common/enums';
 
 @Injectable()
@@ -16,6 +18,7 @@ export class PaymentsService {
     @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,
     @InjectRepository(Order) private orderRepo: Repository<Order>,
     @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(PaymentGateway) private paymentGatewayRepo: Repository<PaymentGateway>,
     private configService: ConfigService,
   ) {
     const stripeKey = this.configService.get('STRIPE_SECRET_KEY');
@@ -121,8 +124,7 @@ export class PaymentsService {
 
   /** Razorpay: create an order and return order_id + key_id for front-end checkout */
   async createRazorpayOrder(orderId: string, userId: string) {
-    const keyId = this.configService.get('RAZORPAY_KEY_ID');
-    const keySecret = this.configService.get('RAZORPAY_KEY_SECRET');
+    const { keyId, keySecret } = await this.getRazorpayCredentials();
     if (!keyId || !keySecret) throw new BadRequestException('Razorpay is not configured');
 
     const order = await this.orderRepo.findOne({ where: { id: orderId } });
@@ -145,6 +147,49 @@ export class PaymentsService {
     }));
 
     return { razorpayOrderId: rzOrder.id, keyId, amount: amountPaise, currency: 'INR' };
+  }
+
+  async verifyRazorpayPayment(body: {
+    orderId: string;
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+  }) {
+    const { keySecret } = await this.getRazorpayCredentials();
+    if (!keySecret) throw new BadRequestException('Razorpay is not configured');
+
+    const { orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature } = body;
+    if (!orderId || !razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      throw new BadRequestException('Missing Razorpay verification data');
+    }
+
+    const expectedSignature = createHmac('sha256', keySecret)
+      .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+      .digest('hex');
+
+    if (expectedSignature !== razorpaySignature) {
+      throw new BadRequestException('Invalid Razorpay signature');
+    }
+
+    await this.orderRepo.update(orderId, {
+      paymentStatus: PaymentStatus.PAID,
+      paymentTransactionId: razorpayPaymentId,
+    });
+    await this.transactionRepo.update(
+      { gatewayTransactionId: razorpayOrderId },
+      { status: PaymentStatus.PAID, gatewayTransactionId: razorpayPaymentId },
+    );
+
+    return { message: 'Payment verified', orderId, paymentId: razorpayPaymentId };
+  }
+
+  private async getRazorpayCredentials(): Promise<{ keyId?: string; keySecret?: string }> {
+    const gateway = await this.paymentGatewayRepo.findOne({ where: { slug: 'razorpay' } });
+    const config = gateway?.config || {};
+    return {
+      keyId: config.razorpay_key_id || config.key_id || config.keyId || config.razorpay_key || this.configService.get('RAZORPAY_KEY_ID'),
+      keySecret: config.razorpay_key_secret || config.key_secret || config.keySecret || config.razorpay_secret || this.configService.get('RAZORPAY_KEY_SECRET'),
+    };
   }
 
   async handleRazorpayWebhook(body: any) {

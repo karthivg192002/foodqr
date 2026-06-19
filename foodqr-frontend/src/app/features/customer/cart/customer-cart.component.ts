@@ -6,6 +6,12 @@ import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrderType, CartItem } from '../../../core/models';
 
+declare global {
+  interface Window {
+    Razorpay?: any;
+  }
+}
+
 @Component({
   selector: 'app-customer-cart',
   templateUrl: './customer-cart.component.html',
@@ -13,6 +19,7 @@ import { OrderType, CartItem } from '../../../core/models';
 export class CustomerCartComponent implements OnInit {
   orderType = OrderType.DELIVERY;
   paymentMethod = 'cash_on_delivery';
+  paymentGateway = '';
   orderNote = '';
   placing = false;
   couponCode = '';
@@ -38,10 +45,11 @@ export class CustomerCartComponent implements OnInit {
   loadGateways(): void {
     this.api.get<any[]>('payment-gateways/active').subscribe({
       next: (gateways) => {
+        const onlineGateways = (gateways || []).filter((g) => !['credit', 'cash_on_delivery', 'e_wallet'].includes(g.slug));
         this.enabledGateways = [
           { slug: 'cash_on_delivery', name: 'Cash on Delivery' },
           { slug: 'e_wallet', name: 'Wallet Balance' },
-          ...(gateways || []).filter((g) => g.slug !== 'credit'),
+          ...onlineGateways,
         ];
         if (this.enabledGateways.length) this.paymentMethod = this.enabledGateways[0].slug;
       },
@@ -66,6 +74,11 @@ export class CustomerCartComponent implements OnInit {
   }
 
   getItemPrice(cartItem: CartItem): number { return this.cartService.getItemPrice(cartItem); }
+
+  paymentLabel(slug?: string | null): string {
+    if (!slug) return 'N/A';
+    return this.enabledGateways.find((gw) => gw.slug === slug)?.name || slug.replace(/_/g, ' ');
+  }
 
   guestCheckout(): void {
     if (this.cartService.isEmpty) return;
@@ -97,9 +110,13 @@ export class CustomerCartComponent implements OnInit {
 
     this.placing = true;
     const selectedAddr = this.savedAddresses.find((a) => a.id === this.selectedAddressId);
+    const selectedPaymentGateway = this.paymentMethod !== 'cash_on_delivery' && this.paymentMethod !== 'e_wallet'
+      ? this.paymentMethod
+      : null;
     const order: any = {
       orderType: this.orderType,
       paymentMethod: this.paymentMethod,
+      paymentGateway: selectedPaymentGateway,
       items: this.cartService.toOrderItems(),
       orderNote: this.orderNote,
     };
@@ -114,13 +131,72 @@ export class CustomerCartComponent implements OnInit {
     }
 
     this.api.post<any>('orders', order).subscribe({
-      next: () => {
-        this.cartService.clear();
-        this.toastr.success('Order placed successfully!');
-        this.router.navigate(['/customer/orders']);
-        this.placing = false;
+      next: (created) => {
+        if (this.paymentMethod === 'razorpay') {
+          this.openRazorpayCheckout(created);
+          return;
+        }
+
+        this.finishOrder('Order placed successfully!');
       },
       error: () => { this.placing = false; },
     });
+  }
+
+  private openRazorpayCheckout(order: any): void {
+    if (!window.Razorpay) {
+      this.placing = false;
+      this.toastr.error('Razorpay checkout failed to load. Check your internet connection or script blockers.');
+      return;
+    }
+
+    this.api.post<any>('payments/razorpay/create-order', { orderId: order.id }).subscribe({
+      next: (rz) => {
+        const checkout = new window.Razorpay({
+          key: rz.keyId,
+          amount: rz.amount,
+          currency: rz.currency || 'INR',
+          name: 'FoodQR',
+          description: `Order #${order.orderSerialNo}`,
+          order_id: rz.razorpayOrderId,
+          handler: (response: any) => this.verifyRazorpayPayment(order, response),
+          modal: {
+            ondismiss: () => {
+              this.placing = false;
+              this.toastr.warning('Payment was cancelled. Your order is still unpaid.');
+              this.router.navigate(['/customer/orders']);
+            },
+          },
+          theme: { color: '#f97316' },
+        });
+        checkout.open();
+      },
+      error: () => {
+        this.placing = false;
+      },
+    });
+  }
+
+  private verifyRazorpayPayment(order: any, response: any): void {
+    this.api.post<any>('payments/razorpay/verify', {
+      orderId: order.id,
+      razorpayOrderId: response.razorpay_order_id,
+      razorpayPaymentId: response.razorpay_payment_id,
+      razorpaySignature: response.razorpay_signature,
+    }).subscribe({
+      next: () => this.finishOrder('Payment successful!'),
+      error: () => {
+        this.placing = false;
+        this.toastr.error('Payment verification failed. Please contact support with your order number.');
+        this.router.navigate(['/customer/orders']);
+      },
+    });
+  }
+
+  private finishOrder(message: string): void {
+    this.cartService.clear();
+    this.toastr.success(message);
+    this.router.navigate(['/customer/orders']);
+    this.placing = false;
   }
 }

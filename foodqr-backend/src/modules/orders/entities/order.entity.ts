@@ -65,6 +65,9 @@ export class Order {
   @Column({ nullable: true })
   paymentTransactionId: string;
 
+  @Column({ nullable: true })
+  paymentGateway: string;
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   subtotal: number;
 

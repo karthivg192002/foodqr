@@ -17,16 +17,19 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const config_1 = require("@nestjs/config");
+const crypto_1 = require("crypto");
 const stripe_1 = require("stripe");
 const transaction_entity_1 = require("./entities/transaction.entity");
 const order_entity_1 = require("../orders/entities/order.entity");
 const user_entity_1 = require("../users/entities/user.entity");
+const payment_gateway_entity_1 = require("../payment-gateways/entities/payment-gateway.entity");
 const enums_1 = require("../../common/enums");
 let PaymentsService = class PaymentsService {
-    constructor(transactionRepo, orderRepo, userRepo, configService) {
+    constructor(transactionRepo, orderRepo, userRepo, paymentGatewayRepo, configService) {
         this.transactionRepo = transactionRepo;
         this.orderRepo = orderRepo;
         this.userRepo = userRepo;
+        this.paymentGatewayRepo = paymentGatewayRepo;
         this.configService = configService;
         const stripeKey = this.configService.get('STRIPE_SECRET_KEY');
         if (stripeKey)
@@ -119,8 +122,7 @@ let PaymentsService = class PaymentsService {
         return { received: true };
     }
     async createRazorpayOrder(orderId, userId) {
-        const keyId = this.configService.get('RAZORPAY_KEY_ID');
-        const keySecret = this.configService.get('RAZORPAY_KEY_SECRET');
+        const { keyId, keySecret } = await this.getRazorpayCredentials();
         if (!keyId || !keySecret)
             throw new common_1.BadRequestException('Razorpay is not configured');
         const order = await this.orderRepo.findOne({ where: { id: orderId } });
@@ -141,6 +143,35 @@ let PaymentsService = class PaymentsService {
             amount: order.total, gatewayTransactionId: rzOrder.id,
         }));
         return { razorpayOrderId: rzOrder.id, keyId, amount: amountPaise, currency: 'INR' };
+    }
+    async verifyRazorpayPayment(body) {
+        const { keySecret } = await this.getRazorpayCredentials();
+        if (!keySecret)
+            throw new common_1.BadRequestException('Razorpay is not configured');
+        const { orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature } = body;
+        if (!orderId || !razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+            throw new common_1.BadRequestException('Missing Razorpay verification data');
+        }
+        const expectedSignature = (0, crypto_1.createHmac)('sha256', keySecret)
+            .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+            .digest('hex');
+        if (expectedSignature !== razorpaySignature) {
+            throw new common_1.BadRequestException('Invalid Razorpay signature');
+        }
+        await this.orderRepo.update(orderId, {
+            paymentStatus: enums_1.PaymentStatus.PAID,
+            paymentTransactionId: razorpayPaymentId,
+        });
+        await this.transactionRepo.update({ gatewayTransactionId: razorpayOrderId }, { status: enums_1.PaymentStatus.PAID, gatewayTransactionId: razorpayPaymentId });
+        return { message: 'Payment verified', orderId, paymentId: razorpayPaymentId };
+    }
+    async getRazorpayCredentials() {
+        const gateway = await this.paymentGatewayRepo.findOne({ where: { slug: 'razorpay' } });
+        const config = gateway?.config || {};
+        return {
+            keyId: config.razorpay_key_id || config.key_id || config.keyId || config.razorpay_key || this.configService.get('RAZORPAY_KEY_ID'),
+            keySecret: config.razorpay_key_secret || config.key_secret || config.keySecret || config.razorpay_secret || this.configService.get('RAZORPAY_KEY_SECRET'),
+        };
     }
     async handleRazorpayWebhook(body) {
         const event = body?.event;
@@ -351,7 +382,9 @@ exports.PaymentsService = PaymentsService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(transaction_entity_1.Transaction)),
     __param(1, (0, typeorm_1.InjectRepository)(order_entity_1.Order)),
     __param(2, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __param(3, (0, typeorm_1.InjectRepository)(payment_gateway_entity_1.PaymentGateway)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         config_1.ConfigService])

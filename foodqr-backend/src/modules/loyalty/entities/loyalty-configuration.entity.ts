@@ -17,7 +17,7 @@ export class LoyaltyConfiguration {
   @JoinColumn({ name: 'loyaltyProgramId' })
   program: LoyaltyProgram;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
   @Column({ type: 'enum', enum: LoyaltyStampCalculationType, default: LoyaltyStampCalculationType.FIXED_PER_ORDER })
@@ -40,6 +40,9 @@ export class LoyaltyConfiguration {
 
   @Column({ nullable: true })
   periodLimit: number;
+
+  @Column({ nullable: true })
+  maxStampsPerPeriod: number;
 
   @CreateDateColumn()
   createdAt: Date;

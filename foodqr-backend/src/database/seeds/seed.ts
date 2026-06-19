@@ -8,6 +8,7 @@ import { AppSetting } from '../../modules/settings/entities/app-setting.entity';
 import { ItemCategory } from '../../modules/menu/categories/entities/item-category.entity';
 import { Item } from '../../modules/menu/items/entities/item.entity';
 import { ItemVariation } from '../../modules/menu/variations/entities/item-variation.entity';
+import { PaymentGateway } from '../../modules/payment-gateways/entities/payment-gateway.entity';
 import { UserRole, UserStatus, ItemType } from '../../common/enums';
 
 dotenv.config();
@@ -19,7 +20,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'password',
   database: process.env.DB_DATABASE || 'foodqr_db',
-  entities: [User, Branch, AppSetting, ItemCategory, Item, ItemVariation],
+  entities: [User, Branch, AppSetting, ItemCategory, Item, ItemVariation, PaymentGateway],
   synchronize: false,
 });
 
@@ -119,6 +120,64 @@ const defaultSettings: SettingsGroup = [
   { group: 'loyalty', key: 'loyalty_amount_threshold', value: '100' },
   { group: 'loyalty', key: 'loyalty_required_stamps', value: '10' },
   { group: 'loyalty', key: 'loyalty_reward_value', value: '5' },
+];
+
+const seedPaymentGateways: Partial<PaymentGateway>[] = [
+  {
+    name: 'Stripe',
+    slug: 'stripe',
+    isActive: true,
+    mode: 'sandbox',
+    config: {
+      publicKey: '',
+      secretKey: '',
+    },
+  },
+  {
+    name: 'PayPal',
+    slug: 'paypal',
+    isActive: true,
+    mode: 'sandbox',
+    config: {
+      clientId: '',
+      clientSecret: '',
+    },
+  },
+  {
+    name: 'Razorpay',
+    slug: 'razorpay',
+    isActive: true,
+    mode: 'sandbox',
+    config: {
+      keyId: '',
+      keySecret: '',
+    },
+  },
+  {
+    name: 'Cash on Delivery',
+    slug: 'cash_on_delivery',
+    isActive: true,
+    mode: 'sandbox',
+    config: {},
+  },
+  {
+    name: 'Wallet Balance',
+    slug: 'e_wallet',
+    isActive: true,
+    mode: 'sandbox',
+    config: {},
+  },
+  {
+    name: 'Square',
+    slug: 'square',
+    isActive: false,
+    mode: 'sandbox',
+    config: {
+      applicationId: '',
+      accessToken: '',
+      locationId: '',
+    },
+  },
 ];
 
 const seedCategories: { name: string; icon: string; items: Partial<Item>[] }[] = [
@@ -229,6 +288,28 @@ async function seed() {
   console.log('─'.repeat(40));
   console.log(`Categories created : ${categoriesCreated}`);
   console.log(`Items created      : ${itemsCreated}`);
+  console.log('─'.repeat(40));
+
+  // --- Payment Gateways ---
+  const paymentGatewayRepo = AppDataSource.getRepository(PaymentGateway);
+  let gatewaysCreated = 0;
+  let gatewaysSkipped = 0;
+
+  for (const gateway of seedPaymentGateways) {
+    const existing = await paymentGatewayRepo.findOne({ where: { slug: gateway.slug } });
+    if (existing) {
+      gatewaysSkipped++;
+      continue;
+    }
+    await paymentGatewayRepo.save(paymentGatewayRepo.create(gateway));
+    gatewaysCreated++;
+  }
+
+  console.log('\nPayment Gateways:');
+  console.log('─'.repeat(40));
+  console.log(`Created : ${gatewaysCreated}`);
+  console.log(`Skipped : ${gatewaysSkipped}`);
+  console.log(`Total   : ${seedPaymentGateways.length}`);
   console.log('─'.repeat(40));
 
   await AppDataSource.destroy();

@@ -206,12 +206,17 @@ let OrdersService = class OrdersService {
             discount = result.discount;
         }
         const total = Math.max(0, subtotal + totalTax + deliveryCharge - discount);
+        const paymentGateway = dto.paymentGateway
+            || (![enums_1.PaymentMethod.CASH_ON_DELIVERY, enums_1.PaymentMethod.E_WALLET].includes(dto.paymentMethod)
+                ? dto.paymentMethod
+                : null);
         const order = this.orderRepo.create({
             orderSerialNo: 'ORD-' + Date.now().toString().slice(-8),
             token: (0, uuid_1.v4)().split('-')[0].toUpperCase(),
             userId: resolvedUserId,
             orderType: dto.orderType,
             paymentMethod: dto.paymentMethod,
+            paymentGateway,
             diningTableId: dto.diningTableId,
             deliveryAddress: dto.deliveryAddress,
             orderNote: dto.orderNote,

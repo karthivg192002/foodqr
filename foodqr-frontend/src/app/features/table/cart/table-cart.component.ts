@@ -14,7 +14,9 @@ export class TableCartComponent {
   orderNote = '';
   placing = false;
   PaymentMethod = PaymentMethod;
-  paymentMethod = PaymentMethod.CASH_ON_DELIVERY;
+  paymentMethod: string = PaymentMethod.CASH_ON_DELIVERY;
+  paymentGateway = '';
+  enabledGateways: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -24,6 +26,26 @@ export class TableCartComponent {
     private toastr: ToastrService,
   ) {
     this.slug = this.route.snapshot.paramMap.get('slug')!;
+    this.loadGateways();
+  }
+
+  loadGateways(): void {
+    this.api.get<any[]>('payment-gateways/active').subscribe({
+      next: (gateways) => {
+        const onlineGateways = (gateways || []).filter((g) => !['credit', 'cash_on_delivery', 'e_wallet'].includes(g.slug));
+        this.enabledGateways = [
+          { slug: 'cash_on_delivery', name: 'Cash on Delivery' },
+          { slug: 'e_wallet', name: 'Wallet' },
+          ...onlineGateways,
+        ];
+      },
+      error: () => {
+        this.enabledGateways = [
+          { slug: 'cash_on_delivery', name: 'Cash on Delivery' },
+          { slug: 'e_wallet', name: 'Wallet' },
+        ];
+      },
+    });
   }
 
   getItemPrice(cartItem: CartItem): number { return this.cartService.getItemPrice(cartItem); }
@@ -36,6 +58,9 @@ export class TableCartComponent {
         const order = {
           orderType: OrderType.DINING_TABLE,
           paymentMethod: this.paymentMethod,
+          paymentGateway: this.paymentMethod !== PaymentMethod.CASH_ON_DELIVERY && this.paymentMethod !== PaymentMethod.E_WALLET
+            ? this.paymentMethod
+            : null,
           diningTableId: table.id,
           items: this.cartService.toOrderItems(),
           orderNote: this.orderNote,

@@ -4,6 +4,25 @@ import { LoyaltyConfiguration } from './entities/loyalty-configuration.entity';
 import { LoyaltyStamp } from './entities/loyalty-stamp.entity';
 import { LoyaltyReward } from './entities/loyalty-reward.entity';
 import { User } from '../users/entities/user.entity';
+import { LoyaltyStampCalculationType, LoyaltyRewardType, LoyaltyPeriodType } from '../../common/enums';
+export declare class CreateLoyaltyConfigurationDto {
+    name?: string;
+    calculationType: LoyaltyStampCalculationType;
+    thresholdValue?: number;
+    stampsPerThreshold?: number;
+    rewardType?: LoyaltyRewardType;
+    rewardValue?: number;
+    periodType?: LoyaltyPeriodType;
+    periodLimit?: number;
+    maxStampsPerPeriod?: number;
+}
+export declare class CreateLoyaltyProgramDto {
+    name: string;
+    description?: string;
+    requiredStamps?: number;
+    isActive?: boolean;
+    autoResetStamps?: boolean;
+}
 export declare class LoyaltyService {
     private programRepo;
     private configRepo;
@@ -13,11 +32,11 @@ export declare class LoyaltyService {
     constructor(programRepo: Repository<LoyaltyProgram>, configRepo: Repository<LoyaltyConfiguration>, stampRepo: Repository<LoyaltyStamp>, rewardRepo: Repository<LoyaltyReward>, userRepo: Repository<User>);
     getPrograms(): Promise<LoyaltyProgram[]>;
     getActiveProgram(): Promise<LoyaltyProgram>;
-    createProgram(data: Partial<LoyaltyProgram>): Promise<LoyaltyProgram>;
-    updateProgram(id: string, data: Partial<LoyaltyProgram>): Promise<LoyaltyProgram>;
-    addConfiguration(programId: string, data: Partial<LoyaltyConfiguration>): Promise<LoyaltyConfiguration>;
+    createProgram(data: CreateLoyaltyProgramDto): Promise<LoyaltyProgram>;
+    updateProgram(id: string, data: Partial<CreateLoyaltyProgramDto>): Promise<LoyaltyProgram>;
+    addConfiguration(programId: string, data: CreateLoyaltyConfigurationDto): Promise<LoyaltyConfiguration>;
     getConfiguration(id: string): Promise<LoyaltyConfiguration>;
-    updateConfiguration(id: string, data: Partial<LoyaltyConfiguration>): Promise<LoyaltyConfiguration>;
+    updateConfiguration(id: string, data: Partial<CreateLoyaltyConfigurationDto>): Promise<LoyaltyConfiguration>;
     removeConfiguration(id: string): Promise<{
         message: string;
     }>;

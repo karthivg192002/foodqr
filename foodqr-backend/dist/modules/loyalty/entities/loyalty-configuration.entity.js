@@ -30,7 +30,7 @@ __decorate([
     __metadata("design:type", loyalty_program_entity_1.LoyaltyProgram)
 ], LoyaltyConfiguration.prototype, "program", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], LoyaltyConfiguration.prototype, "name", void 0);
 __decorate([
@@ -61,6 +61,10 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Number)
 ], LoyaltyConfiguration.prototype, "periodLimit", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], LoyaltyConfiguration.prototype, "maxStampsPerPeriod", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

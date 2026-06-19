@@ -95,6 +95,18 @@ let DiningTablesService = class DiningTablesService {
         await this.tableRepo.update(id, { qrCode });
         return this.findOne(id);
     }
+    async downloadQr(id, res) {
+        const table = await this.findOne(id);
+        if (!table.qrCode)
+            throw new common_1.NotFoundException('QR code not generated');
+        const base64Data = table.qrCode.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        res.set({
+            'Content-Type': 'image/png',
+            'Content-Disposition': `attachment; filename="table-${table.name.replace(/\s+/g, '-')}-qr.png"`,
+        });
+        res.send(buffer);
+    }
     async updateStatus(id, status) {
         await this.tableRepo.update(id, { status });
         return this.findOne(id);

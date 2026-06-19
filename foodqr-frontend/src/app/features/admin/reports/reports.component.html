@@ -1,4 +1,4 @@
-﻿<div class="space-y-5 fade-in-up">
+<div class="space-y-5 fade-in-up">
 
   <!-- Page header -->
   <div class="page-header">
@@ -20,7 +20,7 @@
     <div class="stat-card">
       <div class="stat-card-accent" style="background:linear-gradient(90deg,#ea580c,#f97316)"></div>
       <p class="stat-card-label">Sales Revenue</p>
-      <p class="stat-card-value">${{ getTotalRevenue() | number:'1.0-0' }}</p>
+      <p class="stat-card-value">{{ getTotalRevenue() | fqrCurrency }}</p>
     </div>
     <div class="stat-card">
       <div class="stat-card-accent" style="background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div>
@@ -52,7 +52,7 @@
     </button>
   </div>
 
-  <!-- ── SALES TAB ── -->
+  <!-- -- SALES TAB -- -->
   <ng-container *ngIf="activeTab === 'sales'">
     <div class="flex justify-end">
       <button (click)="exportCsv('sales')" class="btn-secondary btn-sm">
@@ -80,7 +80,7 @@
               <tr *ngFor="let d of salesData">
                 <td style="font-size:13px">{{ d.date | date:'mediumDate' }}</td>
                 <td style="text-align:center;color:#64748b">{{ d.orderCount }}</td>
-                <td style="text-align:right;font-weight:700;color:#0f172a">${{ d.revenue | number:'1.2-2' }}</td>
+                <td style="text-align:right;font-weight:700;color:#0f172a">{{ d.revenue | fqrCurrency }}</td>
               </tr>
               <tr *ngIf="salesData.length===0">
                 <td colspan="3" class="text-center py-10" style="color:#94a3b8;font-size:13px">No sales data for this period</td>
@@ -101,7 +101,7 @@
               <p class="font-semibold capitalize" style="font-size:13.5px;color:#0f172a">{{ r.type?.replace('_', ' ') }}</p>
               <p style="font-size:11.5px;color:#94a3b8;margin-top:2px">{{ r.count }} orders</p>
             </div>
-            <p style="font-size:15px;font-weight:800;color:#ea580c">${{ r.revenue | number:'1.2-2' }}</p>
+            <p style="font-size:15px;font-weight:800;color:#ea580c">{{ r.revenue | fqrCurrency }}</p>
           </div>
           <p *ngIf="!revenueByType.length" class="text-center py-6" style="font-size:13px;color:#94a3b8">No data available</p>
         </div>
@@ -109,7 +109,7 @@
     </div>
   </ng-container>
 
-  <!-- ── ITEMS TAB ── -->
+  <!-- -- ITEMS TAB -- -->
   <ng-container *ngIf="activeTab === 'items'">
     <div class="flex justify-end">
       <button (click)="exportCsv('items')" class="btn-secondary btn-sm">
@@ -132,11 +132,11 @@
         <tbody>
           <tr *ngFor="let item of itemsReport">
             <td style="font-weight:600;color:#0f172a">{{ item.itemName }}</td>
-            <td style="color:#64748b">{{ item.categoryName || '—' }}</td>
+            <td style="color:#64748b">{{ item.categoryName || '�' }}</td>
             <td style="text-align:right;font-weight:700;color:#ea580c">{{ item.totalQuantity }}</td>
             <td style="text-align:right;color:#64748b">{{ item.orderCount }}</td>
-            <td style="text-align:right;font-weight:700;color:#0f172a">${{ item.totalRevenue | number:'1.2-2' }}</td>
-            <td style="text-align:right;color:#64748b">${{ item.avgPrice | number:'1.2-2' }}</td>
+            <td style="text-align:right;font-weight:700;color:#0f172a">{{ item.totalRevenue | fqrCurrency }}</td>
+            <td style="text-align:right;color:#64748b">{{ item.avgPrice | fqrCurrency }}</td>
           </tr>
           <tr *ngIf="!itemsReport.length">
             <td colspan="6" class="text-center py-12" style="color:#94a3b8">No items data for this period</td>
@@ -146,7 +146,7 @@
     </div>
   </ng-container>
 
-  <!-- ── CREDIT TAB ── -->
+  <!-- -- CREDIT TAB -- -->
   <ng-container *ngIf="activeTab === 'credit'">
     <div class="flex justify-end">
       <button (click)="exportCsv('credit-balance')" class="btn-secondary btn-sm">
@@ -178,11 +178,11 @@
                 </div>
               </div>
             </td>
-            <td style="text-align:right;font-weight:600;color:#16a34a">${{ c.totalCredit | number:'1.2-2' }}</td>
-            <td style="text-align:right;font-weight:600;color:#dc2626">${{ c.totalDebit | number:'1.2-2' }}</td>
+            <td style="text-align:right;font-weight:600;color:#16a34a">{{ c.totalCredit | fqrCurrency }}</td>
+            <td style="text-align:right;font-weight:600;color:#dc2626">{{ c.totalDebit | fqrCurrency }}</td>
             <td style="text-align:right">
               <span [style.color]="c.balance >= 0 ? '#16a34a' : '#dc2626'" style="font-size:14px;font-weight:800">
-                ${{ c.balance | number:'1.2-2' }}
+                {{ c.balance | fqrCurrency }}
               </span>
             </td>
             <td style="text-align:center;color:#64748b">{{ c.transactionCount }}</td>
@@ -195,7 +195,7 @@
     </div>
   </ng-container>
 
-  <!-- ── ANALYTICS TAB ── -->
+  <!-- -- ANALYTICS TAB -- -->
   <ng-container *ngIf="activeTab === 'analytics'">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 

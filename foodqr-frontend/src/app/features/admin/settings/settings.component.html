@@ -369,7 +369,22 @@
           <div class="form-group">
             <label class="label">Font Family</label>
             <select [(ngModel)]="themeSettings['font_family']" class="input-field">
-              <option>Inter</option><option>Roboto</option><option>Open Sans</option><option>Poppins</option>
+              <optgroup label="Sans-Serif">
+                <option>Inter</option>
+                <option>Roboto</option>
+                <option>Open Sans</option>
+                <option>Poppins</option>
+                <option>Montserrat</option>
+                <option>Raleway</option>
+                <option>Nunito</option>
+                <option>Josefin Sans</option>
+              </optgroup>
+              <optgroup label="Serif (Premium)">
+                <option>Playfair Display</option>
+                <option>Cormorant Garamond</option>
+                <option>DM Serif Display</option>
+                <option>Lora</option>
+              </optgroup>
             </select>
           </div>
           <div class="form-group">

@@ -36,7 +36,8 @@ export declare enum PaymentMethod {
     FLUTTERWAVE = "flutterwave",
     PAYTM = "paytm",
     BKASH = "bkash",
-    PAYSTACK = "paystack"
+    PAYSTACK = "paystack",
+    PHONEPE = "phonepe"
 }
 export declare enum PaymentStatus {
     UNPAID = "unpaid",

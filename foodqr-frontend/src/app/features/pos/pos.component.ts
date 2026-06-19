@@ -92,6 +92,9 @@ export class PosComponent implements OnInit {
     const order: any = {
       orderType: this.orderType,
       paymentMethod: this.paymentMethod,
+      paymentGateway: this.paymentMethod !== PaymentMethod.CASH_ON_DELIVERY && this.paymentMethod !== PaymentMethod.E_WALLET
+        ? this.paymentMethod
+        : null,
       items: this.cartService.toOrderItems(),
       posReceivedAmount: this.receivedAmount,
     };
@@ -107,5 +110,14 @@ export class PosComponent implements OnInit {
       },
       error: () => { this.placing = false; },
     });
+  }
+
+  paymentLabel(value?: string | null): string {
+    const labels: Record<string, string> = {
+      cash_on_delivery: 'Cash',
+      e_wallet: 'Wallet',
+      stripe: 'Card',
+    };
+    return value ? (labels[value] || value.replace(/_/g, ' ')) : 'N/A';
   }
 }

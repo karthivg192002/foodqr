@@ -91,6 +91,7 @@ export interface Order {
   orderType: OrderType;
   status: OrderStatus;
   paymentMethod: string;
+  paymentGateway?: string;
   paymentStatus: string;
   subtotal: number;
   discount: number;
@@ -134,6 +135,15 @@ export enum PaymentMethod {
   CASH_ON_DELIVERY = 'cash_on_delivery',
   E_WALLET = 'e_wallet',
   STRIPE = 'stripe',
+  PAYPAL = 'paypal',
+  RAZORPAY = 'razorpay',
+  CASHFREE = 'cashfree',
+  MOLLIE = 'mollie',
+  FLUTTERWAVE = 'flutterwave',
+  PAYSTACK = 'paystack',
+  PHONEPE = 'phonepe',
+  PAYTM = 'paytm',
+  BKASH = 'bkash',
 }
 
 export enum OrderStatus {

@@ -40,6 +40,7 @@ export enum PaymentMethod {
   PAYTM = 'paytm',
   BKASH = 'bkash',
   PAYSTACK = 'paystack',
+  PHONEPE = 'phonepe',
 }
 
 export enum PaymentStatus {

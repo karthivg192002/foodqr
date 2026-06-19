@@ -61,6 +61,13 @@ export class PaymentsController {
     return this.paymentsService.createRazorpayOrder(orderId, user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('payments/razorpay/verify')
+  verifyRazorpayPayment(@Body() body: { orderId: string; razorpayOrderId: string; razorpayPaymentId: string; razorpaySignature: string }) {
+    return this.paymentsService.verifyRazorpayPayment(body);
+  }
+
   @Public()
   @Post('payments/webhook/razorpay')
   razorpayWebhook(@Body() body: any) {

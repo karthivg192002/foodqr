@@ -16,7 +16,7 @@ export class PaymentGatewaysComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.api.get<any[]>('admin/payment-gateways').subscribe({
+    this.api.get<any[]>('payment-gateways').subscribe({
       next: (d) => { this.gateways = d; this.loading = false; },
       error: () => { this.loading = false; },
     });
@@ -28,7 +28,7 @@ export class PaymentGatewaysComponent implements OnInit {
   }
 
   toggle(gw: any): void {
-    this.api.patch(`admin/payment-gateways/${gw.slug}`, { isActive: !gw.isActive }).subscribe({
+    this.api.patch(`payment-gateways/${gw.slug}`, { isActive: !gw.isActive }).subscribe({
       next: () => { this.toastr.success('Updated'); this.load(); },
     });
   }
@@ -38,7 +38,7 @@ export class PaymentGatewaysComponent implements OnInit {
     let config: any = {};
     try { config = JSON.parse(this.configJson); } catch { this.toastr.error('Invalid JSON'); this.saving = false; return; }
 
-    this.api.patch(`admin/payment-gateways/${this.selectedGateway.slug}`, {
+    this.api.patch(`payment-gateways/${this.selectedGateway.slug}`, {
       isActive: this.selectedGateway.isActive,
       mode: this.selectedGateway.mode,
       config,

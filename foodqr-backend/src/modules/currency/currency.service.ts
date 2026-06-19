@@ -1,14 +1,32 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { IsString, IsOptional, IsNumber, IsBoolean, IsNotEmpty } from 'class-validator';
 import { Currency } from './entities/currency.entity';
 
 export class CreateCurrencyDto {
+  @IsString()
+  @IsNotEmpty()
   name: string;
+
+  @IsString()
+  @IsNotEmpty()
   code: string;
+
+  @IsString()
+  @IsNotEmpty()
   symbol: string;
+
+  @IsNumber()
+  @IsOptional()
   exchangeRate?: number;
+
+  @IsBoolean()
+  @IsOptional()
   isDefault?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
   status?: boolean;
 }
 

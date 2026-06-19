@@ -44,6 +44,7 @@ var PaymentMethod;
     PaymentMethod["PAYTM"] = "paytm";
     PaymentMethod["BKASH"] = "bkash";
     PaymentMethod["PAYSTACK"] = "paystack";
+    PaymentMethod["PHONEPE"] = "phonepe";
 })(PaymentMethod || (exports.PaymentMethod = PaymentMethod = {}));
 var PaymentStatus;
 (function (PaymentStatus) {

@@ -36,7 +36,7 @@
           <h3 class="font-semibold text-gray-900 truncate">{{ item.name }}</h3>
           <p class="text-xs text-gray-500 line-clamp-2">{{ item.description }}</p>
           <div class="flex items-center justify-between mt-2">
-            <span class="text-orange-600 font-bold">${{ item.price | number:'1.2-2' }}</span>
+            <span class="text-orange-600 font-bold">{{ item.price | fqrCurrency }}</span>
             <ng-container *ngIf="getCartQty(item.id) > 0; else addBtn">
               <div class="flex items-center gap-2 bg-orange-50 rounded-full px-2 py-1">
                 <button (click)="cartService.updateQuantity(item.id, undefined, getCartQty(item.id) - 1)" class="text-orange-500 font-bold w-5 h-5 flex items-center justify-center">−</button>
@@ -60,6 +60,6 @@
   <button (click)="goToCart()" class="w-full bg-orange-500 text-white rounded-2xl py-4 flex items-center justify-between px-5 shadow-lg">
     <span class="bg-orange-600 text-white text-sm font-bold rounded-xl px-2 py-0.5">{{ cartService.count }}</span>
     <span class="font-bold text-lg">View Cart</span>
-    <span class="font-bold">${{ cartService.total | number:'1.2-2' }}</span>
+    <span class="font-bold">{{ cartService.total | fqrCurrency }}</span>
   </button>
 </div>

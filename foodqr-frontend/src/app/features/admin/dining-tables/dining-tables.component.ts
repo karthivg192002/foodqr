@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DiningTable } from '../../../core/models';
+import { environment } from '../../../../environments/environment';
 
 @Component({ selector: 'app-dining-tables', templateUrl: './dining-tables.component.html' })
 export class DiningTablesComponent implements OnInit {
@@ -60,6 +61,32 @@ export class DiningTablesComponent implements OnInit {
     this.api.post(`admin/dining-tables/${id}/regenerate-qr`, {}).subscribe({
       next: (table: any) => { this.toastr.success('QR regenerated'); this.load(); },
     });
+  }
+
+  downloadQr(table: DiningTable): void {
+    const url = `${environment.apiUrl}/admin/dining-tables/${table.id}/qr/download`;
+    const token = localStorage.getItem('token');
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.responseType = 'blob';
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const blob = new Blob([xhr.response], { type: 'image/png' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `table-${table.name.replace(/\s+/g, '-')}-qr.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+        this.toastr.success('QR code downloaded');
+      } else {
+        this.toastr.error('Failed to download QR code');
+      }
+    };
+    xhr.onerror = () => this.toastr.error('Download failed');
+    xhr.send();
   }
 
   delete(id: string): void {

@@ -94,5 +94,23 @@ export class OrdersComponent implements OnInit {
     return map[status] || 'badge-gray';
   }
 
+  paymentLabel(value?: string | null): string {
+    const labels: Record<string, string> = {
+      cash_on_delivery: 'Cash on Delivery',
+      e_wallet: 'Wallet',
+      paypal: 'PayPal',
+      razorpay: 'Razorpay',
+      cashfree: 'Cashfree',
+      mollie: 'Mollie',
+      flutterwave: 'Flutterwave',
+      paystack: 'Paystack',
+      phonepe: 'PhonePe',
+      paytm: 'Paytm',
+      bkash: 'bKash',
+      stripe: 'Stripe',
+    };
+    return value ? (labels[value] || value.replace(/_/g, ' ')) : 'N/A';
+  }
+
   get pages(): number { return Math.ceil(this.total / this.limit); }
 }

@@ -44,6 +44,9 @@ let PaymentsController = class PaymentsController {
     createRazorpayOrder(user, orderId) {
         return this.paymentsService.createRazorpayOrder(orderId, user.id);
     }
+    verifyRazorpayPayment(body) {
+        return this.paymentsService.verifyRazorpayPayment(body);
+    }
     razorpayWebhook(body) {
         return this.paymentsService.handleRazorpayWebhook(body);
     }
@@ -159,6 +162,15 @@ __decorate([
     __metadata("design:paramtypes", [user_entity_1.User, String]),
     __metadata("design:returntype", void 0)
 ], PaymentsController.prototype, "createRazorpayOrder", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Post)('payments/razorpay/verify'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], PaymentsController.prototype, "verifyRazorpayPayment", null);
 __decorate([
     (0, decorators_1.Public)(),
     (0, common_1.Post)('payments/webhook/razorpay'),

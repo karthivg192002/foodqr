@@ -1,4 +1,4 @@
-﻿<div class="space-y-5 fade-in-up">
+<div class="space-y-5 fade-in-up">
 
   <!-- Page header -->
   <div class="page-header">
@@ -19,7 +19,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
       </svg>
       <input [(ngModel)]="search" (ngModelChange)="page=1; loadItems()" type="text"
-        placeholder="Search items…" class="input-field">
+        placeholder="Search items�" class="input-field">
     </div>
     <select [(ngModel)]="filterCategory" (ngModelChange)="page=1; loadItems()" class="input-field" style="width:180px">
       <option value="">All Categories</option>
@@ -56,13 +56,13 @@
                 <div *ngIf="!item.thumbImage"
                   class="flex items-center justify-center rounded-xl text-lg"
                   style="width:40px;height:40px;background:linear-gradient(135deg,#fff7ed,#fef3c7)">
-                  🍽️
+                  ???
                 </div>
               </div>
               <span style="font-size:13.5px;font-weight:600;color:#0f172a">{{ item.name }}</span>
             </div>
           </td>
-          <td style="font-size:13px;color:#64748b">{{ item.category?.name || '—' }}</td>
+          <td style="font-size:13px;color:#64748b">{{ item.category?.name || '�' }}</td>
           <td>
             <span [ngClass]="{
               'badge-success': item.itemType === 'veg',
@@ -71,7 +71,7 @@
             }" class="capitalize">{{ item.itemType?.replace('_', ' ') }}</span>
           </td>
           <td style="text-align:right;font-size:14px;font-weight:700;color:#0f172a">
-            ${{ item.price | number:'1.2-2' }}
+            {{ item.price | fqrCurrency }}
           </td>
           <td style="text-align:center">
             <button (click)="toggleFeatured(item)"
@@ -128,12 +128,12 @@
   </div>
 </div>
 
-<!-- ── Item Form Modal ── -->
+<!-- -- Item Form Modal -- -->
 <div *ngIf="showForm" class="modal-backdrop">
   <div class="modal-box" style="max-width:560px">
     <div class="modal-header">
       <p class="modal-header-title">{{ editingId ? 'Edit Item' : 'New Menu Item' }}</p>
-      <button (click)="showForm=false" class="modal-close-btn">×</button>
+      <button (click)="showForm=false" class="modal-close-btn">�</button>
     </div>
     <form [formGroup]="form" (ngSubmit)="save()">
       <div class="modal-body space-y-4 max-h-[65vh] overflow-y-auto">
@@ -157,7 +157,7 @@
               </svg>
             </div>
             <div>
-              <p style="font-size:13px;font-weight:500;color:#334155">{{ uploadingImage ? 'Uploading…' : 'Click to upload image' }}</p>
+              <p style="font-size:13px;font-weight:500;color:#334155">{{ uploadingImage ? 'Uploading�' : 'Click to upload image' }}</p>
               <p style="font-size:11.5px;color:#94a3b8">PNG, JPG up to 5 MB</p>
             </div>
             <input type="file" accept="image/*" (change)="onImageSelected($event)" class="hidden" [disabled]="uploadingImage" />
@@ -248,7 +248,7 @@
       <div class="modal-footer">
         <button type="button" (click)="showForm=false" class="btn-secondary btn-sm">Cancel</button>
         <button type="submit" [disabled]="saving || form.invalid" class="btn-primary btn-sm">
-          {{ saving ? 'Saving…' : (editingId ? 'Update Item' : 'Create Item') }}
+          {{ saving ? 'Saving�' : (editingId ? 'Update Item' : 'Create Item') }}
         </button>
       </div>
     </form>

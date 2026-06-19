@@ -3,13 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import { Transaction } from './entities/transaction.entity';
 import { Order } from '../orders/entities/order.entity';
 import { User } from '../users/entities/user.entity';
+import { PaymentGateway } from '../payment-gateways/entities/payment-gateway.entity';
 export declare class PaymentsService {
     private transactionRepo;
     private orderRepo;
     private userRepo;
+    private paymentGatewayRepo;
     private configService;
     private stripe;
-    constructor(transactionRepo: Repository<Transaction>, orderRepo: Repository<Order>, userRepo: Repository<User>, configService: ConfigService);
+    constructor(transactionRepo: Repository<Transaction>, orderRepo: Repository<Order>, userRepo: Repository<User>, paymentGatewayRepo: Repository<PaymentGateway>, configService: ConfigService);
     createStripePaymentIntent(orderId: string, userId: string): Promise<{
         clientSecret: string;
         paymentIntentId: string;
@@ -35,10 +37,21 @@ export declare class PaymentsService {
     }>;
     createRazorpayOrder(orderId: string, userId: string): Promise<{
         razorpayOrderId: any;
-        keyId: any;
+        keyId: string;
         amount: number;
         currency: string;
     }>;
+    verifyRazorpayPayment(body: {
+        orderId: string;
+        razorpayOrderId: string;
+        razorpayPaymentId: string;
+        razorpaySignature: string;
+    }): Promise<{
+        message: string;
+        orderId: string;
+        paymentId: string;
+    }>;
+    private getRazorpayCredentials;
     handleRazorpayWebhook(body: any): Promise<{
         received: boolean;
     }>;

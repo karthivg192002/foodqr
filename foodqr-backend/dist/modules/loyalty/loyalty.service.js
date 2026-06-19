@@ -12,16 +12,91 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LoyaltyService = void 0;
+exports.LoyaltyService = exports.CreateLoyaltyProgramDto = exports.CreateLoyaltyConfigurationDto = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const class_validator_1 = require("class-validator");
 const loyalty_program_entity_1 = require("./entities/loyalty-program.entity");
 const loyalty_configuration_entity_1 = require("./entities/loyalty-configuration.entity");
 const loyalty_stamp_entity_1 = require("./entities/loyalty-stamp.entity");
 const loyalty_reward_entity_1 = require("./entities/loyalty-reward.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 const enums_1 = require("../../common/enums");
+class CreateLoyaltyConfigurationDto {
+}
+exports.CreateLoyaltyConfigurationDto = CreateLoyaltyConfigurationDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateLoyaltyConfigurationDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(enums_1.LoyaltyStampCalculationType),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateLoyaltyConfigurationDto.prototype, "calculationType", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateLoyaltyConfigurationDto.prototype, "thresholdValue", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateLoyaltyConfigurationDto.prototype, "stampsPerThreshold", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(enums_1.LoyaltyRewardType),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateLoyaltyConfigurationDto.prototype, "rewardType", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateLoyaltyConfigurationDto.prototype, "rewardValue", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(enums_1.LoyaltyPeriodType),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateLoyaltyConfigurationDto.prototype, "periodType", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateLoyaltyConfigurationDto.prototype, "periodLimit", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateLoyaltyConfigurationDto.prototype, "maxStampsPerPeriod", void 0);
+class CreateLoyaltyProgramDto {
+}
+exports.CreateLoyaltyProgramDto = CreateLoyaltyProgramDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateLoyaltyProgramDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateLoyaltyProgramDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateLoyaltyProgramDto.prototype, "requiredStamps", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateLoyaltyProgramDto.prototype, "isActive", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateLoyaltyProgramDto.prototype, "autoResetStamps", void 0);
 let LoyaltyService = class LoyaltyService {
     constructor(programRepo, configRepo, stampRepo, rewardRepo, userRepo) {
         this.programRepo = programRepo;

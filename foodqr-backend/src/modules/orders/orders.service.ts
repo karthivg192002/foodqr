@@ -18,7 +18,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { EventsService } from '../events/events.service';
 import { DeliveryZonesService } from '../delivery-zones/delivery-zones.service';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto/order.dto';
-import { OrderStatus, OrderType, PaymentStatus } from '../../common/enums';
+import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '../../common/enums';
 
 @Injectable()
 export class OrdersService {
@@ -235,6 +235,10 @@ export class OrdersService {
     }
 
     const total = Math.max(0, subtotal + totalTax + deliveryCharge - discount);
+    const paymentGateway = dto.paymentGateway
+      || (![PaymentMethod.CASH_ON_DELIVERY, PaymentMethod.E_WALLET].includes(dto.paymentMethod)
+        ? dto.paymentMethod
+        : null);
 
     const order = this.orderRepo.create({
       orderSerialNo: 'ORD-' + Date.now().toString().slice(-8),
@@ -242,6 +246,7 @@ export class OrdersService {
       userId: resolvedUserId,
       orderType: dto.orderType,
       paymentMethod: dto.paymentMethod,
+      paymentGateway,
       diningTableId: dto.diningTableId,
       deliveryAddress: dto.deliveryAddress,
       orderNote: dto.orderNote,

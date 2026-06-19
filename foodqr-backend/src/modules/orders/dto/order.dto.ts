@@ -58,6 +58,10 @@ export class CreateOrderDto {
   paymentMethod: PaymentMethod;
 
   @ApiPropertyOptional()
+  @IsOptional() @IsString()
+  paymentGateway?: string;
+
+  @ApiPropertyOptional()
   @IsOptional() @IsUUID()
   diningTableId?: string;
 

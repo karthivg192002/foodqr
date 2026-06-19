@@ -66,13 +66,16 @@
               <span style="font-size:13px;color:#64748b">{{ order.items?.length }} item{{ order.items?.length !== 1 ? 's' : '' }}</span>
             </td>
             <td style="text-align:right">
-              <span style="font-size:14px;font-weight:700;color:#0f172a">${{ order.total | number:'1.2-2' }}</span>
+              <span style="font-size:14px;font-weight:700;color:#0f172a">{{ order.total | fqrCurrency }}</span>
             </td>
             <td style="text-align:center"><span [class]="getStatusBadge(order.status)" class="capitalize">{{ order.status }}</span></td>
             <td style="text-align:center">
-              <span [class]="order.paymentStatus === 'paid' ? 'badge-success' : 'badge-warning'" class="capitalize">
-                {{ order.paymentStatus }}
-              </span>
+              <div class="flex flex-col items-center gap-1">
+                <span [class]="order.paymentStatus === 'paid' ? 'badge-success' : 'badge-warning'" class="capitalize">
+                  {{ order.paymentStatus }}
+                </span>
+                <span style="font-size:11px;color:#64748b">{{ paymentLabel(order.paymentMethod) }}</span>
+              </div>
             </td>
             <td style="text-align:right">
               <div class="flex items-center justify-end gap-1">
@@ -168,11 +171,15 @@
         </div>
         <div class="p-3 rounded-xl" style="background:#f8fafc;border:1px solid #f1f5f9">
           <p style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em">Payment Method</p>
-          <p class="capitalize" style="font-size:13.5px;font-weight:600;color:#0f172a;margin-top:4px">{{ selectedOrder.paymentMethod }}</p>
+          <p style="font-size:13.5px;font-weight:600;color:#0f172a;margin-top:4px">{{ paymentLabel(selectedOrder.paymentMethod) }}</p>
         </div>
         <div class="p-3 rounded-xl" style="background:#f8fafc;border:1px solid #f1f5f9">
           <p style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em">Status</p>
           <div class="mt-1"><span [class]="getStatusBadge(selectedOrder.status)" class="capitalize">{{ selectedOrder.status }}</span></div>
+        </div>
+        <div *ngIf="selectedOrder.paymentGateway" class="p-3 rounded-xl" style="background:#f8fafc;border:1px solid #f1f5f9">
+          <p style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em">Payment Gateway</p>
+          <p style="font-size:13.5px;font-weight:600;color:#0f172a;margin-top:4px">{{ paymentLabel(selectedOrder.paymentGateway) }}</p>
         </div>
       </div>
 
@@ -195,7 +202,7 @@
                   <span *ngIf="item.variationName" style="color:#94a3b8;font-size:12px"> ({{ item.variationName }})</span>
                 </td>
                 <td style="text-align:center;color:#64748b">{{ item.quantity }}</td>
-                <td style="text-align:right;font-weight:600;color:#0f172a">${{ item.subtotal | number:'1.2-2' }}</td>
+                <td style="text-align:right;font-weight:600;color:#0f172a">{{ item.subtotal | fqrCurrency }}</td>
               </tr>
             </tbody>
           </table>
@@ -205,13 +212,13 @@
       <!-- Totals -->
       <div class="rounded-xl p-4" style="background:#f8fafc;border:1px solid #f1f5f9">
         <div class="flex justify-between py-1.5" style="font-size:13px;color:#64748b">
-          <span>Subtotal</span><span style="color:#334155">${{ selectedOrder.subtotal | number:'1.2-2' }}</span>
+          <span>Subtotal</span><span style="color:#334155">{{ selectedOrder.subtotal | fqrCurrency }}</span>
         </div>
         <div class="flex justify-between py-1.5" style="font-size:13px;color:#64748b">
-          <span>Tax</span><span style="color:#334155">${{ selectedOrder.totalTax | number:'1.2-2' }}</span>
+          <span>Tax</span><span style="color:#334155">{{ selectedOrder.totalTax | fqrCurrency }}</span>
         </div>
         <div class="flex justify-between py-2 mt-1" style="font-size:15px;font-weight:800;color:#0f172a;border-top:1.5px solid #e2e8f0">
-          <span>Total</span><span>${{ selectedOrder.total | number:'1.2-2' }}</span>
+          <span>Total</span><span>{{ selectedOrder.total | fqrCurrency }}</span>
         </div>
       </div>
 

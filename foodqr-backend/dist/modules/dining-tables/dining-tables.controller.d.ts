@@ -22,5 +22,6 @@ export declare class DiningTablesController {
         message: string;
     }>;
     assignWaiter(id: string, waiterId: string): Promise<import("./entities/dining-table.entity").DiningTable>;
+    downloadQr(id: string, res: Response): Promise<void>;
     exportExcel(branchId: string, res: Response): Promise<void>;
 }

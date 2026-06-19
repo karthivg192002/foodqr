@@ -16,6 +16,7 @@ exports.PaymentGatewaysController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
+const decorators_1 = require("../../common/decorators");
 const payment_gateways_service_1 = require("./payment-gateways.service");
 let PaymentGatewaysController = class PaymentGatewaysController {
     constructor(service) {
@@ -30,18 +31,23 @@ let PaymentGatewaysController = class PaymentGatewaysController {
 };
 exports.PaymentGatewaysController = PaymentGatewaysController;
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], PaymentGatewaysController.prototype, "findAll", null);
 __decorate([
+    (0, decorators_1.Public)(),
     (0, common_1.Get)('active'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], PaymentGatewaysController.prototype, "findActive", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Get)(':slug'),
     __param(0, (0, common_1.Param)('slug')),
     __metadata("design:type", Function),
@@ -49,6 +55,9 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PaymentGatewaysController.prototype, "findOne", null);
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.Patch)(':slug'),
     (0, common_1.Put)(':slug'),
     __param(0, (0, common_1.Param)('slug')),
     __param(1, (0, common_1.Body)()),
@@ -58,8 +67,6 @@ __decorate([
 ], PaymentGatewaysController.prototype, "update", null);
 exports.PaymentGatewaysController = PaymentGatewaysController = __decorate([
     (0, swagger_1.ApiTags)('Payment Gateways'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('payment-gateways'),
     __metadata("design:paramtypes", [payment_gateways_service_1.PaymentGatewaysService])
 ], PaymentGatewaysController);

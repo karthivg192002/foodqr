@@ -42,7 +42,7 @@
               <div *ngIf="!item.thumbImage" class="w-full h-full flex items-center justify-center text-3xl">🍽️</div>
             </div>
             <p class="font-medium text-gray-900 text-sm truncate">{{ item.name }}</p>
-            <p class="text-orange-600 font-bold text-sm mt-0.5">${{ item.price | number:'1.2-2' }}</p>
+            <p class="text-orange-600 font-bold text-sm mt-0.5">{{ item.price | fqrCurrency }}</p>
             <span *ngIf="getCartQty(item.id) > 0"
               class="absolute top-2 right-2 w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
               {{ getCartQty(item.id) }}
@@ -79,7 +79,7 @@
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium text-gray-900 truncate">{{ item.item.name }}</p>
             <p *ngIf="item.variation" class="text-xs text-gray-500">{{ item.variation.name }}</p>
-            <p class="text-xs text-orange-600 font-semibold">${{ getItemPrice(item) | number:'1.2-2' }}</p>
+            <p class="text-xs text-orange-600 font-semibold">{{ getItemPrice(item) | fqrCurrency }}</p>
           </div>
           <div class="flex items-center gap-1.5 bg-gray-100 rounded-lg px-1.5 py-0.5">
             <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity - 1)"
@@ -88,7 +88,7 @@
             <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity + 1)"
               class="text-gray-600 font-bold w-5 h-5 flex items-center justify-center">+</button>
           </div>
-          <p class="text-sm font-bold w-14 text-right">${{ getItemPrice(item) * item.quantity | number:'1.2-2' }}</p>
+          <p class="text-sm font-bold w-14 text-right">{{ getItemPrice(item) * item.quantity | fqrCurrency }}</p>
         </div>
       </div>
 
@@ -124,7 +124,7 @@
               {{ isSufficient ? 'Change' : 'Short by' }}
             </span>
             <span class="font-bold" [class]="isSufficient ? 'text-green-600' : 'text-red-500'">
-              ${{ (isSufficient ? changeAmount : orderTotal - receivedAmount) | number:'1.2-2' }}
+              {{ (isSufficient ? changeAmount : orderTotal - receivedAmount) | fqrCurrency }}
             </span>
           </div>
           <p *ngIf="receivedAmount > 0 && !isSufficient" class="text-xs text-red-500">Insufficient cash received</p>
@@ -134,11 +134,11 @@
         <div class="space-y-1 text-sm">
           <div class="flex justify-between text-gray-600">
             <span>Items ({{ cartService.count }})</span>
-            <span>${{ cartService.total | number:'1.2-2' }}</span>
+            <span>{{ cartService.total | fqrCurrency }}</span>
           </div>
           <div class="flex justify-between font-bold text-base pt-2 border-t">
             <span>Total</span>
-            <span class="text-orange-600">${{ cartService.total | number:'1.2-2' }}</span>
+            <span class="text-orange-600">{{ cartService.total | fqrCurrency }}</span>
           </div>
         </div>
 
@@ -151,6 +151,7 @@
         <!-- Last order confirmation -->
         <div *ngIf="lastOrder" class="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-center">
           <p class="text-green-700 font-medium">✅ Order #{{ lastOrder.orderSerialNo }} placed!</p>
+          <p class="text-green-600 text-xs mt-1">Payment: {{ paymentLabel(lastOrder.paymentMethod) }}</p>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { LoyaltyService } from './loyalty.service';
+import { LoyaltyService, CreateLoyaltyProgramDto, CreateLoyaltyConfigurationDto } from './loyalty.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles, CurrentUser } from '../../common/decorators';
@@ -37,19 +37,19 @@ export class LoyaltyController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Post('admin/loyalty/programs')
-  createProgram(@Body() data: any) { return this.loyaltyService.createProgram(data); }
+  createProgram(@Body() data: CreateLoyaltyProgramDto) { return this.loyaltyService.createProgram(data); }
 
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch('admin/loyalty/programs/:id')
-  updateProgram(@Param('id', ParseUUIDPipe) id: string, @Body() data: any) {
+  updateProgram(@Param('id', ParseUUIDPipe) id: string, @Body() data: Partial<CreateLoyaltyProgramDto>) {
     return this.loyaltyService.updateProgram(id, data);
   }
 
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Post('admin/loyalty/programs/:id/configurations')
-  addConfiguration(@Param('id', ParseUUIDPipe) id: string, @Body() data: any) {
+  addConfiguration(@Param('id', ParseUUIDPipe) id: string, @Body() data: CreateLoyaltyConfigurationDto) {
     return this.loyaltyService.addConfiguration(id, data);
   }
 
@@ -63,7 +63,7 @@ export class LoyaltyController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch('admin/loyalty/configurations/:id')
-  updateConfiguration(@Param('id', ParseUUIDPipe) id: string, @Body() data: any) {
+  updateConfiguration(@Param('id', ParseUUIDPipe) id: string, @Body() data: Partial<CreateLoyaltyConfigurationDto>) {
     return this.loyaltyService.updateConfiguration(id, data);
   }
 

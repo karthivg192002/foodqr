@@ -1,12 +1,71 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { IsString, IsEnum, IsNumber, IsOptional, IsNotEmpty } from 'class-validator';
 import { LoyaltyProgram } from './entities/loyalty-program.entity';
 import { LoyaltyConfiguration } from './entities/loyalty-configuration.entity';
 import { LoyaltyStamp } from './entities/loyalty-stamp.entity';
 import { LoyaltyReward } from './entities/loyalty-reward.entity';
 import { User } from '../users/entities/user.entity';
-import { LoyaltyStampCalculationType, LoyaltyRewardType } from '../../common/enums';
+import { LoyaltyStampCalculationType, LoyaltyRewardType, LoyaltyPeriodType } from '../../common/enums';
+
+export class CreateLoyaltyConfigurationDto {
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @IsEnum(LoyaltyStampCalculationType)
+  @IsNotEmpty()
+  calculationType: LoyaltyStampCalculationType;
+
+  @IsNumber()
+  @IsOptional()
+  thresholdValue?: number;
+
+  @IsNumber()
+  @IsOptional()
+  stampsPerThreshold?: number;
+
+  @IsEnum(LoyaltyRewardType)
+  @IsOptional()
+  rewardType?: LoyaltyRewardType;
+
+  @IsNumber()
+  @IsOptional()
+  rewardValue?: number;
+
+  @IsEnum(LoyaltyPeriodType)
+  @IsOptional()
+  periodType?: LoyaltyPeriodType;
+
+  @IsNumber()
+  @IsOptional()
+  periodLimit?: number;
+
+  @IsNumber()
+  @IsOptional()
+  maxStampsPerPeriod?: number;
+}
+
+export class CreateLoyaltyProgramDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsNumber()
+  @IsOptional()
+  requiredStamps?: number;
+
+  @IsOptional()
+  isActive?: boolean;
+
+  @IsOptional()
+  autoResetStamps?: boolean;
+}
 
 @Injectable()
 export class LoyaltyService {
@@ -29,17 +88,17 @@ export class LoyaltyService {
     });
   }
 
-  async createProgram(data: Partial<LoyaltyProgram>) {
+  async createProgram(data: CreateLoyaltyProgramDto) {
     const program = this.programRepo.create(data);
     return this.programRepo.save(program);
   }
 
-  async updateProgram(id: string, data: Partial<LoyaltyProgram>) {
+  async updateProgram(id: string, data: Partial<CreateLoyaltyProgramDto>) {
     await this.programRepo.update(id, data);
     return this.programRepo.findOne({ where: { id }, relations: ['configurations'] });
   }
 
-  async addConfiguration(programId: string, data: Partial<LoyaltyConfiguration>) {
+  async addConfiguration(programId: string, data: CreateLoyaltyConfigurationDto) {
     const program = await this.programRepo.findOne({ where: { id: programId } });
     if (!program) throw new NotFoundException('Program not found');
     const config = this.configRepo.create({ ...data, loyaltyProgramId: programId });
@@ -52,7 +111,7 @@ export class LoyaltyService {
     return config;
   }
 
-  async updateConfiguration(id: string, data: Partial<LoyaltyConfiguration>) {
+  async updateConfiguration(id: string, data: Partial<CreateLoyaltyConfigurationDto>) {
     await this.getConfiguration(id);
     await this.configRepo.update(id, data);
     return this.getConfiguration(id);

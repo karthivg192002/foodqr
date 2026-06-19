@@ -10,6 +10,7 @@ const app_setting_entity_1 = require("../../modules/settings/entities/app-settin
 const item_category_entity_1 = require("../../modules/menu/categories/entities/item-category.entity");
 const item_entity_1 = require("../../modules/menu/items/entities/item.entity");
 const item_variation_entity_1 = require("../../modules/menu/variations/entities/item-variation.entity");
+const payment_gateway_entity_1 = require("../../modules/payment-gateways/entities/payment-gateway.entity");
 const enums_1 = require("../../common/enums");
 dotenv.config();
 const AppDataSource = new typeorm_1.DataSource({
@@ -19,7 +20,7 @@ const AppDataSource = new typeorm_1.DataSource({
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'password',
     database: process.env.DB_DATABASE || 'foodqr_db',
-    entities: [user_entity_1.User, branch_entity_1.Branch, app_setting_entity_1.AppSetting, item_category_entity_1.ItemCategory, item_entity_1.Item, item_variation_entity_1.ItemVariation],
+    entities: [user_entity_1.User, branch_entity_1.Branch, app_setting_entity_1.AppSetting, item_category_entity_1.ItemCategory, item_entity_1.Item, item_variation_entity_1.ItemVariation, payment_gateway_entity_1.PaymentGateway],
     synchronize: false,
 });
 const SEED_PASSWORD = 'Admin@123';
@@ -97,6 +98,63 @@ const defaultSettings = [
     { group: 'loyalty', key: 'loyalty_amount_threshold', value: '100' },
     { group: 'loyalty', key: 'loyalty_required_stamps', value: '10' },
     { group: 'loyalty', key: 'loyalty_reward_value', value: '5' },
+];
+const seedPaymentGateways = [
+    {
+        name: 'Stripe',
+        slug: 'stripe',
+        isActive: true,
+        mode: 'sandbox',
+        config: {
+            publicKey: '',
+            secretKey: '',
+        },
+    },
+    {
+        name: 'PayPal',
+        slug: 'paypal',
+        isActive: true,
+        mode: 'sandbox',
+        config: {
+            clientId: '',
+            clientSecret: '',
+        },
+    },
+    {
+        name: 'Razorpay',
+        slug: 'razorpay',
+        isActive: true,
+        mode: 'sandbox',
+        config: {
+            keyId: '',
+            keySecret: '',
+        },
+    },
+    {
+        name: 'Cash on Delivery',
+        slug: 'cash_on_delivery',
+        isActive: true,
+        mode: 'sandbox',
+        config: {},
+    },
+    {
+        name: 'Wallet Balance',
+        slug: 'e_wallet',
+        isActive: true,
+        mode: 'sandbox',
+        config: {},
+    },
+    {
+        name: 'Square',
+        slug: 'square',
+        isActive: false,
+        mode: 'sandbox',
+        config: {
+            applicationId: '',
+            accessToken: '',
+            locationId: '',
+        },
+    },
 ];
 const seedCategories = [
     {
@@ -192,6 +250,24 @@ async function seed() {
     console.log('─'.repeat(40));
     console.log(`Categories created : ${categoriesCreated}`);
     console.log(`Items created      : ${itemsCreated}`);
+    console.log('─'.repeat(40));
+    const paymentGatewayRepo = AppDataSource.getRepository(payment_gateway_entity_1.PaymentGateway);
+    let gatewaysCreated = 0;
+    let gatewaysSkipped = 0;
+    for (const gateway of seedPaymentGateways) {
+        const existing = await paymentGatewayRepo.findOne({ where: { slug: gateway.slug } });
+        if (existing) {
+            gatewaysSkipped++;
+            continue;
+        }
+        await paymentGatewayRepo.save(paymentGatewayRepo.create(gateway));
+        gatewaysCreated++;
+    }
+    console.log('\nPayment Gateways:');
+    console.log('─'.repeat(40));
+    console.log(`Created : ${gatewaysCreated}`);
+    console.log(`Skipped : ${gatewaysSkipped}`);
+    console.log(`Total   : ${seedPaymentGateways.length}`);
     console.log('─'.repeat(40));
     await AppDataSource.destroy();
 }

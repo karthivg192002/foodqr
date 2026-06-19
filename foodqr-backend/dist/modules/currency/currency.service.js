@@ -16,10 +16,41 @@ exports.CurrencyService = exports.CreateCurrencyDto = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const class_validator_1 = require("class-validator");
 const currency_entity_1 = require("./entities/currency.entity");
 class CreateCurrencyDto {
 }
 exports.CreateCurrencyDto = CreateCurrencyDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateCurrencyDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateCurrencyDto.prototype, "code", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateCurrencyDto.prototype, "symbol", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateCurrencyDto.prototype, "exchangeRate", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateCurrencyDto.prototype, "isDefault", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateCurrencyDto.prototype, "status", void 0);
 let CurrencyService = class CurrencyService {
     constructor(currencyRepo) {
         this.currencyRepo = currencyRepo;

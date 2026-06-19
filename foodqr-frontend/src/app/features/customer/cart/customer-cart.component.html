@@ -24,7 +24,7 @@
         <div class="flex-1 min-w-0">
           <p class="font-semibold text-gray-900 truncate">{{ item.item.name }}</p>
           <p *ngIf="item.variation" class="text-xs text-gray-500">{{ item.variation.name }}</p>
-          <p class="text-orange-600 font-semibold mt-1">${{ getItemPrice(item) | number:'1.2-2' }}</p>
+          <p class="text-orange-600 font-semibold mt-1">{{ getItemPrice(item) | fqrCurrency }}</p>
         </div>
         <div class="flex flex-col items-center justify-center gap-2">
           <div class="flex items-center gap-2 bg-orange-50 rounded-full px-2 py-1">
@@ -32,7 +32,7 @@
             <span class="text-orange-600 font-semibold text-sm w-5 text-center">{{ item.quantity }}</span>
             <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity + 1)" class="text-orange-500 font-bold w-5 h-5 flex items-center justify-center text-lg">+</button>
           </div>
-          <p class="text-sm font-bold text-gray-900">${{ getItemPrice(item) * item.quantity | number:'1.2-2' }}</p>
+          <p class="text-sm font-bold text-gray-900">{{ getItemPrice(item) * item.quantity | fqrCurrency }}</p>
         </div>
       </div>
     </div>
@@ -83,9 +83,14 @@
         <label *ngFor="let gw of enabledGateways"
           class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition"
           [class]="paymentMethod === gw.slug ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
-          <input type="radio" [value]="gw.slug" [(ngModel)]="paymentMethod" class="text-orange-500">
+          <input type="radio" [value]="gw.slug" [(ngModel)]="paymentMethod" [disabled]="gw.isActive === false" class="text-orange-500">
           <span class="text-sm font-medium text-gray-800">{{ gw.name }}</span>
         </label>
+      </div>
+
+      <!-- Payment Gateway Selection (when online payment is selected) -->
+      <div *ngIf="paymentMethod && paymentMethod !== 'cash_on_delivery' && paymentMethod !== 'e_wallet'" class="mt-4 pt-4 border-t">
+        <p class="text-xs text-gray-500 mb-2">Payment Gateway: <strong>{{ paymentLabel(paymentMethod) }}</strong></p>
       </div>
     </div>
 
@@ -106,9 +111,9 @@
     <!-- Summary -->
     <div class="bg-white rounded-2xl p-4 shadow-sm mb-5">
       <div class="space-y-2 text-sm">
-        <div class="flex justify-between text-gray-600"><span>Subtotal</span><span>${{ cartService.total | number:'1.2-2' }}</span></div>
+        <div class="flex justify-between text-gray-600"><span>Subtotal</span><span>{{ cartService.total | fqrCurrency }}</span></div>
         <div class="flex justify-between text-gray-600"><span>Delivery</span><span>Calculated at checkout</span></div>
-        <div class="flex justify-between font-bold text-gray-900 text-base pt-2 border-t"><span>Total</span><span>${{ cartService.total | number:'1.2-2' }}</span></div>
+        <div class="flex justify-between font-bold text-gray-900 text-base pt-2 border-t"><span>Total</span><span>{{ cartService.total | fqrCurrency }}</span></div>
       </div>
     </div>
 

@@ -15,6 +15,7 @@ export declare class CreateOrderDto {
     orderType: OrderType;
     items: OrderItemDto[];
     paymentMethod: PaymentMethod;
+    paymentGateway?: string;
     diningTableId?: string;
     branchId?: string;
     deliveryAddress?: object;

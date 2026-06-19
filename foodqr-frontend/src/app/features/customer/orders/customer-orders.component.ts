@@ -47,4 +47,22 @@ export class CustomerOrdersComponent implements OnInit {
     };
     return map[status] || 'badge-gray';
   }
+
+  paymentLabel(value?: string | null): string {
+    const labels: Record<string, string> = {
+      cash_on_delivery: 'Cash on Delivery',
+      e_wallet: 'Wallet Balance',
+      paypal: 'PayPal',
+      razorpay: 'Razorpay',
+      cashfree: 'Cashfree',
+      mollie: 'Mollie',
+      flutterwave: 'Flutterwave',
+      paystack: 'Paystack',
+      phonepe: 'PhonePe',
+      paytm: 'Paytm',
+      bkash: 'bKash',
+      stripe: 'Stripe',
+    };
+    return value ? (labels[value] || value.replace(/_/g, ' ')) : 'N/A';
+  }
 }

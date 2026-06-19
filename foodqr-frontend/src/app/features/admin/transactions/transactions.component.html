@@ -1,4 +1,4 @@
-﻿<div class="space-y-5 fade-in-up">
+<div class="space-y-5 fade-in-up">
 
   <!-- Page header -->
   <div class="page-header">
@@ -24,7 +24,7 @@
     <div class="stat-card">
       <div class="stat-card-accent" style="background:linear-gradient(90deg,#22c55e,#4ade80)"></div>
       <p class="stat-card-label">Completed Revenue</p>
-      <p class="stat-card-value" style="color:#16a34a">${{ totalAmount | number:'1.2-2' }}</p>
+      <p class="stat-card-value" style="color:#16a34a">{{ totalAmount | fqrCurrency }}</p>
     </div>
     <div class="stat-card">
       <div class="stat-card-accent" style="background:linear-gradient(90deg,#ef4444,#f87171)"></div>
@@ -99,7 +99,7 @@
             </div>
           </td>
           <td>
-            <span class="font-mono" style="font-size:13px;color:#64748b">{{ txn.order?.orderSerialNo ?? '—' }}</span>
+            <span class="font-mono" style="font-size:13px;color:#64748b">{{ txn.order?.orderSerialNo ?? '�' }}</span>
           </td>
           <td style="text-align:right;font-size:14px;font-weight:700;color:#0f172a">
             {{ txn.currency ?? '' }} {{ txn.amount | number:'1.2-2' }}

@@ -33,9 +33,19 @@ export declare class PaymentsController {
     }>;
     createRazorpayOrder(user: User, orderId: string): Promise<{
         razorpayOrderId: any;
-        keyId: any;
+        keyId: string;
         amount: number;
         currency: string;
+    }>;
+    verifyRazorpayPayment(body: {
+        orderId: string;
+        razorpayOrderId: string;
+        razorpayPaymentId: string;
+        razorpaySignature: string;
+    }): Promise<{
+        message: string;
+        orderId: string;
+        paymentId: string;
     }>;
     razorpayWebhook(body: any): Promise<{
         received: boolean;
