@@ -50,6 +50,7 @@ export class SettingsService {
       'enable_delivery', 'enable_takeaway', 'enable_dining_table',
       'enable_pos', 'enable_loyalty',
       'primary_color', 'secondary_color', 'font_family', 'favicon',
+      'product_name', 'footer_credit',
     ];
     const settings = await this.settingRepo.find();
     return settings

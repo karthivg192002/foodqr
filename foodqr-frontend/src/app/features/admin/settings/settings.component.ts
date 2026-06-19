@@ -21,6 +21,8 @@ export class SettingsComponent implements OnInit {
   smsSettings: any = {};
   socialSettings: any = {};
   themeSettings: any = {};
+  uploadingLogo = false;
+  uploadingFavicon = false;
 
   // Menu permissions
   navItems: any[] = [];
@@ -179,6 +181,36 @@ export class SettingsComponent implements OnInit {
         if (group === 'theme') this.themeService.apply(this.themeSettings);
       },
       error: () => { this.saving = false; },
+    });
+  }
+
+  onLogoSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadingLogo = true;
+    this.api.upload('admin/settings/upload-logo', file).subscribe({
+      next: (res) => {
+        this.themeSettings['logo'] = res.url;
+        this.uploadingLogo = false;
+        this.toastr.success('Logo uploaded');
+        this.themeService.apply(this.themeSettings);
+      },
+      error: () => { this.uploadingLogo = false; },
+    });
+  }
+
+  onFaviconSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadingFavicon = true;
+    this.api.upload('admin/settings/upload-favicon', file).subscribe({
+      next: (res) => {
+        this.themeSettings['favicon'] = res.url;
+        this.uploadingFavicon = false;
+        this.toastr.success('Favicon uploaded');
+        this.themeService.apply(this.themeSettings);
+      },
+      error: () => { this.uploadingFavicon = false; },
     });
   }
 

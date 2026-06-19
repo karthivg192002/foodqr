@@ -1,9 +1,7 @@
 import { SettingsService } from './settings.service';
-import { UploadService } from '../upload/upload.service';
 export declare class SettingsController {
     private readonly settingsService;
-    private readonly uploadService;
-    constructor(settingsService: SettingsService, uploadService: UploadService);
+    constructor(settingsService: SettingsService);
     getAll(group?: string): Promise<{}>;
     getCompany(): Promise<{}>;
     setCompany(settings: Record<string, string>): Promise<{}>;

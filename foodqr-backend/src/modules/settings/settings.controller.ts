@@ -3,9 +3,10 @@ import {
   UploadedFile, UseInterceptors, BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { SettingsService } from './settings.service';
-import { UploadService } from '../upload/upload.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles, Public } from '../../common/decorators';
@@ -16,10 +17,7 @@ import { UserRole } from '../../common/enums';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class SettingsController {
-  constructor(
-    private readonly settingsService: SettingsService,
-    private readonly uploadService: UploadService,
-  ) {}
+  constructor(private readonly settingsService: SettingsService) {}
 
   @Get()
   @Roles(UserRole.ADMIN)
@@ -158,10 +156,15 @@ export class SettingsController {
   @Post('upload-logo')
   @Roles(UserRole.ADMIN)
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads/branding',
+      filename: (_req, file, cb) => cb(null, `logo-${Date.now()}${extname(file.originalname)}`),
+    }),
+  }))
   async uploadLogo(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('No file uploaded');
-    const url = this.uploadService.getFileUrl(file.filename);
+    const url = `/uploads/branding/${file.filename}`;
     await this.settingsService.setMany({ logo: url }, 'theme');
     return { url };
   }
@@ -169,10 +172,15 @@ export class SettingsController {
   @Post('upload-favicon')
   @Roles(UserRole.ADMIN)
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads/branding',
+      filename: (_req, file, cb) => cb(null, `favicon-${Date.now()}${extname(file.originalname)}`),
+    }),
+  }))
   async uploadFavicon(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('No file uploaded');
-    const url = this.uploadService.getFileUrl(file.filename);
+    const url = `/uploads/branding/${file.filename}`;
     await this.settingsService.setMany({ favicon: url }, 'theme');
     return { url };
   }

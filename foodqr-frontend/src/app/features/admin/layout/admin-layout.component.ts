@@ -3,6 +3,7 @@ import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { ApiService } from '../../../core/services/api.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { UserRole } from '../../../core/models';
 
 interface NavItem {
@@ -95,12 +96,14 @@ export class AdminLayoutComponent implements OnInit {
   ];
 
   navGroups: NavGroup[] = this.DEFAULT_NAV_GROUPS;
+  branding$ = this.themeService.branding$;
 
   constructor(
     public authService: AuthService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private api: ApiService,
+    private themeService: ThemeService,
   ) {}
 
   ngOnInit(): void {

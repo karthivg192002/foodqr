@@ -80,16 +80,7 @@
             <label class="label">Timezone</label>
             <input [(ngModel)]="companySettings['timezone']" class="input-field" placeholder="UTC" />
           </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="form-group">
-              <label class="label">Logo URL</label>
-              <input [(ngModel)]="companySettings['logo']" class="input-field" />
-            </div>
-            <div class="form-group">
-              <label class="label">Favicon URL</label>
-              <input [(ngModel)]="companySettings['favicon']" class="input-field" />
-            </div>
-          </div>
+          <p class="text-xs text-gray-400">Logo and favicon are managed under the <button type="button" (click)="onTabChange('theme')" class="text-orange-600 font-medium hover:underline">Theme</button> tab.</p>
         </div>
         <div class="card-footer">
           <button (click)="save('company')" [disabled]="saving" class="btn-primary btn-sm">
@@ -320,6 +311,45 @@
           <p class="card-subtitle">Customise your storefront colours and typography</p>
         </div>
         <div class="card-body space-y-4 max-w-2xl">
+          <div class="form-group">
+            <label class="label">Product Name</label>
+            <input [(ngModel)]="themeSettings['product_name']" class="input-field" placeholder="FoodQR" />
+            <p class="text-xs text-gray-400 mt-1">Shown in the header, sidebar, login pages, and browser tab title across the app.</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="label">Logo</label>
+              <div class="flex items-center gap-3">
+                <div class="w-14 h-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
+                  <img *ngIf="themeSettings['logo']" [src]="themeSettings['logo']" class="w-full h-full object-contain" />
+                  <span *ngIf="!themeSettings['logo']" class="text-xs text-gray-400">None</span>
+                </div>
+                <div>
+                  <input type="file" accept="image/*" #logoInput hidden (change)="onLogoSelected($event)" />
+                  <button type="button" (click)="logoInput.click()" [disabled]="uploadingLogo" class="btn-secondary btn-sm">
+                    {{ uploadingLogo ? 'Uploading…' : 'Upload Logo' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="label">Favicon</label>
+              <div class="flex items-center gap-3">
+                <div class="w-14 h-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
+                  <img *ngIf="themeSettings['favicon']" [src]="themeSettings['favicon']" class="w-full h-full object-contain" />
+                  <span *ngIf="!themeSettings['favicon']" class="text-xs text-gray-400">None</span>
+                </div>
+                <div>
+                  <input type="file" accept="image/*" #faviconInput hidden (change)="onFaviconSelected($event)" />
+                  <button type="button" (click)="faviconInput.click()" [disabled]="uploadingFavicon" class="btn-secondary btn-sm">
+                    {{ uploadingFavicon ? 'Uploading…' : 'Upload Favicon' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="grid grid-cols-2 gap-4">
             <div class="form-group">
               <label class="label">Primary Color</label>
@@ -341,6 +371,10 @@
             <select [(ngModel)]="themeSettings['font_family']" class="input-field">
               <option>Inter</option><option>Roboto</option><option>Open Sans</option><option>Poppins</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label class="label">Footer Credit</label>
+            <input [(ngModel)]="themeSettings['footer_credit']" class="input-field" placeholder="© 2025 FoodQR. All rights reserved." />
           </div>
         </div>
         <div class="card-footer">

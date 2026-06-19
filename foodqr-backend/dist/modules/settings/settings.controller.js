@@ -15,17 +15,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SettingsController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
+const multer_1 = require("multer");
+const path_1 = require("path");
 const swagger_1 = require("@nestjs/swagger");
 const settings_service_1 = require("./settings.service");
-const upload_service_1 = require("../upload/upload.service");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../common/guards/roles.guard");
 const decorators_1 = require("../../common/decorators");
 const enums_1 = require("../../common/enums");
 let SettingsController = class SettingsController {
-    constructor(settingsService, uploadService) {
+    constructor(settingsService) {
         this.settingsService = settingsService;
-        this.uploadService = uploadService;
     }
     getAll(group) { return this.settingsService.getAll(group); }
     getCompany() { return this.settingsService.getCompanySettings(); }
@@ -83,14 +83,14 @@ let SettingsController = class SettingsController {
     async uploadLogo(file) {
         if (!file)
             throw new common_1.BadRequestException('No file uploaded');
-        const url = this.uploadService.getFileUrl(file.filename);
+        const url = `/uploads/branding/${file.filename}`;
         await this.settingsService.setMany({ logo: url }, 'theme');
         return { url };
     }
     async uploadFavicon(file) {
         if (!file)
             throw new common_1.BadRequestException('No file uploaded');
-        const url = this.uploadService.getFileUrl(file.filename);
+        const url = `/uploads/branding/${file.filename}`;
         await this.settingsService.setMany({ favicon: url }, 'theme');
         return { url };
     }
@@ -304,7 +304,12 @@ __decorate([
     (0, common_1.Post)('upload-logo'),
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/branding',
+            filename: (_req, file, cb) => cb(null, `logo-${Date.now()}${(0, path_1.extname)(file.originalname)}`),
+        }),
+    })),
     __param(0, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -314,7 +319,12 @@ __decorate([
     (0, common_1.Post)('upload-favicon'),
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+        storage: (0, multer_1.diskStorage)({
+            destination: './uploads/branding',
+            filename: (_req, file, cb) => cb(null, `favicon-${Date.now()}${(0, path_1.extname)(file.originalname)}`),
+        }),
+    })),
     __param(0, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -332,7 +342,6 @@ exports.SettingsController = SettingsController = __decorate([
     (0, common_1.Controller)('admin/settings'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, swagger_1.ApiBearerAuth)(),
-    __metadata("design:paramtypes", [settings_service_1.SettingsService,
-        upload_service_1.UploadService])
+    __metadata("design:paramtypes", [settings_service_1.SettingsService])
 ], SettingsController);
 //# sourceMappingURL=settings.controller.js.map

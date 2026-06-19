@@ -85,6 +85,8 @@ const defaultSettings: SettingsGroup = [
   { group: 'theme', key: 'primary_color', value: '#FF6B35' },
   { group: 'theme', key: 'secondary_color', value: '#1A1A2E' },
   { group: 'theme', key: 'font_family', value: 'Inter' },
+  { group: 'theme', key: 'product_name', value: 'FoodQR' },
+  { group: 'theme', key: 'footer_credit', value: '© 2025 FoodQR. All rights reserved.' },
 
   // --- Social Media ---
   { group: 'social_media', key: 'facebook_url', value: '' },

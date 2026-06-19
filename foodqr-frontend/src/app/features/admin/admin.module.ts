@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { AuthGuard } from '../../core/guards/auth.guard';
 import { UserRole } from '../../core/models';
+import { SharedModule } from '../../shared/shared.module';
 
 import { AdminLayoutComponent } from './layout/admin-layout.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -101,6 +102,7 @@ const routes: Routes = [
     ReactiveFormsModule,
     FormsModule,
     RouterModule.forChild(routes),
+    SharedModule,
   ],
 })
 export class AdminModule {}
