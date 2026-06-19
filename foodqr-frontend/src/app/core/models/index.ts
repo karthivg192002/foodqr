@@ -212,6 +212,19 @@ export interface Banner {
   sortOrder: number;
 }
 
+export interface PromotionBanner {
+  id: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image?: string;
+  badgeText?: string;
+  badgeColor?: string;
+  linkUrl?: string;
+  sortOrder: number;
+  status: boolean;
+}
+
 export interface Transaction {
   id: string;
   userId: string;

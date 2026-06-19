@@ -44,9 +44,6 @@ let OrdersController = class OrdersController {
     updateStatus(id, dto) {
         return this.ordersService.updateStatus(id, dto);
     }
-    getKdsOrders(branchId) {
-        return this.ordersService.getKdsOrders(branchId);
-    }
     getDashboardStats(startDate, endDate) {
         return this.ordersService.getDashboardStats(startDate, endDate);
     }
@@ -142,16 +139,6 @@ __decorate([
     __metadata("design:paramtypes", [String, order_dto_1.UpdateOrderStatusDto]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "updateStatus", null);
-__decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.Get)('admin/kds/orders'),
-    __param(0, (0, common_1.Query)('branchId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], OrdersController.prototype, "getKdsOrders", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),

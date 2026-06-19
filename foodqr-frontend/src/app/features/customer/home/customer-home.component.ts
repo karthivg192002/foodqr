@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
 import { CartService } from '../../../core/services/cart.service';
-import { Item, ItemCategory, Banner, Offer } from '../../../core/models';
+import { Item, ItemCategory, Banner, Offer, PromotionBanner } from '../../../core/models';
 
 @Component({
   selector: 'app-customer-home',
@@ -16,6 +16,7 @@ export class CustomerHomeComponent implements OnInit {
   allItems: Item[] = [];
   banners: Banner[] = [];
   offers: Offer[] = [];
+  promotionBanners: PromotionBanner[] = [];
   selectedCategory = '';
   selectedSubCategory = '';
   search = '';
@@ -33,6 +34,7 @@ export class CustomerHomeComponent implements OnInit {
     this.loadPopular();
     this.loadBanners();
     this.loadOffers();
+    this.loadPromotionBanners();
     this.loadItems();
   }
 
@@ -54,6 +56,10 @@ export class CustomerHomeComponent implements OnInit {
 
   loadOffers(): void {
     this.api.get<Offer[]>('frontend/offers').subscribe({ next: (d) => this.offers = d });
+  }
+
+  loadPromotionBanners(): void {
+    this.api.get<PromotionBanner[]>('frontend/promotion-banners').subscribe({ next: (d) => this.promotionBanners = d });
   }
 
   loadItems(): void {

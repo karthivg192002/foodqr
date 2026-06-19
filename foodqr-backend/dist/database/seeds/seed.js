@@ -7,6 +7,9 @@ const bcrypt = require("bcryptjs");
 const user_entity_1 = require("../../modules/users/entities/user.entity");
 const branch_entity_1 = require("../../modules/branches/entities/branch.entity");
 const app_setting_entity_1 = require("../../modules/settings/entities/app-setting.entity");
+const item_category_entity_1 = require("../../modules/menu/categories/entities/item-category.entity");
+const item_entity_1 = require("../../modules/menu/items/entities/item.entity");
+const item_variation_entity_1 = require("../../modules/menu/variations/entities/item-variation.entity");
 const enums_1 = require("../../common/enums");
 dotenv.config();
 const AppDataSource = new typeorm_1.DataSource({
@@ -16,7 +19,7 @@ const AppDataSource = new typeorm_1.DataSource({
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'password',
     database: process.env.DB_DATABASE || 'foodqr_db',
-    entities: [user_entity_1.User, branch_entity_1.Branch, app_setting_entity_1.AppSetting],
+    entities: [user_entity_1.User, branch_entity_1.Branch, app_setting_entity_1.AppSetting, item_category_entity_1.ItemCategory, item_entity_1.Item, item_variation_entity_1.ItemVariation],
     synchronize: false,
 });
 const SEED_PASSWORD = 'Admin@123';
@@ -93,6 +96,36 @@ const defaultSettings = [
     { group: 'loyalty', key: 'loyalty_required_stamps', value: '10' },
     { group: 'loyalty', key: 'loyalty_reward_value', value: '5' },
 ];
+const seedCategories = [
+    {
+        name: 'Starters', icon: '🥗',
+        items: [
+            { name: 'Crispy Spring Rolls', description: 'Vegetable-stuffed rolls with sweet chili dip', price: 6.5, itemType: enums_1.ItemType.VEG, isFeatured: true },
+            { name: 'Chicken Wings', description: 'Spicy buffalo wings with ranch dip', price: 8.5, itemType: enums_1.ItemType.NON_VEG },
+        ],
+    },
+    {
+        name: 'Main Course', icon: '🍛',
+        items: [
+            { name: 'Margherita Pizza', description: 'Classic pizza with mozzarella and basil', price: 11.99, itemType: enums_1.ItemType.VEG, isFeatured: true },
+            { name: 'Grilled Chicken Burger', description: 'Juicy grilled chicken with lettuce and mayo', price: 9.99, itemType: enums_1.ItemType.NON_VEG },
+            { name: 'Paneer Tikka Masala', description: 'Cottage cheese cubes in spiced curry', price: 10.5, itemType: enums_1.ItemType.VEG },
+        ],
+    },
+    {
+        name: 'Beverages', icon: '🥤',
+        items: [
+            { name: 'Fresh Lemonade', description: 'Chilled lemonade with mint', price: 3.5, itemType: enums_1.ItemType.BEVERAGE },
+            { name: 'Mango Smoothie', description: 'Creamy mango smoothie', price: 4.5, itemType: enums_1.ItemType.BEVERAGE, isFeatured: true },
+        ],
+    },
+    {
+        name: 'Desserts', icon: '🍰',
+        items: [
+            { name: 'Chocolate Brownie', description: 'Warm brownie with vanilla ice cream', price: 5.5, itemType: enums_1.ItemType.VEG },
+        ],
+    },
+];
 async function seed() {
     await AppDataSource.initialize();
     console.log('Database connected.\n');
@@ -134,6 +167,29 @@ async function seed() {
     console.log(`Created : ${createdCount}`);
     console.log(`Skipped : ${skippedCount}`);
     console.log(`Total   : ${defaultSettings.length}`);
+    console.log('─'.repeat(40));
+    const categoryRepo = AppDataSource.getRepository(item_category_entity_1.ItemCategory);
+    const itemRepo = AppDataSource.getRepository(item_entity_1.Item);
+    let categoriesCreated = 0;
+    let itemsCreated = 0;
+    for (const [index, cat] of seedCategories.entries()) {
+        let category = await categoryRepo.findOne({ where: { name: cat.name } });
+        if (!category) {
+            category = await categoryRepo.save(categoryRepo.create({ name: cat.name, icon: cat.icon, sortOrder: index, status: true }));
+            categoriesCreated++;
+        }
+        for (const [itemIndex, itemData] of cat.items.entries()) {
+            const existingItem = await itemRepo.findOne({ where: { name: itemData.name } });
+            if (existingItem)
+                continue;
+            await itemRepo.save(itemRepo.create({ ...itemData, categoryId: category.id, sortOrder: itemIndex, status: true }));
+            itemsCreated++;
+        }
+    }
+    console.log('\nMenu:');
+    console.log('─'.repeat(40));
+    console.log(`Categories created : ${categoriesCreated}`);
+    console.log(`Items created      : ${itemsCreated}`);
     console.log('─'.repeat(40));
     await AppDataSource.destroy();
 }

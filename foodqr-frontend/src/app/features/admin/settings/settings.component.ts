@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
 import { RolesService, RoleDef } from '../../../core/services/roles.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 interface SettingsTab { key: string; label: string; group: string; }
 
@@ -44,7 +45,12 @@ export class SettingsComponent implements OnInit {
     { key: 'menu_permissions', label: 'Menu & Permissions', group: 'menu_permissions' },
   ];
 
-  constructor(private api: ApiService, private toastr: ToastrService, private rolesService: RolesService) {}
+  constructor(
+    private api: ApiService,
+    private toastr: ToastrService,
+    private rolesService: RolesService,
+    private themeService: ThemeService,
+  ) {}
 
   ngOnInit(): void {
     this.loadAll();
@@ -167,7 +173,11 @@ export class SettingsComponent implements OnInit {
   save(group: string): void {
     this.saving = true;
     this.api.post(`admin/settings/${group}`, this.dataFor(group)).subscribe({
-      next: () => { this.toastr.success('Settings saved'); this.saving = false; },
+      next: () => {
+        this.toastr.success('Settings saved');
+        this.saving = false;
+        if (group === 'theme') this.themeService.apply(this.themeSettings);
+      },
       error: () => { this.saving = false; },
     });
   }

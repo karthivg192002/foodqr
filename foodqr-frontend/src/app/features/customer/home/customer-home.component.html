@@ -24,6 +24,39 @@
     </div>
   </div>
 
+  <!-- Promotion banners -->
+  <div *ngIf="promotionBanners.length" class="px-4 mt-3 flex gap-3 overflow-x-auto pb-1 scrollbar-none">
+    <div *ngFor="let promo of promotionBanners" class="relative flex-shrink-0 w-64 rounded-2xl overflow-hidden h-28">
+      <img *ngIf="promo.image" [src]="promo.image" class="w-full h-full object-cover">
+      <div *ngIf="!promo.image" class="w-full h-full bg-gradient-to-br from-orange-500 to-orange-600"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-black/55 to-transparent flex flex-col justify-center p-3">
+        <span *ngIf="promo.badgeText" class="self-start text-[10px] font-bold uppercase px-2 py-0.5 rounded-full mb-1"
+          [style.background]="promo.badgeColor || '#f97316'" style="color:#fff">{{ promo.badgeText }}</span>
+        <h3 class="font-bold text-white text-sm leading-tight">{{ promo.title }}</h3>
+        <p *ngIf="promo.subtitle" class="text-white text-xs opacity-90">{{ promo.subtitle }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offers -->
+  <div *ngIf="offers.length" class="mt-4">
+    <h2 class="px-4 font-bold text-gray-900 mb-3">Offers for you</h2>
+    <div class="flex gap-3 overflow-x-auto px-4 pb-2">
+      <div *ngFor="let offer of offers" class="flex-shrink-0 w-44 bg-white rounded-2xl shadow-sm overflow-hidden border border-orange-100">
+        <div class="h-20 bg-gray-100 relative">
+          <img *ngIf="offer.image" [src]="offer.image" class="w-full h-full object-cover">
+          <div *ngIf="!offer.image" class="w-full h-full flex items-center justify-center text-2xl">🎁</div>
+          <span *ngIf="offer.badgeText" class="absolute top-1 left-1 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full"
+            [style.background]="offer.badgeColor || '#f97316'" style="color:#fff">{{ offer.badgeText }}</span>
+        </div>
+        <div class="p-2">
+          <p class="font-semibold text-gray-900 text-sm truncate">{{ offer.title }}</p>
+          <p *ngIf="offer.description" class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ offer.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Category filter -->
   <div class="mt-4 px-4">
     <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">

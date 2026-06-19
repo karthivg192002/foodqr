@@ -5,7 +5,10 @@ import * as bcrypt from 'bcryptjs';
 import { User } from '../../modules/users/entities/user.entity';
 import { Branch } from '../../modules/branches/entities/branch.entity';
 import { AppSetting } from '../../modules/settings/entities/app-setting.entity';
-import { UserRole, UserStatus } from '../../common/enums';
+import { ItemCategory } from '../../modules/menu/categories/entities/item-category.entity';
+import { Item } from '../../modules/menu/items/entities/item.entity';
+import { ItemVariation } from '../../modules/menu/variations/entities/item-variation.entity';
+import { UserRole, UserStatus, ItemType } from '../../common/enums';
 
 dotenv.config();
 
@@ -16,7 +19,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'password',
   database: process.env.DB_DATABASE || 'foodqr_db',
-  entities: [User, Branch, AppSetting],
+  entities: [User, Branch, AppSetting, ItemCategory, Item, ItemVariation],
   synchronize: false,
 });
 
@@ -116,6 +119,37 @@ const defaultSettings: SettingsGroup = [
   { group: 'loyalty', key: 'loyalty_reward_value', value: '5' },
 ];
 
+const seedCategories: { name: string; icon: string; items: Partial<Item>[] }[] = [
+  {
+    name: 'Starters', icon: '🥗',
+    items: [
+      { name: 'Crispy Spring Rolls', description: 'Vegetable-stuffed rolls with sweet chili dip', price: 6.5, itemType: ItemType.VEG, isFeatured: true },
+      { name: 'Chicken Wings', description: 'Spicy buffalo wings with ranch dip', price: 8.5, itemType: ItemType.NON_VEG },
+    ],
+  },
+  {
+    name: 'Main Course', icon: '🍛',
+    items: [
+      { name: 'Margherita Pizza', description: 'Classic pizza with mozzarella and basil', price: 11.99, itemType: ItemType.VEG, isFeatured: true },
+      { name: 'Grilled Chicken Burger', description: 'Juicy grilled chicken with lettuce and mayo', price: 9.99, itemType: ItemType.NON_VEG },
+      { name: 'Paneer Tikka Masala', description: 'Cottage cheese cubes in spiced curry', price: 10.5, itemType: ItemType.VEG },
+    ],
+  },
+  {
+    name: 'Beverages', icon: '🥤',
+    items: [
+      { name: 'Fresh Lemonade', description: 'Chilled lemonade with mint', price: 3.5, itemType: ItemType.BEVERAGE },
+      { name: 'Mango Smoothie', description: 'Creamy mango smoothie', price: 4.5, itemType: ItemType.BEVERAGE, isFeatured: true },
+    ],
+  },
+  {
+    name: 'Desserts', icon: '🍰',
+    items: [
+      { name: 'Chocolate Brownie', description: 'Warm brownie with vanilla ice cream', price: 5.5, itemType: ItemType.VEG },
+    ],
+  },
+];
+
 async function seed() {
   await AppDataSource.initialize();
   console.log('Database connected.\n');
@@ -164,6 +198,35 @@ async function seed() {
   console.log(`Created : ${createdCount}`);
   console.log(`Skipped : ${skippedCount}`);
   console.log(`Total   : ${defaultSettings.length}`);
+  console.log('─'.repeat(40));
+
+  // --- Menu categories & items ---
+  const categoryRepo = AppDataSource.getRepository(ItemCategory);
+  const itemRepo = AppDataSource.getRepository(Item);
+  let categoriesCreated = 0;
+  let itemsCreated = 0;
+
+  for (const [index, cat] of seedCategories.entries()) {
+    let category = await categoryRepo.findOne({ where: { name: cat.name } });
+    if (!category) {
+      category = await categoryRepo.save(
+        categoryRepo.create({ name: cat.name, icon: cat.icon, sortOrder: index, status: true }),
+      );
+      categoriesCreated++;
+    }
+
+    for (const [itemIndex, itemData] of cat.items.entries()) {
+      const existingItem = await itemRepo.findOne({ where: { name: itemData.name } });
+      if (existingItem) continue;
+      await itemRepo.save(itemRepo.create({ ...itemData, categoryId: category.id, sortOrder: itemIndex, status: true }));
+      itemsCreated++;
+    }
+  }
+
+  console.log('\nMenu:');
+  console.log('─'.repeat(40));
+  console.log(`Categories created : ${categoriesCreated}`);
+  console.log(`Items created      : ${itemsCreated}`);
   console.log('─'.repeat(40));
 
   await AppDataSource.destroy();

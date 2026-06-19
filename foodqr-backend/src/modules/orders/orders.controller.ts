@@ -73,14 +73,6 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
   @ApiBearerAuth()
-  @Get('admin/kds/orders')
-  getKdsOrders(@Query('branchId') branchId?: string) {
-    return this.ordersService.getKdsOrders(branchId);
-  }
-
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
-  @ApiBearerAuth()
   @Get('admin/dashboard/stats')
   getDashboardStats(
     @Query('startDate') startDate?: string,

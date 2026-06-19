@@ -49,6 +49,7 @@ export class SettingsService {
       'business_name', 'logo', 'currency_symbol', 'timezone',
       'enable_delivery', 'enable_takeaway', 'enable_dining_table',
       'enable_pos', 'enable_loyalty',
+      'primary_color', 'secondary_color', 'font_family', 'favicon',
     ];
     const settings = await this.settingRepo.find();
     return settings

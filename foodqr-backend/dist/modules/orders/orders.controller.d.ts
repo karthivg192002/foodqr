@@ -23,7 +23,6 @@ export declare class OrdersController {
     findOne(id: string): Promise<import("./entities/order.entity").Order>;
     trackByToken(token: string): Promise<import("./entities/order.entity").Order>;
     updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<import("./entities/order.entity").Order>;
-    getKdsOrders(branchId?: string): Promise<import("./entities/order.entity").Order[]>;
     getDashboardStats(startDate?: string, endDate?: string): Promise<{
         totalOrders: number;
         todayOrders: number;
