@@ -9,6 +9,7 @@ const SEED_ITEMS: Partial<NavMenu>[] = [
   { group: 'Overview', groupOrder: 1, name: 'My Dashboard',  iconKey: 'home',        route: '/admin/staff-dashboard', external: false, roles: ['waiter','chef','staff'],                        sortOrder: 2 },
   // Operations
   { group: 'Operations', groupOrder: 2, name: 'Live Orders',     iconKey: 'orders',  route: '/admin/orders',  external: false, roles: [],                                                       sortOrder: 1 },
+  { group: 'Operations', groupOrder: 2, name: 'Table Orders',    iconKey: 'table',   route: '/admin/table-orders', external: false, roles: ['admin','branch_manager','waiter'],                 sortOrder: 1 },
   { group: 'Operations', groupOrder: 2, name: 'Kitchen Display',  iconKey: 'kitchen', route: '/kds',           external: true,  roles: ['admin','branch_manager','chef','staff'],                sortOrder: 2 },
   { group: 'Operations', groupOrder: 2, name: 'Order Status',     iconKey: 'tv',      route: '/oss',           external: true,  roles: ['admin','branch_manager'],                               sortOrder: 3 },
   { group: 'Operations', groupOrder: 2, name: 'Point of Sale',    iconKey: 'pos',     route: '/pos',           external: true,  roles: ['admin','branch_manager','pos_operator'],                sortOrder: 4 },
@@ -17,6 +18,7 @@ const SEED_ITEMS: Partial<NavMenu>[] = [
   { group: 'Menu Management', groupOrder: 3, name: 'Menu Items',       iconKey: 'menu',        route: '/admin/menu/items',       external: false, roles: ['admin','branch_manager'], sortOrder: 2 },
   { group: 'Menu Management', groupOrder: 3, name: 'Item Extras',      iconKey: 'plus-circle', route: '/admin/menu/extras',      external: false, roles: ['admin','branch_manager'], sortOrder: 3 },
   { group: 'Menu Management', groupOrder: 3, name: 'Item Attributes',  iconKey: 'tag',         route: '/admin/menu/attributes',  external: false, roles: ['admin','branch_manager'], sortOrder: 4 },
+  { group: 'Menu Management', groupOrder: 3, name: 'Menu Sections & Templates', iconKey: 'menu', route: '/admin/menu-management', external: false, roles: ['admin','branch_manager'], sortOrder: 5 },
   // Customer & Staff
   { group: 'Customer & Staff', groupOrder: 4, name: 'Customers',       iconKey: 'users',      route: '/admin/customers',  external: false, roles: ['admin','branch_manager'], sortOrder: 1 },
   { group: 'Customer & Staff', groupOrder: 4, name: 'Staff & Employees', iconKey: 'user-check', route: '/admin/staff',     external: false, roles: ['admin','branch_manager'], sortOrder: 2 },
@@ -30,12 +32,20 @@ const SEED_ITEMS: Partial<NavMenu>[] = [
   { group: 'Marketing', groupOrder: 6, name: 'Offers & Banners', iconKey: 'gift', route: '/admin/offers',  external: false, roles: ['admin'], sortOrder: 2 },
   // Finance & Reports
   { group: 'Finance & Reports', groupOrder: 7, name: 'Reports',       iconKey: 'chart',       route: '/admin/reports',       external: false, roles: ['admin','branch_manager'], sortOrder: 1 },
-  { group: 'Finance & Reports', groupOrder: 7, name: 'Transactions',  iconKey: 'credit-card', route: '/admin/transactions',  external: false, roles: ['admin'],                  sortOrder: 2 },
-  { group: 'Finance & Reports', groupOrder: 7, name: 'Currency & Tax', iconKey: 'currency',   route: '/admin/currency-tax',  external: false, roles: ['admin'],                  sortOrder: 3 },
+  { group: 'Finance & Reports', groupOrder: 7, name: 'Analytics',    iconKey: 'chart',       route: '/admin/analytics-sections', external: false, roles: ['admin','branch_manager'], sortOrder: 2 },
+  { group: 'Finance & Reports', groupOrder: 7, name: 'Transactions',  iconKey: 'credit-card', route: '/admin/transactions',  external: false, roles: ['admin'],                  sortOrder: 3 },
+  { group: 'Finance & Reports', groupOrder: 7, name: 'Currency & Tax', iconKey: 'currency',   route: '/admin/currency-tax',  external: false, roles: ['admin'],                  sortOrder: 4 },
   // Configuration
   { group: 'Configuration', groupOrder: 8, name: 'Settings',         iconKey: 'settings', route: '/admin/settings',         external: false, roles: ['admin'], sortOrder: 1 },
-  { group: 'Configuration', groupOrder: 8, name: 'Payment Gateways', iconKey: 'card',     route: '/admin/payment-gateways', external: false, roles: ['admin'], sortOrder: 2 },
+  { group: 'Configuration', groupOrder: 8, name: 'Roles & Permissions', iconKey: 'user-check', route: '/admin/roles-permissions', external: false, roles: ['admin'], sortOrder: 2 },
   { group: 'Configuration', groupOrder: 8, name: 'Role Manager',     iconKey: 'user-check', route: '/admin/role-manager',  external: false, roles: ['admin'], sortOrder: 3 },
+  { group: 'Configuration', groupOrder: 8, name: 'Payment Gateways', iconKey: 'card',     route: '/admin/payment-gateways', external: false, roles: ['admin'], sortOrder: 4 },
+  // Customer Nav (mobile/desktop nav for logged-in customers)
+  { group: 'Customer Nav', groupOrder: 9, name: 'Home',        iconKey: 'home',  route: '/customer/home',    external: false, roles: ['customer'], sortOrder: 1 },
+  { group: 'Customer Nav', groupOrder: 9, name: 'Scan & Order', iconKey: 'qr',   route: '/customer/scan',    external: false, roles: ['customer'], sortOrder: 2 },
+  { group: 'Customer Nav', groupOrder: 9, name: 'Orders',      iconKey: 'orders', route: '/customer/orders', external: false, roles: ['customer'], sortOrder: 3 },
+  { group: 'Customer Nav', groupOrder: 9, name: 'Rewards',     iconKey: 'star',  route: '/customer/loyalty', external: false, roles: ['customer'], sortOrder: 4 },
+  { group: 'Customer Nav', groupOrder: 9, name: 'Profile',     iconKey: 'user',  route: '/customer/dashboard', external: false, roles: ['customer'], sortOrder: 5 },
 ];
 
 @Injectable()

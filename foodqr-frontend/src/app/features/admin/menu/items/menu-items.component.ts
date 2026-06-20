@@ -28,6 +28,9 @@ export class MenuItemsComponent implements OnInit {
 
   uploadingImage = false;
 
+  addons: any[] = [];
+  addonItemId = '';
+
   constructor(private api: ApiService, private toastr: ToastrService, private fb: FormBuilder) {
     this.form = this.fb.group({
       name: ['', Validators.required],
@@ -103,6 +106,8 @@ export class MenuItemsComponent implements OnInit {
   openCreate(): void {
     this.editingId = null;
     this.variations.clear();
+    this.addons = [];
+    this.addonItemId = '';
     this.form.reset({ status: true, itemType: 'veg', price: 0, taxRate: 0, thumbImage: '' });
     this.showForm = true;
   }
@@ -120,7 +125,33 @@ export class MenuItemsComponent implements OnInit {
     })));
     const { variations, ...rest } = item as any;
     this.form.patchValue(rest);
+    this.addonItemId = '';
+    this.loadAddons(item.id);
     this.showForm = true;
+  }
+
+  loadAddons(itemId: string): void {
+    this.api.get<any[]>(`item-addons/item/${itemId}`).subscribe({
+      next: (res) => { this.addons = res || []; },
+      error: () => { this.addons = []; },
+    });
+  }
+
+  get availableAddonItems(): Item[] {
+    return this.items.filter((i) => i.id !== this.editingId && !this.addons.some((a) => a.addonItemId === i.id));
+  }
+
+  addAddon(): void {
+    if (!this.editingId || !this.addonItemId) return;
+    this.api.post('item-addons', { itemId: this.editingId, addonItemId: this.addonItemId }).subscribe({
+      next: () => { this.toastr.success('Addon linked'); this.addonItemId = ''; this.loadAddons(this.editingId!); },
+    });
+  }
+
+  removeAddon(id: string): void {
+    this.api.delete(`item-addons/${id}`).subscribe({
+      next: () => { this.loadAddons(this.editingId!); },
+    });
   }
 
   save(): void {

@@ -33,6 +33,7 @@ import { AnalyticsSectionsComponent } from './analytics-sections/analytics-secti
 import { StaffDashboardComponent } from './staff-dashboard/staff-dashboard.component';
 import { RoleManagerComponent } from './role-manager/role-manager.component';
 import { AdminManagementComponent } from './admin-management/admin-management.component';
+import { TableOrdersComponent } from './table-orders/table-orders.component';
 
 const routes: Routes = [
   {
@@ -42,6 +43,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard',            component: DashboardComponent, canActivate: [AuthGuard], data: { roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] } },
       { path: 'orders',               component: OrdersComponent },
+      { path: 'table-orders',         component: TableOrdersComponent },
       { path: 'menu/categories',      component: MenuCategoriesComponent },
       { path: 'menu/items',           component: MenuItemsComponent },
       { path: 'menu/extras',          component: MenuExtrasComponent },
@@ -99,6 +101,7 @@ const routes: Routes = [
     StaffDashboardComponent,
     RoleManagerComponent,
     AdminManagementComponent,
+    TableOrdersComponent,
   ],
   imports: [
     CommonModule,

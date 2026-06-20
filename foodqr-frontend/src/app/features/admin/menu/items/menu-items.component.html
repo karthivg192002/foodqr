@@ -255,6 +255,26 @@
           </div>
         </div>
 
+        <!-- Addons -->
+        <div *ngIf="editingId">
+          <p class="label mb-2">Addons <span style="color:#94a3b8;font-weight:400">(suggest other items with this one)</span></p>
+          <div class="flex gap-2 mb-2">
+            <select [(ngModel)]="addonItemId" [ngModelOptions]="{standalone: true}" class="input-field flex-1">
+              <option value="">Select item to add as addon�</option>
+              <option *ngFor="let i of availableAddonItems" [value]="i.id">{{ i.name }}</option>
+            </select>
+            <button type="button" (click)="addAddon()" [disabled]="!addonItemId" class="btn-secondary btn-sm">Add</button>
+          </div>
+          <div class="space-y-1.5">
+            <div *ngFor="let a of addons" class="flex items-center justify-between px-3 py-2 rounded-lg"
+              style="background:#f8fafc;border:1px solid #e2e8f0">
+              <span style="font-size:13px;color:#334155">{{ a.addonItem?.name || a.addonItemId }}</span>
+              <button type="button" (click)="removeAddon(a.id)" class="action-link action-link-danger">Remove</button>
+            </div>
+            <p *ngIf="!addons.length" style="font-size:12px;color:#94a3b8">No addons linked yet.</p>
+          </div>
+        </div>
+
         <!-- Toggles -->
         <div class="grid grid-cols-2 gap-3">
           <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">

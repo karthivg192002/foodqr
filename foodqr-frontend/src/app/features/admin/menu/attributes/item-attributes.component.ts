@@ -16,6 +16,11 @@ export class ItemAttributesComponent implements OnInit {
   showAssignForm = false;
   assignData: { attributeId: string; categoryId: string } = { attributeId: '', categoryId: '' };
 
+  // Category attributes view
+  viewCategoryId = '';
+  categoryAttributes: any[] = [];
+  categoryAttributesLoading = false;
+
   constructor(private api: ApiService, private toastr: ToastrService, private fb: FormBuilder) {
     this.form = this.fb.group({ name: ['', Validators.required], status: [true] });
   }
@@ -59,7 +64,25 @@ export class ItemAttributesComponent implements OnInit {
   assignToCategory(): void {
     if (!this.assignData.attributeId || !this.assignData.categoryId) return;
     this.api.post('admin/item-attributes/assign-to-category', this.assignData).subscribe({
-      next: () => { this.toastr.success('Assigned to category'); this.showAssignForm = false; this.load(); },
+      next: () => {
+        this.toastr.success('Assigned to category');
+        this.showAssignForm = false;
+        this.load();
+        if (this.viewCategoryId === this.assignData.categoryId) this.loadCategoryAttributes();
+      },
+    });
+  }
+
+  onViewCategoryChange(): void {
+    this.categoryAttributes = [];
+    if (this.viewCategoryId) this.loadCategoryAttributes();
+  }
+
+  loadCategoryAttributes(): void {
+    this.categoryAttributesLoading = true;
+    this.api.get<any[]>(`admin/item-attributes/category/${this.viewCategoryId}`).subscribe({
+      next: (res) => { this.categoryAttributes = res || []; this.categoryAttributesLoading = false; },
+      error: () => { this.categoryAttributesLoading = false; },
     });
   }
 }

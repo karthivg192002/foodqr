@@ -397,6 +397,72 @@
         </div>
       </div>
 
+      <!-- ── LANGUAGE ── -->
+      <div *ngIf="activeTab==='language'" class="card">
+        <div class="card-header flex items-center justify-between">
+          <div>
+            <p class="card-title">Language Management</p>
+            <p class="card-subtitle">Manage the languages available to customers and staff</p>
+          </div>
+          <button (click)="openLanguageCreate()" class="btn-primary btn-sm">+ Add Language</button>
+        </div>
+        <div class="card-body">
+          <div *ngIf="languagesLoading" class="flex items-center justify-center py-10"><div class="spinner"></div></div>
+          <table *ngIf="!languagesLoading" class="data-table">
+            <thead>
+              <tr><th>Name</th><th>Code</th><th>Native Name</th><th>Direction</th><th style="text-align:center">Default</th><th style="text-align:center">Active</th><th style="text-align:right">Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let lang of languages">
+                <td style="font-weight:600">{{ lang.name }}</td>
+                <td class="font-mono">{{ lang.code }}</td>
+                <td>{{ lang.nativeName || '—' }}</td>
+                <td class="uppercase">{{ lang.direction }}</td>
+                <td style="text-align:center"><span *ngIf="lang.isDefault" class="badge-orange badge-plain">Default</span></td>
+                <td style="text-align:center">
+                  <button (click)="toggleLanguageActive(lang)" class="inline-flex rounded-full transition-colors"
+                    [style.background]="lang.isActive ? '#22c55e' : '#e2e8f0'" style="width:36px;height:20px;position:relative">
+                    <span style="position:absolute;top:2px;width:16px;height:16px;background:white;border-radius:50%;transition:left 0.2s"
+                      [style.left]="lang.isActive ? '18px' : '2px'"></span>
+                  </button>
+                </td>
+                <td style="text-align:right">
+                  <button (click)="openLanguageEdit(lang)" class="action-link action-link-gray">Edit</button>
+                  <button (click)="deleteLanguage(lang.id)" class="action-link action-link-danger">Delete</button>
+                </td>
+              </tr>
+              <tr *ngIf="!languages.length"><td colspan="7" class="text-center text-gray-400 py-6">No languages configured yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── LICENSE ── -->
+      <div *ngIf="activeTab==='license'" class="card">
+        <div class="card-header">
+          <p class="card-title">License</p>
+          <p class="card-subtitle">View and manage your FoodQR license activation</p>
+        </div>
+        <div class="card-body space-y-4 max-w-2xl">
+          <div *ngIf="licenseLoading" class="flex items-center justify-center py-10"><div class="spinner"></div></div>
+          <div *ngIf="!licenseLoading && licenseInfo" class="p-4 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+            <pre style="font-size:12.5px;color:#334155;white-space:pre-wrap">{{ licenseInfo | json }}</pre>
+          </div>
+          <div class="flex gap-2">
+            <button (click)="checkLicense()" class="btn-secondary btn-sm">Check License</button>
+            <button (click)="deactivateLicense()" class="btn-secondary btn-sm" style="color:#dc2626">Deactivate</button>
+          </div>
+          <div class="pt-4" style="border-top:1px solid #f1f5f9">
+            <p class="label mb-2">Activate a License</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="form-group"><label class="label">License Key</label><input [(ngModel)]="licenseActivateForm.licenseKey" class="input-field" placeholder="XXXX-XXXX-XXXX" /></div>
+              <div class="form-group"><label class="label">Email</label><input [(ngModel)]="licenseActivateForm.email" type="email" class="input-field" /></div>
+            </div>
+            <button (click)="activateLicense()" [disabled]="activatingLicense" class="btn-primary btn-sm mt-3">{{ activatingLicense ? 'Activating…' : 'Activate License' }}</button>
+          </div>
+        </div>
+      </div>
+
       <!-- ── MENU PERMISSIONS ── -->
       <div *ngIf="activeTab==='menu_permissions'" class="space-y-4">
 
@@ -541,6 +607,47 @@
       <button (click)="saveNav()" [disabled]="navSaving" class="btn-primary btn-sm">
         {{ navSaving ? 'Saving…' : 'Save Item' }}
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- -- Language Form Modal -- -->
+<div *ngIf="showLanguageForm" class="modal-backdrop">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingLanguageId ? 'Edit Language' : 'Add Language' }}</p>
+      <button (click)="showLanguageForm=false" class="modal-close-btn">×</button>
+    </div>
+    <div class="modal-body space-y-4">
+      <div class="form-group">
+        <label class="label">Name <span style="color:#dc2626">*</span></label>
+        <input [(ngModel)]="languageForm.name" class="input-field" placeholder="e.g. English" />
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="form-group">
+          <label class="label">Code <span style="color:#dc2626">*</span></label>
+          <input [(ngModel)]="languageForm.code" class="input-field" placeholder="en" />
+        </div>
+        <div class="form-group">
+          <label class="label">Native Name</label>
+          <input [(ngModel)]="languageForm.nativeName" class="input-field" placeholder="English" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="label">Direction</label>
+        <select [(ngModel)]="languageForm.direction" class="input-field">
+          <option value="ltr">Left to Right (LTR)</option>
+          <option value="rtl">Right to Left (RTL)</option>
+        </select>
+      </div>
+      <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+        <input type="checkbox" [(ngModel)]="languageForm.isDefault" id="langDefault" class="w-4 h-4">
+        <label for="langDefault" style="font-size:13.5px;font-weight:500;color:#334155;cursor:pointer">Set as default language</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button (click)="showLanguageForm=false" class="btn-secondary btn-sm">Cancel</button>
+      <button (click)="saveLanguage()" class="btn-primary btn-sm">Save Language</button>
     </div>
   </div>
 </div>

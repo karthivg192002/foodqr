@@ -7,10 +7,10 @@
 
   <ng-container *ngIf="!loading && dashboard">
     <!-- Stamp progress card -->
-    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-5 text-white mb-5">
+    <div class="bg-gradient-to-br from-orange-500 via-orange-600 to-amber-600 rounded-3xl p-5 text-white mb-5 shadow-xl animate-fade-in-up">
       <p class="text-sm opacity-80">{{ dashboard.programName }}</p>
       <div class="mt-2 flex items-end gap-2">
-        <span class="text-5xl font-bold">{{ dashboard.totalStamps }}</span>
+        <span class="text-5xl font-bold tracking-tight">{{ dashboard.totalStamps }}</span>
         <span class="text-xl opacity-70 mb-1">/ {{ dashboard.requiredStamps }}</span>
       </div>
       <p class="text-sm opacity-80 mt-1">stamps collected</p>
@@ -24,27 +24,27 @@
     </div>
 
     <!-- Stamp visual grid -->
-    <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+    <div class="bg-white rounded-2xl p-4 shadow-card mb-4">
       <h3 class="font-semibold text-gray-900 mb-3">Stamps</h3>
       <div class="flex flex-wrap gap-2">
         <div *ngFor="let i of [].constructor(dashboard.requiredStamps); let idx = index"
-          [class]="idx < dashboard.totalStamps ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-300'"
-          class="w-10 h-10 rounded-full flex items-center justify-center text-lg">
+          [class]="idx < dashboard.totalStamps ? 'bg-orange-500 text-white shadow-card' : 'bg-gray-100 text-gray-300'"
+          class="w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all duration-300">
           ⭐
         </div>
       </div>
     </div>
 
     <!-- Pending rewards -->
-    <div *ngIf="dashboard.pendingRewards?.length" class="bg-white rounded-2xl p-4 shadow-sm">
+    <div *ngIf="dashboard.pendingRewards?.length" class="bg-white rounded-2xl p-4 shadow-card">
       <h3 class="font-semibold text-gray-900 mb-3">Your Rewards</h3>
       <div class="space-y-3">
-        <div *ngFor="let reward of dashboard.pendingRewards" class="flex items-center justify-between p-3 bg-orange-50 rounded-xl">
+        <div *ngFor="let reward of dashboard.pendingRewards" class="flex items-center justify-between p-3 bg-orange-50 rounded-xl hover:shadow-card transition-shadow">
           <div>
             <p class="font-medium text-gray-900">🎁 Reward Unlocked!</p>
             <p class="text-sm text-gray-500 capitalize">{{ reward.rewardType }} · {{ reward.rewardValue }}</p>
           </div>
-          <button (click)="redeem(reward.id)" class="btn-primary text-sm px-3 py-1.5">Redeem</button>
+          <button (click)="redeem(reward.id)" class="btn-primary text-sm px-3 py-1.5 active:scale-95 transition-transform">Redeem</button>
         </div>
       </div>
     </div>

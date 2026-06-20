@@ -1,49 +1,106 @@
 # FoodQR — Missing Features
 
-**Analysis Date:** 2026-06-17
-**Last Updated:** 2026-06-20 (re-audited nav/menu parity per role against OLD codebase)
+**Last Updated:** 2026-06-20
 **OLD codebase:** `E:\poc\personal\foodqrweb` (Laravel/PHP)
 **NEW codebase:** `E:\poc\personal\foodqr` (NestJS + Angular)
 
-> Items marked ✅ have been implemented in the new codebase and removed from the gap list.
-
 ---
 
-## UI Layout Fix (2026-06-20)
+## Multi-Tenant SaaS Management — Database-per-Tenant
 
-Customer-facing layouts (`customer-layout.component.ts`, `table-layout.component.ts`) were hard-capped at
-`max-w-lg` (512px) on every breakpoint, so on desktop the whole app rendered as a narrow centered column
-with large empty margins, even though the page content underneath (e.g. customer-home's item grid) was
-already responsive. Fixed by widening the header/main/nav containers to `max-w-7xl` and adding a desktop
-top-nav (Home/Orders/Rewards/Profile) since the mobile bottom tab bar is now hidden at `lg:` breakpoints.
-Admin/Waiter/Chef/Staff dashboards already used a full-screen sidebar layout (`admin-layout.component.ts`)
-and needed no change.
+NEW is currently single-tenant. This section lists the work to turn it into a multi-tenant SaaS platform
+where **each tenant has its own isolated database**, all tenants are reachable through **one single domain/URL**,
+and the tenant is resolved transparently after login.
 
----
+### Target Architecture
 
-## Role Menu Parity Gaps (re-opened 2026-06-20)
+- **One control/master DB** — holds the tenant registry, subscription plans, billing/subscription status,
+  and per-tenant DB connection metadata (host, db name, credentials reference). This is the only DB the
+  platform knows about before a tenant is resolved.
+- **One DB per tenant** — holds that tenant's own data (menus, orders, customers, staff, etc.) using the
+  existing FoodQR schema. Fully isolated from other tenants.
+- **Single public URL** — all clients (customers, staff, tenant admins) log in through the same domain.
+  There is no per-tenant subdomain/path requirement in this flow — tenant identity is resolved from the
+  login credentials, not from the URL.
+- **Super-admin UI** — a separate management UI (distinct from the per-tenant admin UI) for the platform
+  owner to manage tenants, subscriptions, plans, and tenant DB provisioning.
+- **Tenant admin UI** — within a resolved tenant's own admin panel, the tenant admin can trigger/track DB
+  migrations for their own tenant database (schema upgrades as the platform evolves).
 
-Role mapping OLD → NEW: Admin, Customer, Waiter, Chef, Branch Manager, POS Operator, Staff — all carried
-over 1:1. Comparison based on OLD `MenuTableSeeder.php`, `routes/api.php`, and the Vue nav components
-(`BackendMenuComponent.vue`, `CustomerSidebar.vue`, `StaffDashboardComponent.vue`) vs the NEW Angular nav
-(`admin-layout.component.ts`, `customer-layout.component.ts`).
+### Task List
 
-- [ ] **Customer — Scan & Order**: OLD customer sidebar has a dedicated "Scan & Order" entry; no equivalent route under `/customer/` in NEW (table/QR ordering exists at `/table/...` but isn't reachable from the customer nav).
-- [ ] **Admin — Role & Permission management**: OLD `/admin/setting/role` and `/admin/setting/permission` UIs have no NEW nav entry (a `roles-permissions` folder exists in the Angular tree but isn't linked in `admin-layout.component.ts`'s nav groups — verify and wire it up).
-- [ ] **Admin — Language management**: OLD `/admin/setting/language`; no equivalent in NEW.
-- [ ] **Admin — SMS Gateway / Mail / Site / Company / Theme / License / OTP settings**: OLD exposes these as distinct settings sub-pages; NEW collapses everything under a single `/admin/settings` with unclear sub-page coverage — needs verification of what `admin/settings` actually renders.
-- [ ] **Admin — Menu Sections & Menu Templates**: OLD `/admin/setting/menu-section`, `/admin/setting/menu-template`; no NEW equivalent under `/admin/menu/*`.
-- [ ] **Admin — Category Attributes** (distinct from Item Attributes) and **Item Addons** (distinct from Item Extras): OLD treats these as separate concepts; NEW only has Categories/Items/Extras/Attributes.
-- [ ] **Admin — Table Orders view**: OLD has a dedicated table-orders management screen distinct from general Live Orders; not clearly present in NEW.
-- [ ] **Admin — Offers vs Banners**: NEW merges "Offers & Banners" into one nav item; confirm both OLD feature sets (separate `/admin/offers` and `/admin/banners`) are actually reachable, not just the offers half.
-- [ ] **Admin — Loyalty Configurations**: OLD has `/admin/loyalty-configurations` as a distinct screen from the loyalty program itself; confirm NEW's single "Loyalty Program" nav item covers configuration, not just point rules.
-- [ ] **Reports — Items Report / Credit Balance Report**: OLD exposes 3 separate report types; NEW has one generic "Reports" nav item — confirm sub-reports are reachable from within it.
-- [ ] **Per-user admin actions**: OLD per-user (customer/employee/waiter/chef/admin) management includes change-password, change-image, address management, and "my orders" sub-views; unclear whether these exist in NEW's `/admin/staff`, `/admin/customers`, `/admin/administrators` detail views — needs direct UI check, not just nav-item check.
-- [ ] **Staff/Waiter/Chef dashboard — Analytics tab**: OLD `StaffDashboardComponent.vue` has an Analytics view (efficiency score, avg order time, customer rating, completed count). NEW `/admin/staff-dashboard` needs to be checked for this.
-- [ ] **Platform/tenant admin**: OLD has multi-tenant SaaS management (`tenant-management`, `superadmin/subscription` routes) — if FoodQR NEW is still meant to be multi-tenant, this entire area has no frontend yet (may be intentionally out of scope if NEW is single-tenant by design — confirm with product intent before treating as a gap).
+**1. Control/Master Database**
+- [ ] Design master DB schema: `tenants` (id, name, slug, status, created_at), `tenant_databases`
+      (tenant_id, db_host, db_name, db_user/secret ref, db_status), `subscription_plans` (name, price,
+      limits/features), `tenant_subscriptions` (tenant_id, plan_id, status, started_at, renews_at,
+      cancelled_at), `tenant_admins` (login identity → tenant_id mapping, used for tenant resolution).
+- [ ] Set up a dedicated NestJS connection/module for the master DB, separate from the per-tenant
+      TypeORM connection(s).
+- [ ] Build master-DB migrations and seeders (plans, initial super-admin user).
 
-Most of the above are nav/discoverability gaps rather than confirmed missing backend functionality — several may already exist server-side or behind an unlinked route. Each item should be spot-checked in the running app before being scheduled as build work.
+**2. Tenant Resolution at Login**
+- [ ] Add a tenant-resolution step to the auth flow: user submits credentials at the single public login
+      URL → look up the user's `tenant_id` in the master DB (via `tenant_admins` / a global user-to-tenant
+      index) → resolve which tenant DB to use *before* validating the password against that tenant's data.
+- [ ] Decide and implement the lookup key for resolution (e.g. email is globally unique across the
+      platform in the master DB, or tenant slug entered alongside credentials) — needs a product decision,
+      not just code.
+- [ ] Issue a JWT (or extend the existing one) that embeds the resolved `tenant_id` so that all subsequent
+      requests in that session know which tenant DB to use without re-resolving on every call.
 
----
+**3. Dynamic Per-Tenant DB Connection (Backend)**
+- [ ] Replace the current single static TypeORM connection with a per-request/per-tenant connection
+      resolver: given `tenant_id` from the authenticated request, look up that tenant's DB credentials in
+      the master DB and obtain (or create/cache) a TypeORM `DataSource` for it.
+- [ ] Add connection pooling/caching so each tenant DB connection isn't re-established on every request
+      (e.g. an in-memory map of `tenant_id → DataSource`, with idle-connection eviction).
+- [ ] Audit every existing service/repository in the codebase that currently assumes a single global
+      connection, and route them through the tenant-scoped connection instead. This touches most of the
+      existing modules (orders, menu, users, etc.) — significant refactor, not additive work.
+- [ ] Make sure background jobs / cron tasks (if any) are tenant-aware or run per-tenant in a loop, since
+      they can no longer assume one global DB.
 
-*Previous session (2026-06-18) closed out all gaps known at that time; this update reflects a fresh, more granular pass over per-role navigation menus and is not a regression.*
+**4. Tenant Provisioning (DB Creation + Migration)**
+- [ ] Build a provisioning service that, given a new tenant record in the master DB, creates a new
+      physical database, runs the full existing schema migration set against it, and seeds it with the
+      same defaults a fresh single-tenant install gets today (default roles, nav menus, settings).
+- [ ] Record provisioning status on the tenant record (`pending` → `provisioning` → `active` / `failed`)
+      so the super-admin UI can show progress and retry failures.
+- [ ] Build a per-tenant migration runner so that when the platform ships a new schema migration, it can
+      be applied to one tenant, a batch of tenants, or all tenants — and the **tenant admin** (not just the
+      super-admin) can trigger/track migration runs for their own tenant DB from their own admin UI.
+- [ ] Define a rollback/backup strategy before running migrations against live tenant data (at minimum:
+      snapshot or backup step before each migration batch).
+
+**5. Super-Admin UI (separate from tenant admin UI)**
+- [ ] New frontend area (e.g. `/superadmin/...`) restricted to a platform-owner role, entirely separate
+      from the existing `/admin/...` tenant UI.
+- [ ] Tenant list/detail screens: create tenant, view provisioning status, suspend/reactivate tenant,
+      view which DB it's on.
+- [ ] Subscription/plan management screens: define plans, assign/change a tenant's plan, view
+      subscription status and renewal/cancellation.
+- [ ] Tenant DB management screen: trigger provisioning, view DB health, trigger/monitor migrations
+      across tenants.
+- [ ] Billing integration (if subscriptions are paid) — out of scope to spec in detail here; needs its own
+      design pass once a payment provider is chosen for platform-level billing (distinct from the
+      per-tenant payment-gateway settings that already exist for customer orders).
+
+**6. Tenant Admin UI additions**
+- [ ] Add a "Database & Migrations" settings screen inside the existing tenant `/admin/settings` area,
+      visible only to that tenant's admin, showing their own DB's current schema version and a button to
+      run pending migrations against their own tenant DB.
+- [ ] Surface the tenant's current subscription plan/status (read-only, sourced from the master DB) inside
+      the tenant admin UI, since plan limits (e.g. number of branches, staff seats) will need to be
+      enforced somewhere in the tenant app.
+
+**7. Cross-Cutting Concerns**
+- [ ] Decide and enforce plan-based feature/usage limits (e.g. max branches, max staff) — needs the tenant
+      app to check master-DB subscription data before allowing certain actions.
+- [ ] Security review of tenant isolation: confirm there is no code path where a resolved tenant's
+      connection could leak into another tenant's request (critical given each tenant has its own DB credentials).
+- [ ] Decide what happens to a tenant's data/DB on subscription cancellation or non-renewal (retain
+      read-only, archive, or delete after a grace period) — product decision needed before building it.
+
+This is a large, foundational change (new master DB, dynamic connection layer touching nearly every
+existing backend module, two new frontend areas, and several unresolved product decisions). It should be
+scoped and sequenced as its own project rather than folded into incremental feature work.

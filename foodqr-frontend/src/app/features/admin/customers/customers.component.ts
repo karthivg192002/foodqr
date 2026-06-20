@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
 import { User, PaginatedResponse } from '../../../core/models';
 
@@ -11,7 +12,15 @@ export class CustomersComponent implements OnInit {
   loading = false;
   search = '';
 
-  constructor(private api: ApiService) {}
+  // Detail drawer
+  selected: User | null = null;
+  detailTab: 'profile' | 'addresses' | 'orders' = 'profile';
+  addresses: any[] = [];
+  orders: any[] = [];
+  detailLoading = false;
+  uploadingImage = false;
+
+  constructor(private api: ApiService, private toastr: ToastrService) {}
   ngOnInit(): void { this.load(); }
 
   load(): void {
@@ -40,4 +49,53 @@ export class CustomersComponent implements OnInit {
   }
 
   get pages(): number { return Math.ceil(this.total / 20); }
+
+  openDetail(customer: User): void {
+    this.selected = customer;
+    this.detailTab = 'profile';
+    this.addresses = [];
+    this.orders = [];
+  }
+
+  closeDetail(): void {
+    this.selected = null;
+  }
+
+  onDetailTabChange(tab: 'profile' | 'addresses' | 'orders'): void {
+    this.detailTab = tab;
+    if (!this.selected) return;
+    if (tab === 'addresses' && !this.addresses.length) {
+      this.detailLoading = true;
+      this.api.get<any[]>(`admin/customers/${this.selected.id}/addresses`).subscribe({
+        next: (res) => { this.addresses = res || []; this.detailLoading = false; },
+        error: () => { this.detailLoading = false; },
+      });
+    }
+    if (tab === 'orders' && !this.orders.length) {
+      this.detailLoading = true;
+      this.api.get<any>(`admin/customers/${this.selected.id}/orders`).subscribe({
+        next: (res) => { this.orders = res?.data || res || []; this.detailLoading = false; },
+        error: () => { this.detailLoading = false; },
+      });
+    }
+  }
+
+  onImageSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file || !this.selected) return;
+    this.uploadingImage = true;
+    this.api.upload('upload/image', file).subscribe({
+      next: (res) => {
+        this.api.patch(`admin/users/${this.selected!.id}/image`, { profileImage: res.url }).subscribe({
+          next: () => {
+            this.selected!.profileImage = res.url;
+            this.uploadingImage = false;
+            this.toastr.success('Profile image updated');
+          },
+          error: () => { this.uploadingImage = false; },
+        });
+      },
+      error: () => { this.uploadingImage = false; this.toastr.error('Upload failed'); },
+    });
+  }
 }

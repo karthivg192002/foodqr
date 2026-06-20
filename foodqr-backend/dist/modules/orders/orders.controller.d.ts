@@ -54,6 +54,11 @@ export declare class OrdersController {
             orderCount: number;
             revenue: number;
         };
+        analytics: {
+            efficiencyScore: number;
+            avgOrderTimeMinutes: number;
+            completedCount: number;
+        };
         assignedOrders: import("./entities/order.entity").Order[];
         totalHandled: number;
         pendingCount: number;

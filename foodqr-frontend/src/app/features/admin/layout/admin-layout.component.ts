@@ -41,6 +41,7 @@ export class AdminLayoutComponent implements OnInit {
       heading: 'Operations',
       items: [
         { label: 'Live Orders', icon: 'orders', route: '/admin/orders' },
+        { label: 'Table Orders', icon: 'table', route: '/admin/table-orders', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.WAITER] },
         { label: 'Kitchen Display', icon: 'kitchen', route: '/kds', external: true, roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.CHEF, UserRole.STAFF] },
         { label: 'Order Status', icon: 'tv', route: '/oss', external: true, roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
         { label: 'Point of Sale', icon: 'pos', route: '/pos', external: true, roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER, UserRole.POS_OPERATOR] },
@@ -53,6 +54,7 @@ export class AdminLayoutComponent implements OnInit {
         { label: 'Menu Items', icon: 'menu', route: '/admin/menu/items', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
         { label: 'Item Extras', icon: 'plus-circle', route: '/admin/menu/extras', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
         { label: 'Item Attributes', icon: 'tag', route: '/admin/menu/attributes', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
+        { label: 'Menu Sections & Templates', icon: 'menu', route: '/admin/menu-management', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
       ],
     },
     {
@@ -83,6 +85,7 @@ export class AdminLayoutComponent implements OnInit {
       heading: 'Finance & Reports',
       items: [
         { label: 'Reports', icon: 'chart', route: '/admin/reports', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
+        { label: 'Analytics', icon: 'chart', route: '/admin/analytics-sections', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
         { label: 'Transactions', icon: 'credit-card', route: '/admin/transactions', roles: [UserRole.ADMIN] },
         { label: 'Currency & Tax', icon: 'currency', route: '/admin/currency-tax', roles: [UserRole.ADMIN] },
       ],
@@ -91,6 +94,8 @@ export class AdminLayoutComponent implements OnInit {
       heading: 'Configuration',
       items: [
         { label: 'Settings', icon: 'settings', route: '/admin/settings', roles: [UserRole.ADMIN] },
+        { label: 'Roles & Permissions', icon: 'user-check', route: '/admin/roles-permissions', roles: [UserRole.ADMIN] },
+        { label: 'Role Manager', icon: 'user-check', route: '/admin/role-manager', roles: [UserRole.ADMIN] },
         { label: 'Payment Gateways', icon: 'card', route: '/admin/payment-gateways', roles: [UserRole.ADMIN] },
       ],
     },

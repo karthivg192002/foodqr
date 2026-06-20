@@ -15,6 +15,25 @@
     </div>
   </div>
 
+  <!-- Category Attributes view (which attributes apply to a given category) -->
+  <div class="card">
+    <div class="card-header">
+      <p class="card-title">Category Attributes</p>
+      <p class="card-subtitle">View which attributes are assigned to a specific category</p>
+    </div>
+    <div class="card-body space-y-3 max-w-md">
+      <select [(ngModel)]="viewCategoryId" (ngModelChange)="onViewCategoryChange()" class="input-field">
+        <option value="">Select a category…</option>
+        <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+      </select>
+      <div *ngIf="categoryAttributesLoading" class="flex items-center justify-center py-4"><div class="spinner"></div></div>
+      <div *ngIf="!categoryAttributesLoading && viewCategoryId" class="flex flex-wrap gap-1.5">
+        <span *ngFor="let a of categoryAttributes" class="badge-orange badge-plain" style="font-size:11.5px">{{ a.attribute?.name }}</span>
+        <span *ngIf="!categoryAttributes.length" style="font-size:13px;color:#94a3b8">No attributes assigned to this category yet.</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Loading -->
   <div *ngIf="loading" class="flex items-center justify-center py-20">
     <div class="spinner"></div>

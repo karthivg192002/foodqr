@@ -44,8 +44,23 @@ export class SettingsComponent implements OnInit {
     { key: 'sms',              label: 'SMS',              group: 'sms'         },
     { key: 'social_media',     label: 'Social Media',     group: 'social_media'},
     { key: 'theme',            label: 'Theme',            group: 'theme'       },
+    { key: 'language',         label: 'Language',         group: 'language'    },
+    { key: 'license',          label: 'License',          group: 'license'     },
     { key: 'menu_permissions', label: 'Menu & Permissions', group: 'menu_permissions' },
   ];
+
+  // Language management
+  languages: any[] = [];
+  languagesLoading = false;
+  showLanguageForm = false;
+  editingLanguageId: string | null = null;
+  languageForm: any = { name: '', code: '', nativeName: '', direction: 'ltr', isDefault: false, isActive: true };
+
+  // License management
+  licenseInfo: any = null;
+  licenseLoading = false;
+  activatingLicense = false;
+  licenseActivateForm: any = { licenseKey: '', email: '' };
 
   constructor(
     private api: ApiService,
@@ -80,6 +95,87 @@ export class SettingsComponent implements OnInit {
     if (key === 'menu_permissions' && !this.navItems.length) {
       this.loadNavItems();
     }
+    if (key === 'language' && !this.languages.length) {
+      this.loadLanguages();
+    }
+    if (key === 'license' && !this.licenseInfo) {
+      this.loadLicenseInfo();
+    }
+  }
+
+  loadLanguages(): void {
+    this.languagesLoading = true;
+    this.api.get<any[]>('admin/languages').subscribe({
+      next: (items) => { this.languages = items ?? []; this.languagesLoading = false; },
+      error: () => { this.languagesLoading = false; },
+    });
+  }
+
+  openLanguageCreate(): void {
+    this.editingLanguageId = null;
+    this.languageForm = { name: '', code: '', nativeName: '', direction: 'ltr', isDefault: false, isActive: true };
+    this.showLanguageForm = true;
+  }
+
+  openLanguageEdit(lang: any): void {
+    this.editingLanguageId = lang.id;
+    this.languageForm = { ...lang };
+    this.showLanguageForm = true;
+  }
+
+  saveLanguage(): void {
+    if (!this.languageForm.name || !this.languageForm.code) return;
+    const req = this.editingLanguageId
+      ? this.api.patch(`admin/languages/${this.editingLanguageId}`, this.languageForm)
+      : this.api.post('admin/languages', this.languageForm);
+    req.subscribe({
+      next: () => { this.toastr.success('Saved'); this.showLanguageForm = false; this.loadLanguages(); },
+    });
+  }
+
+  deleteLanguage(id: string): void {
+    if (!confirm('Delete this language?')) return;
+    this.api.delete(`admin/languages/${id}`).subscribe({
+      next: () => { this.toastr.success('Deleted'); this.loadLanguages(); },
+    });
+  }
+
+  toggleLanguageActive(lang: any): void {
+    this.api.patch(`admin/languages/${lang.id}`, { isActive: !lang.isActive }).subscribe({
+      next: () => { lang.isActive = !lang.isActive; this.toastr.success('Updated'); },
+    });
+  }
+
+  loadLicenseInfo(): void {
+    this.licenseLoading = true;
+    this.api.get<any>('admin/license').subscribe({
+      next: (info) => { this.licenseInfo = info; this.licenseLoading = false; },
+      error: () => { this.licenseLoading = false; },
+    });
+  }
+
+  checkLicense(): void {
+    this.licenseLoading = true;
+    this.api.get<any>('admin/license/check').subscribe({
+      next: (info) => { this.licenseInfo = info; this.licenseLoading = false; this.toastr.success('License checked'); },
+      error: () => { this.licenseLoading = false; },
+    });
+  }
+
+  activateLicense(): void {
+    if (!this.licenseActivateForm.licenseKey || !this.licenseActivateForm.email) return;
+    this.activatingLicense = true;
+    this.api.post('admin/license/activate', this.licenseActivateForm).subscribe({
+      next: () => { this.toastr.success('License activated'); this.activatingLicense = false; this.loadLicenseInfo(); },
+      error: () => { this.activatingLicense = false; },
+    });
+  }
+
+  deactivateLicense(): void {
+    if (!confirm('Deactivate the current license?')) return;
+    this.api.post('admin/license/deactivate', {}).subscribe({
+      next: () => { this.toastr.success('License deactivated'); this.loadLicenseInfo(); },
+    });
   }
 
   loadNavItems(): void {

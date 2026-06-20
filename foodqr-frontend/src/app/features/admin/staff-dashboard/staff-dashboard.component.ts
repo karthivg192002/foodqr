@@ -9,6 +9,11 @@ interface StaffDashboardData {
   pendingCount: number;
   preparingCount: number;
   preparedCount: number;
+  analytics?: {
+    efficiencyScore: number;
+    avgOrderTimeMinutes: number;
+    completedCount: number;
+  };
 }
 
 @Component({
@@ -19,6 +24,7 @@ export class StaffDashboardComponent implements OnInit, OnDestroy {
   data: StaffDashboardData | null = null;
   loading = true;
   OrderStatus = OrderStatus;
+  activeTab: 'orders' | 'analytics' = 'orders';
   private interval: any;
 
   constructor(private api: ApiService, private toastr: ToastrService) {}

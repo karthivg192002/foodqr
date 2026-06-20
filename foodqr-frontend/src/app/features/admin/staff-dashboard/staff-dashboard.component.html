@@ -38,13 +38,46 @@
     </div>
   </div>
 
+  <!-- Tabs -->
+  <div *ngIf="data" class="flex items-center gap-1 border-b" style="border-color:#e2e8f0">
+    <button (click)="activeTab='orders'"
+      class="px-4 py-2.5 text-sm font-semibold transition-colors"
+      [style]="activeTab==='orders' ? 'color:#ea580c;border-bottom:2px solid #ea580c' : 'color:#94a3b8;border-bottom:2px solid transparent'">
+      Active Orders
+    </button>
+    <button (click)="activeTab='analytics'"
+      class="px-4 py-2.5 text-sm font-semibold transition-colors"
+      [style]="activeTab==='analytics' ? 'color:#ea580c;border-bottom:2px solid #ea580c' : 'color:#94a3b8;border-bottom:2px solid transparent'">
+      Analytics
+    </button>
+  </div>
+
+  <!-- Analytics tab -->
+  <div *ngIf="data && activeTab==='analytics'" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:linear-gradient(90deg,#0ea5e9,#38bdf8)"></div>
+      <p class="stat-card-label">Efficiency Score</p>
+      <p class="stat-card-value" style="color:#0284c7">{{ data.analytics?.efficiencyScore ?? 0 }}%</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:linear-gradient(90deg,#a855f7,#c084fc)"></div>
+      <p class="stat-card-label">Avg. Order Time</p>
+      <p class="stat-card-value" style="color:#9333ea">{{ data.analytics?.avgOrderTimeMinutes ?? 0 }}<span style="font-size:13px;font-weight:600;color:#94a3b8"> min</span></p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-accent" style="background:linear-gradient(90deg,#22c55e,#4ade80)"></div>
+      <p class="stat-card-label">Completed Orders</p>
+      <p class="stat-card-value" style="color:#16a34a">{{ data.analytics?.completedCount ?? 0 }}</p>
+    </div>
+  </div>
+
   <!-- Loading -->
   <div *ngIf="loading" class="flex items-center justify-center py-20">
     <div class="spinner"></div>
   </div>
 
   <!-- Empty state -->
-  <div *ngIf="!loading && data && !data.assignedOrders.length"
+  <div *ngIf="!loading && data && activeTab==='orders' && !data.assignedOrders.length"
     class="empty-state card py-16">
     <div class="empty-state-icon" style="background:#f0fdf4">
       <svg class="w-7 h-7" style="color:#22c55e" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,7 +89,7 @@
   </div>
 
   <!-- Orders table -->
-  <div *ngIf="!loading && data && data.assignedOrders.length" class="table-container">
+  <div *ngIf="!loading && data && activeTab==='orders' && data.assignedOrders.length" class="table-container">
     <div class="flex items-center justify-between px-5 py-3.5" style="border-bottom:1px solid #f1f5f9">
       <h2 style="font-size:14px;font-weight:700;color:#0f172a">
         Active Orders

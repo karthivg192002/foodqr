@@ -6,26 +6,26 @@
 
   <ng-container *ngIf="!loading">
     <!-- Profile header -->
-    <div class="flex items-center gap-4 mb-6">
-      <div class="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-3xl font-bold text-orange-600 overflow-hidden flex-shrink-0">
+    <div class="flex items-center gap-4 mb-6 animate-fade-in-up">
+      <div class="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-3xl font-bold text-orange-600 overflow-hidden flex-shrink-0 shadow-card">
         <img *ngIf="profile?.profileImage" [src]="profile.profileImage" class="w-full h-full object-cover rounded-full">
         <span *ngIf="!profile?.profileImage">{{ profile?.name?.charAt(0)?.toUpperCase() }}</span>
       </div>
       <div>
-        <h1 class="text-xl font-bold text-gray-900">{{ profile?.name }}</h1>
+        <h1 class="text-xl font-bold text-gray-900 tracking-tight">{{ profile?.name }}</h1>
         <p class="text-sm text-gray-500">{{ profile?.email || profile?.phone }}</p>
         <span *ngIf="profile?.isGuest" class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full mt-1 inline-block">Guest</span>
       </div>
     </div>
 
     <!-- Wallet balance card -->
-    <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-5 text-white mb-4 shadow-md">
+    <div class="bg-gradient-to-br from-orange-500 via-orange-600 to-amber-600 rounded-2xl p-5 text-white mb-4 shadow-xl">
       <p class="text-sm opacity-80">Wallet Balance</p>
-      <p class="text-3xl font-bold mt-1">{{ profile?.walletBalance | fqrCurrency }}</p>
+      <p class="text-3xl font-bold mt-1 tracking-tight">{{ profile?.walletBalance | fqrCurrency }}</p>
     </div>
 
     <!-- Loyalty stamp card -->
-    <div *ngIf="loyalty?.programName" class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+    <div *ngIf="loyalty?.programName" class="bg-white rounded-2xl p-4 shadow-card mb-4">
       <div class="flex items-center justify-between mb-3">
         <h2 class="font-semibold text-gray-900">Loyalty Stamps</h2>
         <a routerLink="/customer/loyalty" class="text-orange-500 text-sm font-medium">View →</a>
@@ -44,16 +44,16 @@
     </div>
 
     <!-- Recent orders -->
-    <div class="bg-white rounded-2xl p-4 shadow-sm">
+    <div class="bg-white rounded-2xl p-4 shadow-card">
       <div class="flex items-center justify-between mb-3">
         <h2 class="font-semibold text-gray-900">Recent Orders</h2>
-        <a routerLink="/customer/orders" class="text-orange-500 text-sm font-medium">See all →</a>
+        <a routerLink="/customer/orders" class="text-orange-500 text-sm font-medium hover:underline">See all →</a>
       </div>
 
       <div *ngIf="!recentOrders.length" class="text-center py-6 text-gray-400 text-sm">No orders yet</div>
 
       <div class="space-y-3">
-        <div *ngFor="let order of recentOrders" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+        <div *ngFor="let order of recentOrders" class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors">
           <div>
             <p class="font-medium text-gray-900 text-sm"># {{ order.orderSerialNo }}</p>
             <p class="text-xs text-gray-500 mt-0.5">{{ order.createdAt | date:'MMM d, h:mm a' }}</p>
@@ -62,14 +62,14 @@
             <span [class]="statusClass(order.status)" class="text-xs font-medium px-2 py-1 rounded-full capitalize">
               {{ order.status }}
             </span>
-            <button (click)="trackOrder(order)" class="text-orange-500 text-xs font-medium">Track</button>
+            <button (click)="trackOrder(order)" class="text-orange-500 text-xs font-medium hover:underline">Track</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Logout button -->
-    <button (click)="logout()" class="w-full mt-5 py-3 text-red-500 font-medium text-sm border border-red-200 rounded-2xl">
+    <button (click)="logout()" class="w-full mt-5 py-3 text-red-500 font-medium text-sm border border-red-200 hover:bg-red-50 rounded-2xl transition-colors">
       Sign Out
     </button>
   </ng-container>

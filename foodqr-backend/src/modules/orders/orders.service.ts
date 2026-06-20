@@ -615,12 +615,36 @@ export class OrdersService {
         .getRawOne(),
     ]);
 
+    const completedOrders = base.assignedOrders.filter((o) =>
+      [OrderStatus.PREPARED, OrderStatus.OUT_FOR_DELIVERY, OrderStatus.DELIVERED].includes(o.status),
+    );
+    const completedCount = completedOrders.length;
+    const avgOrderTimeMinutes = completedOrders.length
+      ? Math.round(
+          completedOrders.reduce(
+            (sum, o) => sum + (new Date(o.updatedAt).getTime() - new Date(o.createdAt).getTime()) / 60000,
+            0,
+          ) / completedOrders.length,
+        )
+      : 0;
+    const cancelledCount = base.assignedOrders.filter((o) =>
+      [OrderStatus.CANCELED, OrderStatus.REJECTED, OrderStatus.RETURNED].includes(o.status),
+    ).length;
+    const efficiencyScore = base.assignedOrders.length
+      ? Math.round((completedCount / (completedCount + cancelledCount || 1)) * 100)
+      : 100;
+
     return {
       ...base,
       kdsOrders,
       todayStats: {
         orderCount: todayOrderCount,
         revenue: parseFloat(todayRevenue?.total || '0'),
+      },
+      analytics: {
+        efficiencyScore,
+        avgOrderTimeMinutes,
+        completedCount,
       },
     };
   }

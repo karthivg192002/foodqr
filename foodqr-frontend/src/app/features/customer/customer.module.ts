@@ -12,6 +12,7 @@ import { CustomerLoyaltyComponent } from './loyalty/customer-loyalty.component';
 import { CustomerDashboardComponent } from './dashboard/customer-dashboard.component';
 import { CustomerTrackComponent } from './track/customer-track.component';
 import { CustomerChatComponent } from './chat/customer-chat.component';
+import { CustomerScanComponent } from './scan/customer-scan.component';
 
 const routes: Routes = [
   {
@@ -27,6 +28,7 @@ const routes: Routes = [
       { path: 'profile', component: CustomerProfileComponent },
       { path: 'loyalty', component: CustomerLoyaltyComponent },
       { path: 'chat', component: CustomerChatComponent },
+      { path: 'scan', component: CustomerScanComponent },
     ],
   },
 ];
@@ -36,6 +38,7 @@ const routes: Routes = [
     CustomerLayoutComponent, CustomerHomeComponent, CustomerCartComponent,
     CustomerOrdersComponent, CustomerProfileComponent, CustomerLoyaltyComponent,
     CustomerDashboardComponent, CustomerTrackComponent, CustomerChatComponent,
+    CustomerScanComponent,
   ],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule.forChild(routes), SharedModule],
 })

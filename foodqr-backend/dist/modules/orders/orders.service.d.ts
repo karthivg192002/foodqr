@@ -108,6 +108,11 @@ export declare class OrdersService {
             orderCount: number;
             revenue: number;
         };
+        analytics: {
+            efficiencyScore: number;
+            avgOrderTimeMinutes: number;
+            completedCount: number;
+        };
         assignedOrders: Order[];
         totalHandled: number;
         pendingCount: number;

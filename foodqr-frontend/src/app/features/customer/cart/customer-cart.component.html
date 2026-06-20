@@ -1,9 +1,9 @@
-<div class="px-4 py-4">
+<div class="px-4 py-4 animate-fade-in-up">
   <div class="flex items-center gap-3 mb-5">
-    <a routerLink="/customer/home" class="text-gray-500 hover:text-gray-700">
+    <a routerLink="/customer/home" class="text-gray-500 hover:text-gray-700 transition-colors">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
     </a>
-    <h1 class="font-bold text-xl text-gray-900">Your Cart</h1>
+    <h1 class="font-bold text-xl text-gray-900 tracking-tight">Your Cart</h1>
   </div>
 
   <!-- Empty state -->
@@ -16,7 +16,7 @@
   <!-- Cart items -->
   <div *ngIf="!cartService.isEmpty">
     <div class="space-y-3 mb-5">
-      <div *ngFor="let item of cartService.items" class="bg-white rounded-2xl p-3 flex gap-3 shadow-sm">
+      <div *ngFor="let item of cartService.items" class="bg-white rounded-2xl p-3 flex gap-3 shadow-card">
         <div class="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
           <img *ngIf="item.item.thumbImage" [src]="item.item.thumbImage" class="w-full h-full object-cover">
           <div *ngIf="!item.item.thumbImage" class="w-full h-full flex items-center justify-center text-2xl">🍽️</div>
@@ -38,7 +38,7 @@
     </div>
 
     <!-- Order Type -->
-    <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+    <div class="bg-white rounded-2xl p-4 shadow-card mb-4">
       <h3 class="font-semibold text-gray-900 mb-3">Order Type</h3>
       <div class="grid grid-cols-2 gap-2">
         <button *ngFor="let type of [OrderType.DELIVERY, OrderType.TAKEAWAY]"
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Delivery Address (only for delivery) -->
-    <div *ngIf="orderType === OrderType.DELIVERY" class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+    <div *ngIf="orderType === OrderType.DELIVERY" class="bg-white rounded-2xl p-4 shadow-card mb-4">
       <div class="flex items-center justify-between mb-3">
         <h3 class="font-semibold text-gray-900">Delivery Address</h3>
         <a routerLink="/customer/profile" class="text-xs text-orange-500 font-medium">Manage</a>
@@ -77,7 +77,7 @@
     </div>
 
     <!-- Payment Method -->
-    <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+    <div class="bg-white rounded-2xl p-4 shadow-card mb-4">
       <h3 class="font-semibold text-gray-900 mb-3">Payment Method</h3>
       <div class="space-y-2">
         <label *ngFor="let gw of enabledGateways"
@@ -95,7 +95,7 @@
     </div>
 
     <!-- Coupon Code -->
-    <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+    <div class="bg-white rounded-2xl p-4 shadow-card mb-4">
       <h3 class="font-semibold text-gray-900 mb-2">Coupon Code</h3>
       <div class="flex gap-2">
         <input [(ngModel)]="couponCode" placeholder="Enter coupon code" class="input-field flex-1 text-sm">
@@ -103,13 +103,13 @@
     </div>
 
     <!-- Note -->
-    <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+    <div class="bg-white rounded-2xl p-4 shadow-card mb-4">
       <textarea [(ngModel)]="orderNote" placeholder="Add order note (optional)..."
         class="w-full text-sm text-gray-700 resize-none focus:outline-none" rows="2"></textarea>
     </div>
 
     <!-- Summary -->
-    <div class="bg-white rounded-2xl p-4 shadow-sm mb-5">
+    <div class="bg-white rounded-2xl p-4 shadow-card mb-5">
       <div class="space-y-2 text-sm">
         <div class="flex justify-between text-gray-600"><span>Subtotal</span><span>{{ cartService.total | fqrCurrency }}</span></div>
         <div class="flex justify-between text-gray-600"><span>Delivery</span><span>Calculated at checkout</span></div>
@@ -117,7 +117,7 @@
       </div>
     </div>
 
-    <button (click)="placeOrder()" [disabled]="placing" class="btn-primary w-full py-4 text-base font-bold rounded-2xl">
+    <button (click)="placeOrder()" [disabled]="placing" class="btn-primary w-full py-4 text-base font-bold rounded-2xl shadow-lg active:scale-[0.98] transition-transform">
       <ng-container *ngIf="placing">Placing Order...</ng-container>
       <ng-container *ngIf="!placing">Place Order · {{ cartService.total | fqrCurrency }}</ng-container>
     </button>
