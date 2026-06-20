@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../../core/services/api.service';
 import { Item, ItemCategory } from '../../../../core/models';
@@ -41,7 +41,27 @@ export class MenuItemsComponent implements OnInit {
       status: [true],
       thumbImage: [''],
       calories: [''], protein: [''], carbs: [''], fat: [''],
+      variations: this.fb.array([]),
     });
+  }
+
+  get variations(): FormArray {
+    return this.form.get('variations') as FormArray;
+  }
+
+  addVariation(): void {
+    this.variations.push(this.fb.group({
+      name: ['', Validators.required],
+      price: [0, [Validators.required, Validators.min(0)]],
+      additionalPrice: [0],
+      attributeName: [''],
+      priceType: ['addon'],
+      status: [true],
+    }));
+  }
+
+  removeVariation(index: number): void {
+    this.variations.removeAt(index);
   }
 
   onImageSelected(event: Event): void {
@@ -80,11 +100,26 @@ export class MenuItemsComponent implements OnInit {
     });
   }
 
-  openCreate(): void { this.editingId = null; this.form.reset({ status: true, itemType: 'veg', price: 0, taxRate: 0, thumbImage: '' }); this.showForm = true; }
+  openCreate(): void {
+    this.editingId = null;
+    this.variations.clear();
+    this.form.reset({ status: true, itemType: 'veg', price: 0, taxRate: 0, thumbImage: '' });
+    this.showForm = true;
+  }
 
   openEdit(item: Item): void {
     this.editingId = item.id;
-    this.form.patchValue(item);
+    this.variations.clear();
+    (item.variations || []).forEach((v) => this.variations.push(this.fb.group({
+      name: [v.name, Validators.required],
+      price: [v.price, [Validators.required, Validators.min(0)]],
+      additionalPrice: [v.additionalPrice ?? 0],
+      attributeName: [v.attributeName ?? ''],
+      priceType: [(v as any).priceType ?? 'addon'],
+      status: [v.status ?? true],
+    })));
+    const { variations, ...rest } = item as any;
+    this.form.patchValue(rest);
     this.showForm = true;
   }
 

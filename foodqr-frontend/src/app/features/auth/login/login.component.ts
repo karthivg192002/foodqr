@@ -41,6 +41,15 @@ export class LoginComponent {
       features: ['Table & order management', 'Live order status updates', 'Point of sale access', 'Shift order history'],
     },
     {
+      key: 'waiter',
+      label: 'Waiter',
+      icon: 'table',
+      heading: 'Take orders, table side',
+      subtitle: 'Manage dining tables and send orders straight to the kitchen.',
+      emailPlaceholder: 'waiter@restaurant.com',
+      features: ['Table & dining order management', 'Live order status updates', 'Quick order entry', 'Shift order history'],
+    },
+    {
       key: 'chef',
       label: 'Chef',
       icon: 'kitchen',

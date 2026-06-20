@@ -223,6 +223,13 @@ export class UsersController {
     return { data: COUNTRY_CODES };
   }
 
+  /** Administrator-specific list (admin-only — mirrors super-admin access in the legacy system) */
+  @Get('admin/administrators')
+  @Roles(UserRole.ADMIN)
+  getAdministrators(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number) {
+    return this.usersService.getByRole(UserRole.ADMIN, search, page, limit);
+  }
+
   /** Waiter-specific list, create, update, delete, password change, image, order history */
   @Get('admin/waiters')
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)

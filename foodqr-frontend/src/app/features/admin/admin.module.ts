@@ -32,6 +32,7 @@ import { RolesPermissionsComponent } from './roles-permissions/roles-permissions
 import { AnalyticsSectionsComponent } from './analytics-sections/analytics-sections.component';
 import { StaffDashboardComponent } from './staff-dashboard/staff-dashboard.component';
 import { RoleManagerComponent } from './role-manager/role-manager.component';
+import { AdminManagementComponent } from './admin-management/admin-management.component';
 
 const routes: Routes = [
   {
@@ -64,6 +65,7 @@ const routes: Routes = [
       { path: 'analytics-sections',   component: AnalyticsSectionsComponent },
       { path: 'staff-dashboard',       component: StaffDashboardComponent },
       { path: 'role-manager',          component: RoleManagerComponent },
+      { path: 'administrators',       component: AdminManagementComponent, canActivate: [AuthGuard], data: { roles: [UserRole.ADMIN] } },
     ],
   },
 ];
@@ -96,6 +98,7 @@ const routes: Routes = [
     AnalyticsSectionsComponent,
     StaffDashboardComponent,
     RoleManagerComponent,
+    AdminManagementComponent,
   ],
   imports: [
     CommonModule,

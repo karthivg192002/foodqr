@@ -60,6 +60,7 @@ export class AdminLayoutComponent implements OnInit {
       items: [
         { label: 'Customers', icon: 'users', route: '/admin/customers', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
         { label: 'Staff & Employees', icon: 'user-check', route: '/admin/staff', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
+        { label: 'Admin Management', icon: 'key', route: '/admin/administrators', roles: [UserRole.ADMIN] },
         { label: 'Messaging', icon: 'chat', route: '/admin/messaging', roles: [UserRole.ADMIN, UserRole.BRANCH_MANAGER] },
       ],
     },
