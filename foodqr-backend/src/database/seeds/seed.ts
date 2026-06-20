@@ -9,6 +9,11 @@ import { ItemCategory } from '../../modules/menu/categories/entities/item-catego
 import { Item } from '../../modules/menu/items/entities/item.entity';
 import { ItemVariation } from '../../modules/menu/variations/entities/item-variation.entity';
 import { PaymentGateway } from '../../modules/payment-gateways/entities/payment-gateway.entity';
+import { Currency } from '../../modules/currency/entities/currency.entity';
+import { Language } from '../../modules/languages/entities/language.entity';
+import { SmsGateway } from '../../modules/sms-gateways/entities/sms-gateway.entity';
+import { RoleDefinition } from '../../modules/role-definitions/entities/role-definition.entity';
+import { Tax } from '../../modules/tax/entities/tax.entity';
 import { UserRole, UserStatus, ItemType } from '../../common/enums';
 
 dotenv.config();
@@ -20,7 +25,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'password',
   database: process.env.DB_DATABASE || 'foodqr_db',
-  entities: [User, Branch, AppSetting, ItemCategory, Item, ItemVariation, PaymentGateway],
+  entities: [User, Branch, AppSetting, ItemCategory, Item, ItemVariation, PaymentGateway, Currency, Language, SmsGateway, RoleDefinition, Tax],
   synchronize: false,
 });
 
@@ -211,6 +216,121 @@ const seedCategories: { name: string; icon: string; items: Partial<Item>[] }[] =
   },
 ];
 
+const seedCurrencies: Partial<Currency>[] = [
+  { name: 'US Dollar', code: 'USD', symbol: '$', exchangeRate: 1, isDefault: true, status: true },
+  { name: 'Euro', code: 'EUR', symbol: '€', exchangeRate: 0.92, status: true },
+  { name: 'British Pound', code: 'GBP', symbol: '£', exchangeRate: 0.79, status: true },
+  { name: 'Indian Rupee', code: 'INR', symbol: '₹', exchangeRate: 83.5, status: true },
+  { name: 'Australian Dollar', code: 'AUD', symbol: 'A$', exchangeRate: 1.53, status: true },
+  { name: 'Canadian Dollar', code: 'CAD', symbol: 'C$', exchangeRate: 1.36, status: true },
+  { name: 'UAE Dirham', code: 'AED', symbol: 'AED', exchangeRate: 3.67, status: true },
+  { name: 'Saudi Riyal', code: 'SAR', symbol: 'SAR', exchangeRate: 3.75, status: true },
+];
+
+const seedLanguages: Partial<Language>[] = [
+  { name: 'English', code: 'en', nativeName: 'English', direction: 'ltr', isDefault: true, isActive: true },
+  { name: 'Arabic', code: 'ar', nativeName: 'العربية', direction: 'rtl', isDefault: false, isActive: true },
+  { name: 'French', code: 'fr', nativeName: 'Français', direction: 'ltr', isDefault: false, isActive: true },
+  { name: 'Spanish', code: 'es', nativeName: 'Español', direction: 'ltr', isDefault: false, isActive: true },
+  { name: 'German', code: 'de', nativeName: 'Deutsch', direction: 'ltr', isDefault: false, isActive: true },
+  { name: 'Hindi', code: 'hi', nativeName: 'हिन्दी', direction: 'ltr', isDefault: false, isActive: true },
+];
+
+const seedSmsGateways: Partial<SmsGateway>[] = [
+  {
+    name: 'Twilio',
+    slug: 'twilio',
+    isActive: false,
+    config: { accountSid: '', authToken: '', fromNumber: '' },
+  },
+  {
+    name: 'Vonage',
+    slug: 'vonage',
+    isActive: false,
+    config: { apiKey: '', apiSecret: '', fromNumber: '' },
+  },
+  {
+    name: 'MSG91',
+    slug: 'msg91',
+    isActive: false,
+    config: { authKey: '', senderId: '', templateId: '' },
+  },
+];
+
+const seedRoleDefinitions: Partial<RoleDefinition>[] = [
+  {
+    name: UserRole.ADMIN,
+    label: 'Admin',
+    description: 'Full access to all system features',
+    color: 'red',
+    isSystem: true,
+    isActive: true,
+    permissions: { dashboard: true, menu: true, orders: true, users: true, branches: true, settings: true, reports: true, payments: true, loyalty: true, offers: true },
+  },
+  {
+    name: UserRole.BRANCH_MANAGER,
+    label: 'Branch Manager',
+    description: 'Manages a specific branch',
+    color: 'blue',
+    isSystem: true,
+    isActive: true,
+    permissions: { dashboard: true, menu: true, orders: true, users: false, branches: false, settings: false, reports: true, payments: true, loyalty: true, offers: true },
+  },
+  {
+    name: UserRole.WAITER,
+    label: 'Waiter',
+    description: 'Takes orders at tables',
+    color: 'green',
+    isSystem: true,
+    isActive: true,
+    permissions: { dashboard: false, menu: false, orders: true, users: false, branches: false, settings: false, reports: false, payments: false, loyalty: false, offers: false },
+  },
+  {
+    name: UserRole.CHEF,
+    label: 'Chef',
+    description: 'Manages kitchen and food preparation',
+    color: 'orange',
+    isSystem: true,
+    isActive: true,
+    permissions: { dashboard: false, menu: false, orders: true, users: false, branches: false, settings: false, reports: false, payments: false, loyalty: false, offers: false },
+  },
+  {
+    name: UserRole.POS_OPERATOR,
+    label: 'POS Operator',
+    description: 'Operates point-of-sale system',
+    color: 'purple',
+    isSystem: true,
+    isActive: true,
+    permissions: { dashboard: false, menu: false, orders: true, users: false, branches: false, settings: false, reports: false, payments: true, loyalty: false, offers: false },
+  },
+  {
+    name: UserRole.STAFF,
+    label: 'Staff',
+    description: 'General staff member',
+    color: 'gray',
+    isSystem: true,
+    isActive: true,
+    permissions: { dashboard: false, menu: false, orders: true, users: false, branches: false, settings: false, reports: false, payments: false, loyalty: false, offers: false },
+  },
+  {
+    name: UserRole.CUSTOMER,
+    label: 'Customer',
+    description: 'End customer placing orders',
+    color: 'teal',
+    isSystem: true,
+    isActive: true,
+    permissions: {},
+  },
+];
+
+const seedTaxes: Partial<Tax>[] = [
+  { name: 'No Tax', code: 'NOTAX', type: 'excluded', rate: 0, isIncluded: false, isDefault: true, status: true },
+  { name: 'Standard Tax (10%)', code: 'STD10', type: 'excluded', rate: 10, isIncluded: false, isDefault: false, status: true },
+  { name: 'Standard Tax (5%)', code: 'STD5', type: 'excluded', rate: 5, isIncluded: false, isDefault: false, status: true },
+  { name: 'GST (18%)', code: 'GST18', type: 'excluded', rate: 18, isIncluded: false, isDefault: false, status: true },
+  { name: 'VAT (20%)', code: 'VAT20', type: 'excluded', rate: 20, isIncluded: false, isDefault: false, status: true },
+];
+
 async function seed() {
   await AppDataSource.initialize();
   console.log('Database connected.\n');
@@ -265,7 +385,9 @@ async function seed() {
   const categoryRepo = AppDataSource.getRepository(ItemCategory);
   const itemRepo = AppDataSource.getRepository(Item);
   let categoriesCreated = 0;
+  let categoriesSkipped = 0;
   let itemsCreated = 0;
+  let itemsSkipped = 0;
 
   for (const [index, cat] of seedCategories.entries()) {
     let category = await categoryRepo.findOne({ where: { name: cat.name } });
@@ -274,11 +396,13 @@ async function seed() {
         categoryRepo.create({ name: cat.name, icon: cat.icon, sortOrder: index, status: true }),
       );
       categoriesCreated++;
+    } else {
+      categoriesSkipped++;
     }
 
     for (const [itemIndex, itemData] of cat.items.entries()) {
       const existingItem = await itemRepo.findOne({ where: { name: itemData.name } });
-      if (existingItem) continue;
+      if (existingItem) { itemsSkipped++; continue; }
       await itemRepo.save(itemRepo.create({ ...itemData, categoryId: category.id, sortOrder: itemIndex, status: true }));
       itemsCreated++;
     }
@@ -287,7 +411,9 @@ async function seed() {
   console.log('\nMenu:');
   console.log('─'.repeat(40));
   console.log(`Categories created : ${categoriesCreated}`);
+  console.log(`Categories skipped : ${categoriesSkipped}`);
   console.log(`Items created      : ${itemsCreated}`);
+  console.log(`Items skipped      : ${itemsSkipped}`);
   console.log('─'.repeat(40));
 
   // --- Payment Gateways ---
@@ -310,6 +436,101 @@ async function seed() {
   console.log(`Created : ${gatewaysCreated}`);
   console.log(`Skipped : ${gatewaysSkipped}`);
   console.log(`Total   : ${seedPaymentGateways.length}`);
+  console.log('─'.repeat(40));
+
+  // --- Currencies ---
+  const currencyRepo = AppDataSource.getRepository(Currency);
+  let currenciesCreated = 0;
+  let currenciesSkipped = 0;
+
+  for (const cur of seedCurrencies) {
+    const existing = await currencyRepo.findOne({ where: { code: cur.code } });
+    if (existing) { currenciesSkipped++; continue; }
+    await currencyRepo.save(currencyRepo.create(cur));
+    currenciesCreated++;
+  }
+
+  console.log('\nCurrencies:');
+  console.log('─'.repeat(40));
+  console.log(`Created : ${currenciesCreated}`);
+  console.log(`Skipped : ${currenciesSkipped}`);
+  console.log(`Total   : ${seedCurrencies.length}`);
+  console.log('─'.repeat(40));
+
+  // --- Languages ---
+  const languageRepo = AppDataSource.getRepository(Language);
+  let languagesCreated = 0;
+  let languagesSkipped = 0;
+
+  for (const lang of seedLanguages) {
+    const existing = await languageRepo.findOne({ where: { code: lang.code } });
+    if (existing) { languagesSkipped++; continue; }
+    await languageRepo.save(languageRepo.create(lang));
+    languagesCreated++;
+  }
+
+  console.log('\nLanguages:');
+  console.log('─'.repeat(40));
+  console.log(`Created : ${languagesCreated}`);
+  console.log(`Skipped : ${languagesSkipped}`);
+  console.log(`Total   : ${seedLanguages.length}`);
+  console.log('─'.repeat(40));
+
+  // --- SMS Gateways ---
+  const smsGatewayRepo = AppDataSource.getRepository(SmsGateway);
+  let smsCreated = 0;
+  let smsSkipped = 0;
+
+  for (const gateway of seedSmsGateways) {
+    const existing = await smsGatewayRepo.findOne({ where: { slug: gateway.slug } });
+    if (existing) { smsSkipped++; continue; }
+    await smsGatewayRepo.save(smsGatewayRepo.create(gateway));
+    smsCreated++;
+  }
+
+  console.log('\nSMS Gateways:');
+  console.log('─'.repeat(40));
+  console.log(`Created : ${smsCreated}`);
+  console.log(`Skipped : ${smsSkipped}`);
+  console.log(`Total   : ${seedSmsGateways.length}`);
+  console.log('─'.repeat(40));
+
+  // --- Role Definitions ---
+  const roleRepo = AppDataSource.getRepository(RoleDefinition);
+  let rolesCreated = 0;
+  let rolesSkipped = 0;
+
+  for (const role of seedRoleDefinitions) {
+    const existing = await roleRepo.findOne({ where: { name: role.name } });
+    if (existing) { rolesSkipped++; continue; }
+    await roleRepo.save(roleRepo.create(role));
+    rolesCreated++;
+  }
+
+  console.log('\nRole Definitions:');
+  console.log('─'.repeat(40));
+  console.log(`Created : ${rolesCreated}`);
+  console.log(`Skipped : ${rolesSkipped}`);
+  console.log(`Total   : ${seedRoleDefinitions.length}`);
+  console.log('─'.repeat(40));
+
+  // --- Taxes ---
+  const taxRepo = AppDataSource.getRepository(Tax);
+  let taxesCreated = 0;
+  let taxesSkipped = 0;
+
+  for (const tax of seedTaxes) {
+    const existing = await taxRepo.findOne({ where: { code: tax.code } });
+    if (existing) { taxesSkipped++; continue; }
+    await taxRepo.save(taxRepo.create(tax));
+    taxesCreated++;
+  }
+
+  console.log('\nTaxes:');
+  console.log('─'.repeat(40));
+  console.log(`Created : ${taxesCreated}`);
+  console.log(`Skipped : ${taxesSkipped}`);
+  console.log(`Total   : ${seedTaxes.length}`);
   console.log('─'.repeat(40));
 
   await AppDataSource.destroy();
