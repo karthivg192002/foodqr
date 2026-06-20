@@ -77,6 +77,13 @@ export declare class UsersController {
             dialCode: string;
         }[];
     };
+    getAdministrators(search?: string, page?: number, limit?: number): Promise<{
+        data: User[];
+        total: number;
+        page: number;
+        limit: number;
+        pages: number;
+    }>;
     getWaiters(search?: string, page?: number, limit?: number): Promise<{
         data: User[];
         total: number;

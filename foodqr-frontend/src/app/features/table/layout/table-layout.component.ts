@@ -6,7 +6,7 @@ import { CartService } from '../../../core/services/cart.service';
   template: `
     <div class="min-h-screen bg-gray-50 flex flex-col">
       <header class="bg-white border-b sticky top-0 z-50">
-        <div class="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 h-14 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
               <span class="text-white text-sm font-bold">FQ</span>
@@ -21,7 +21,7 @@ import { CartService } from '../../../core/services/cart.service';
           </a>
         </div>
       </header>
-      <main class="flex-1 max-w-lg mx-auto w-full">
+      <main class="flex-1 max-w-7xl mx-auto w-full lg:px-4">
         <router-outlet></router-outlet>
       </main>
     </div>

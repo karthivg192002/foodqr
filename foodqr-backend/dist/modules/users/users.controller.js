@@ -160,6 +160,9 @@ let UsersController = class UsersController {
     getCountryCodes() {
         return { data: COUNTRY_CODES };
     }
+    getAdministrators(search, page, limit) {
+        return this.usersService.getByRole(enums_1.UserRole.ADMIN, search, page, limit);
+    }
     getWaiters(search, page, limit) {
         return this.usersService.getByRole(enums_1.UserRole.WAITER, search, page, limit);
     }
@@ -337,6 +340,16 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getCountryCodes", null);
+__decorate([
+    (0, common_1.Get)('admin/administrators'),
+    (0, decorators_1.Roles)(enums_1.UserRole.ADMIN),
+    __param(0, (0, common_1.Query)('search')),
+    __param(1, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
+    __param(2, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getAdministrators", null);
 __decorate([
     (0, common_1.Get)('admin/waiters'),
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),

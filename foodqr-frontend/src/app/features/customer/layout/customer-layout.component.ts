@@ -9,8 +9,24 @@ import { CartService } from '../../../core/services/cart.service';
 
       <!-- Header -->
       <header class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-          <app-logo [iconSize]="32" nameClass="font-extrabold text-gray-900 tracking-tight text-base"></app-logo>
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 h-14 flex items-center justify-between">
+          <div class="flex items-center gap-8">
+            <app-logo [iconSize]="32" nameClass="font-extrabold text-gray-900 tracking-tight text-base"></app-logo>
+            <nav class="hidden lg:flex items-center gap-1">
+              <a routerLink="/customer/home" routerLinkActive #dHomeActive="routerLinkActive"
+                class="px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
+                [class]="dHomeActive.isActive ? 'text-orange-600 bg-orange-50' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'">Home</a>
+              <a routerLink="/customer/orders" routerLinkActive #dOrdersActive="routerLinkActive"
+                class="px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
+                [class]="dOrdersActive.isActive ? 'text-orange-600 bg-orange-50' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'">Orders</a>
+              <a routerLink="/customer/loyalty" routerLinkActive #dLoyaltyActive="routerLinkActive"
+                class="px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
+                [class]="dLoyaltyActive.isActive ? 'text-orange-600 bg-orange-50' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'">Rewards</a>
+              <a routerLink="/customer/dashboard" routerLinkActive #dProfileActive="routerLinkActive"
+                class="px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
+                [class]="dProfileActive.isActive ? 'text-orange-600 bg-orange-50' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'">Profile</a>
+            </nav>
+          </div>
           <a routerLink="/customer/cart" class="relative p-2 hover:bg-orange-50 rounded-xl transition-colors">
             <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -24,13 +40,13 @@ import { CartService } from '../../../core/services/cart.service';
       </header>
 
       <!-- Content -->
-      <main class="flex-1 max-w-lg mx-auto w-full">
+      <main class="flex-1 max-w-7xl mx-auto w-full lg:px-4">
         <router-outlet></router-outlet>
       </main>
 
       <!-- Bottom Nav -->
-      <nav class="bg-white border-t border-gray-100 sticky bottom-0 shadow-[0_-1px_8px_rgba(0,0,0,0.06)]">
-        <div class="max-w-lg mx-auto flex">
+      <nav class="bg-white border-t border-gray-100 sticky bottom-0 shadow-[0_-1px_8px_rgba(0,0,0,0.06)] lg:hidden">
+        <div class="max-w-7xl mx-auto flex">
 
           <!-- Home -->
           <a routerLink="/customer/home" routerLinkActive #homeActive="routerLinkActive"
