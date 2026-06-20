@@ -56,7 +56,7 @@
                 <p style="font-size:13px;font-weight:600;color:#0f172a"
                   [style.color]="selectedItem?.id === item.id ? '#ea580c' : '#0f172a'"
                   class="truncate">{{ item.name }}</p>
-                <p style="font-size:11.5px;color:#94a3b8">+{{ item.price | number:'1.2-2' }}</p>
+                <p style="font-size:11.5px;color:#94a3b8">{{ item.price | fqrCurrency }}</p>
               </div>
               <svg *ngIf="selectedItem?.id === item.id" class="w-4 h-4 flex-shrink-0"
                 style="color:#ea580c" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,7 +121,7 @@
             <tbody>
               <tr *ngFor="let extra of extras">
                 <td style="font-size:13.5px;font-weight:600;color:#0f172a">{{ extra.name }}</td>
-                <td style="font-size:13px;font-weight:700;color:#ea580c">+{{ extra.price | number:'1.2-2' }}</td>
+                <td style="font-size:13px;font-weight:700;color:#ea580c">{{ extra.price | fqrCurrency }}</td>
                 <td style="font-size:13px;color:#64748b">{{ extra.maxQuantity ?? 1 }}</td>
                 <td style="text-align:center">
                   <span [class]="extra.isRequired ? 'badge-warning' : 'badge-gray'">

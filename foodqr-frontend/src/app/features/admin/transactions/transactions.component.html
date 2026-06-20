@@ -99,10 +99,10 @@
             </div>
           </td>
           <td>
-            <span class="font-mono" style="font-size:13px;color:#64748b">{{ txn.order?.orderSerialNo ?? '—' }}</span>
+            <span class="font-mono" style="font-size:13px;color:#64748b">{{ txn.order?.orderSerialNo ?? 'ï¿½' }}</span>
           </td>
           <td style="text-align:right;font-size:14px;font-weight:700;color:#0f172a">
-            {{ txn.currency ?? '' }} {{ txn.amount | number:'1.2-2' }}
+            {{ txn.amount | fqrCurrency }}
           </td>
           <td>
             <span class="badge-gray capitalize">{{ txn.paymentMethod }}</span>

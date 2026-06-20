@@ -145,7 +145,8 @@
         <button (click)="placeOrder()" [disabled]="placing || cartService.isEmpty"
           class="w-full py-3.5 rounded-xl font-bold text-white text-base"
           [class]="cartService.isEmpty ? 'bg-gray-300 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'">
-          {{ placing ? 'Processing...' : 'Charge $' + (cartService.total | number:'1.2-2') }}
+          <ng-container *ngIf="placing">Processing...</ng-container>
+          <ng-container *ngIf="!placing">Charge {{ cartService.total | fqrCurrency }}</ng-container>
         </button>
 
         <!-- Last order confirmation -->

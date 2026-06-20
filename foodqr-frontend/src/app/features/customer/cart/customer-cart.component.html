@@ -118,7 +118,8 @@
     </div>
 
     <button (click)="placeOrder()" [disabled]="placing" class="btn-primary w-full py-4 text-base font-bold rounded-2xl">
-      {{ placing ? 'Placing Order...' : 'Place Order · $' + (cartService.total | number:'1.2-2') }}
+      <ng-container *ngIf="placing">Placing Order...</ng-container>
+      <ng-container *ngIf="!placing">Place Order · {{ cartService.total | fqrCurrency }}</ng-container>
     </button>
   </div>
 </div>

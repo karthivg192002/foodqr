@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { SharedModule } from '../../shared/shared.module';
 import { TableScanComponent } from './scan/table-scan.component';
 import { TableMenuComponent } from './menu/table-menu.component';
 import { TableCartComponent } from './cart/table-cart.component';
@@ -29,6 +30,6 @@ const routes: Routes = [
     TableCartComponent,
     TableTrackComponent,
   ],
-  imports: [CommonModule, FormsModule, RouterModule.forChild(routes)],
+  imports: [CommonModule, FormsModule, RouterModule.forChild(routes), SharedModule],
 })
 export class TableModule {}

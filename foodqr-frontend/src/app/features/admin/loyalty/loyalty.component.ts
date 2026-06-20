@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
+import { CurrencyService } from '../../../core/services/currency.service';
 import { LoyaltyProgram } from '../../../core/models';
 
 @Component({ selector: 'app-loyalty', templateUrl: './loyalty.component.html' })
@@ -30,7 +31,12 @@ export class LoyaltyComponent implements OnInit {
   segmentsLoading = false;
   leaderboard: any[] = [];
 
-  constructor(private api: ApiService, private toastr: ToastrService, private fb: FormBuilder) {
+  constructor(
+    private api: ApiService,
+    private toastr: ToastrService,
+    private fb: FormBuilder,
+    public currencyService: CurrencyService,
+  ) {
     this.form = this.fb.group({
       name: ['', Validators.required],
       description: [''],
