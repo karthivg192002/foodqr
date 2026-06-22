@@ -1,0 +1,172 @@
+<div class="space-y-5 fade-in-up">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Tenants</h1>
+      <p class="page-subtitle">Create, suspend, and manage tenant accounts</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button (click)="runMigrationForAll()" class="btn-secondary btn-sm">Run Migration — All Tenants</button>
+      <button (click)="openCreate()" class="btn-primary">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        New Tenant
+      </button>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <select [(ngModel)]="statusFilter" (ngModelChange)="load()" class="input-field" style="width:auto">
+      <option value="">All Statuses</option>
+      <option value="trial">Trial</option>
+      <option value="active">Active</option>
+      <option value="suspended">Suspended</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+  </div>
+
+  <div *ngIf="loading" class="flex items-center justify-center py-20"><div class="spinner"></div></div>
+
+  <div *ngIf="!loading" class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr><th>Tenant</th><th>Plan</th><th>Status</th><th>Database</th><th>Trial / Renewal</th><th style="text-align:right">Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of tenants">
+          <td>
+            <p style="font-size:14px;font-weight:600;color:#0f172a">{{ t.name }}</p>
+            <p style="font-size:12px;color:#94a3b8;margin-top:2px">{{ t.code }} · {{ t.email || '—' }}</p>
+          </td>
+          <td>{{ t.plan?.name || 'Unassigned' }}</td>
+          <td>
+            <span [class]="t.status==='active' ? 'badge-success' : t.status==='suspended' ? 'badge-danger' : t.status==='cancelled' ? 'badge-danger' : 'badge-orange'">{{ t.status }}</span>
+          </td>
+          <td>
+            <span [class]="t.provisioningStatus==='active' ? 'badge-success' : t.provisioningStatus==='failed' ? 'badge-danger' : 'badge-orange'">{{ t.provisioningStatus || 'pending' }}</span>
+            <p *ngIf="t.dbName" style="font-size:11px;color:#94a3b8;margin-top:3px;font-family:monospace">{{ t.dbName }}</p>
+            <p *ngIf="t.provisioningStatus==='failed' && t.provisioningError" style="font-size:11px;color:#dc2626;margin-top:3px;max-width:220px" [title]="t.provisioningError">{{ t.provisioningError }}</p>
+          </td>
+          <td>
+            <p style="font-size:12.5px;color:#64748b">{{ (t.subscriptionEndsAt || t.trialEndsAt) ? ((t.subscriptionEndsAt || t.trialEndsAt) | date:'mediumDate') : '—' }}</p>
+          </td>
+          <td style="text-align:right">
+            <div class="flex items-center justify-end gap-1 flex-wrap">
+              <button *ngIf="t.provisioningStatus==='failed'" (click)="retryProvisioning(t)" class="action-link action-link-blue">Retry Provisioning</button>
+              <button *ngIf="t.provisioningStatus==='active'" (click)="runMigration(t)" class="action-link action-link-gray">Run Migration</button>
+              <button (click)="openAssign(t)" class="action-link action-link-blue">Assign Plan</button>
+              <button (click)="generateInvoice(t)" class="action-link action-link-gray">Invoice</button>
+              <button *ngIf="t.status!=='suspended'" (click)="suspend(t)" class="action-link action-link-danger">Suspend</button>
+              <button *ngIf="t.status==='suspended'" (click)="activate(t)" class="action-link action-link-gray">Activate</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="!tenants.length">
+          <td colspan="6">
+            <div class="empty-state">
+              <p class="empty-state-title">No tenants yet</p>
+              <p class="empty-state-desc">Create your first tenant to get started.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Create Modal -->
+<div *ngIf="showModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:560px">
+    <div class="modal-header">
+      <p class="modal-header-title">New Tenant</p>
+      <button (click)="showModal=false" class="modal-close-btn">×</button>
+    </div>
+
+    <ng-container *ngIf="!createdCredentials">
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="modal-body space-y-4 max-h-[65vh] overflow-y-auto">
+          <div class="form-group">
+            <label class="label">Tenant / Restaurant Name <span style="color:#dc2626">*</span></label>
+            <input formControlName="name" class="input-field" placeholder="e.g. Spice Garden">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="label">Contact Email</label>
+              <input formControlName="email" class="input-field" placeholder="contact@spicegarden.com">
+            </div>
+            <div class="form-group">
+              <label class="label">Contact Phone</label>
+              <input formControlName="phone" class="input-field" placeholder="+1 234 567 8900">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="label">Subscription Plan</label>
+            <select formControlName="planId" class="input-field">
+              <option value="">No plan (trial)</option>
+              <option *ngFor="let p of plans" [value]="p.id">{{ p.name }} — ${{ p.monthlyPrice }}/mo</option>
+            </select>
+          </div>
+          <hr style="border-color:#f1f5f9">
+          <p style="font-size:13px;font-weight:600;color:#0f172a">Admin Login</p>
+          <p style="font-size:12px;color:#94a3b8">This creates the tenant's first admin user and a default branch.</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="label">Admin Name</label>
+              <input formControlName="adminName" class="input-field" placeholder="e.g. Owner Name">
+            </div>
+            <div class="form-group">
+              <label class="label">Admin Email</label>
+              <input formControlName="adminEmail" class="input-field" placeholder="owner@spicegarden.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="label">Admin Password (leave blank to auto-generate)</label>
+            <input formControlName="adminPassword" class="input-field" placeholder="Auto-generated if empty">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" (click)="showModal=false" class="btn-secondary btn-sm">Cancel</button>
+          <button type="submit" [disabled]="saving || form.invalid" class="btn-primary btn-sm">{{ saving ? 'Creating…' : 'Create Tenant' }}</button>
+        </div>
+      </form>
+    </ng-container>
+
+    <ng-container *ngIf="createdCredentials">
+      <div class="modal-body space-y-4">
+        <div class="p-4 rounded-xl" style="background:#f0fdf4;border:1px solid #bbf7d0">
+          <p style="font-size:13.5px;font-weight:600;color:#166534">Tenant created — share these admin credentials</p>
+          <p style="font-size:13px;color:#166534;margin-top:8px">Email: <strong>{{ createdCredentials.email }}</strong></p>
+          <p style="font-size:13px;color:#166534">Temporary Password: <strong>{{ createdCredentials.tempPassword }}</strong></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button (click)="showModal=false" class="btn-primary btn-sm">Done</button>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<!-- Assign Plan Modal -->
+<div *ngIf="showAssignModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <p class="modal-header-title">Assign Plan — {{ assignTenant?.name }}</p>
+      <button (click)="showAssignModal=false" class="modal-close-btn">×</button>
+    </div>
+    <div class="modal-body space-y-4">
+      <div class="form-group">
+        <label class="label">Plan</label>
+        <select [(ngModel)]="assignPlanId" class="input-field">
+          <option value="">Select a plan</option>
+          <option *ngFor="let p of plans" [value]="p.id">{{ p.name }} — ${{ p.monthlyPrice }}/mo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="label">Subscription Months</label>
+        <input type="number" [(ngModel)]="assignMonths" min="1" class="input-field">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button (click)="showAssignModal=false" class="btn-secondary btn-sm">Cancel</button>
+      <button [disabled]="!assignPlanId" (click)="assignPlan()" class="btn-primary btn-sm">Assign</button>
+    </div>
+  </div>
+</div>

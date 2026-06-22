@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Classic Wagyu Burger - Table 12</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Work+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#1c1b1b",
+                    "outline-variant": "#e4beb1",
+                    "tertiary": "#5d5f5f",
+                    "on-background": "#1b1c1c",
+                    "on-surface": "#1b1c1c",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#656464",
+                    "secondary-container": "#e5e2e1",
+                    "on-tertiary-container": "#2a2c2c",
+                    "background": "#fbf9f9",
+                    "inverse-surface": "#303031",
+                    "on-tertiary-fixed": "#1a1c1c",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed": "#e2e2e2",
+                    "on-error-container": "#93000a",
+                    "surface-tint": "#a73a00",
+                    "tertiary-fixed-dim": "#c6c6c7",
+                    "inverse-primary": "#ffb59a",
+                    "inverse-on-surface": "#f2f0f0",
+                    "on-primary-fixed": "#370e00",
+                    "secondary": "#5f5e5e",
+                    "outline": "#8f7065",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "surface-container-highest": "#e3e2e2",
+                    "surface-dim": "#dbdad9",
+                    "on-primary-fixed-variant": "#802a00",
+                    "error": "#ba1a1a",
+                    "surface": "#fbf9f9",
+                    "surface-bright": "#fbf9f9",
+                    "primary-fixed": "#ffdbce",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#e3e2e2",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#ff5c00",
+                    "on-primary": "#ffffff",
+                    "tertiary-container": "#929393",
+                    "secondary-fixed": "#e5e2e1",
+                    "error-container": "#ffdad6",
+                    "on-primary-container": "#521800",
+                    "primary-fixed-dim": "#ffb59a",
+                    "on-secondary-fixed-variant": "#474646",
+                    "surface-container-high": "#e9e8e7",
+                    "surface-container-low": "#f5f3f3",
+                    "surface-container": "#efeded",
+                    "on-surface-variant": "#5b4137",
+                    "primary": "#a73a00",
+                    "on-tertiary-fixed-variant": "#454747"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "md": "16px",
+                    "xs": "4px",
+                    "xl": "40px",
+                    "sm": "8px",
+                    "gutter": "16px",
+                    "container-margin": "20px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "body-md": ["Work Sans"],
+                    "label-bold": ["Work Sans"],
+                    "headline-xl": ["Plus Jakarta Sans"],
+                    "price-display": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-bold": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-xl": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "price-display": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e5e2e1;
+            border-radius: 10px;
+        }
+        .active-ring:focus-within {
+            box-shadow: 0 0 0 2px #ff5c00;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-margin h-16 bg-surface dark:bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.1)] transition-all duration-300">
+<button class="active:scale-95 transition-transform hover:opacity-80 flex items-center justify-center p-2 rounded-full text-primary" onclick="window.history.back()">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface dark:text-on-surface">Table 12</h1>
+<button class="active:scale-95 transition-transform hover:opacity-80 flex items-center justify-center p-2 rounded-full text-primary">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+</button>
+</header>
+<main class="pt-16 pb-32">
+<!-- Hero Section -->
+<div class="relative w-full aspect-[4/3] md:aspect-[21/9] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A gourmet close-up shot of a thick, juicy Classic Wagyu Burger with melted cheddar cheese, crisp lettuce, and heirloom tomatoes on a toasted brioche bun. The lighting is warm and dramatic, highlighting the texture of the seared beef and the glossy sheen of the bun. Set against a clean, modern dark dining environment with soft bokeh background. Professional food photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgSYELpQMxKG7aj7X3pSN07WJWrpdnHljt1yvpDMC8Fyd144BHHKhgiqhKLLwDQkwu6FNnc8sLm2pluWpxfI0g9WhJ3J-RbYd_WG3rM6zlST04ANAnTuDCrz74MC_OA31E4-bRWBNnKjncDLqIkYU7_FYFcQIFRiCC74zL5irEVR8xaNxD1vTXhe92LW0cLFDEVWGMyQhM0_kLAMgzTetUna8V-yk48FL_VSYX5tLWYzW7nijHNYr-lk86SqE8r7yJXihZlgbDHzFb"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+</div>
+<!-- Content Canvas -->
+<div class="px-container-margin -mt-8 relative z-10">
+<div class="bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.1)] p-md">
+<div class="flex justify-between items-start mb-sm">
+<h2 class="font-headline-xl text-headline-xl text-on-surface">Classic Wagyu Burger</h2>
+<span class="font-price-display text-price-display text-primary">$16.00</span>
+</div>
+<p class="text-on-surface-variant font-body-md mb-md leading-relaxed">
+                    Experience the ultimate luxury with our signature Wagyu beef patty, known for its incredible marbling and tenderness. Served on a artisanal toasted brioche bun with house-made secret sauce, vintage cheddar, and organic greens.
+                </p>
+<!-- Ingredients -->
+<div class="mb-lg">
+<h3 class="font-label-bold text-label-bold text-secondary mb-xs">INGREDIENTS</h3>
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-container px-3 py-1 rounded-full text-label-bold text-on-surface-variant text-xs">Wagyu Beef</span>
+<span class="bg-surface-container px-3 py-1 rounded-full text-label-bold text-on-surface-variant text-xs">Brioche Bun</span>
+<span class="bg-surface-container px-3 py-1 rounded-full text-label-bold text-on-surface-variant text-xs">Aged Cheddar</span>
+<span class="bg-surface-container px-3 py-1 rounded-full text-label-bold text-on-surface-variant text-xs">Secret Sauce</span>
+<span class="bg-surface-container px-3 py-1 rounded-full text-label-bold text-on-surface-variant text-xs">Red Onion</span>
+</div>
+</div>
+<!-- Customization Options -->
+<section class="space-y-lg mb-xl">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Customize Your Order</h3>
+<!-- Option 1: Extra Cheese -->
+<div class="flex items-center justify-between p-md bg-surface-container-low rounded-xl active-ring cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex flex-col">
+<span class="font-label-bold text-label-bold text-on-surface">Extra Cheese</span>
+<span class="text-secondary text-xs">+$1.50</span>
+</div>
+<input class="w-6 h-6 rounded border-outline text-primary-container focus:ring-primary-container" type="checkbox"/>
+</div>
+<!-- Option 2: No Onions -->
+<div class="flex items-center justify-between p-md bg-surface-container-low rounded-xl active-ring cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex flex-col">
+<span class="font-label-bold text-label-bold text-on-surface">No Onions</span>
+<span class="text-secondary text-xs">Free</span>
+</div>
+<input class="w-6 h-6 rounded border-outline text-primary-container focus:ring-primary-container" type="checkbox"/>
+</div>
+<!-- Option 3: Gluten-Free Bun -->
+<div class="flex items-center justify-between p-md bg-surface-container-low rounded-xl active-ring cursor-pointer hover:bg-surface-container transition-colors">
+<div class="flex flex-col">
+<span class="font-label-bold text-label-bold text-on-surface">Gluten-Free Bun</span>
+<span class="text-secondary text-xs">+$2.00</span>
+</div>
+<input class="w-6 h-6 border-outline text-primary-container focus:ring-primary-container" name="bun-type" type="radio"/>
+</div>
+</section>
+<!-- Special Requests -->
+<div class="mb-xl">
+<h3 class="font-label-bold text-label-bold text-secondary mb-sm uppercase">Special Requests</h3>
+<textarea class="w-full h-24 p-md rounded-xl border border-outline bg-transparent focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all outline-none resize-none placeholder:text-outline-variant" placeholder="Add a note (e.g. well done, sauce on the side)..."></textarea>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar -->
+<footer class="fixed bottom-0 w-full z-50 bg-on-secondary-fixed dark:bg-on-secondary-fixed shadow-[0px_-4px_20px_rgba(0,0,0,0.15)] rounded-t-2xl px-container-margin py-4">
+<div class="max-w-screen-md mx-auto flex items-center gap-md">
+<!-- Quantity Selector -->
+<div class="flex items-center bg-surface-container-highest rounded-full h-14 px-2">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform" id="decrement">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<span class="w-10 text-center font-label-bold text-label-bold text-on-surface" id="quantity">1</span>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant active:scale-90 transition-transform" id="increment">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<!-- Add to Cart Button -->
+<button class="flex-1 h-14 bg-primary-container text-on-primary font-label-bold text-label-bold rounded-full flex items-center justify-between px-6 active:scale-95 transition-all hover:opacity-90">
+<span>Add to Cart</span>
+<span class="font-price-display" id="total-price">$16.00</span>
+</button>
+</div>
+</footer>
+<script>
+        // Quantity Logic
+        const decrementBtn = document.getElementById('decrement');
+        const incrementBtn = document.getElementById('increment');
+        const quantityEl = document.getElementById('quantity');
+        const totalPriceEl = document.getElementById('total-price');
+        const basePrice = 16.00;
+        let currentQuantity = 1;
+
+        function updateUI() {
+            quantityEl.textContent = currentQuantity;
+            totalPriceEl.textContent = `$${(currentQuantity * basePrice).toFixed(2)}`;
+            decrementBtn.disabled = currentQuantity <= 1;
+            decrementBtn.style.opacity = currentQuantity <= 1 ? '0.3' : '1';
+        }
+
+        decrementBtn.addEventListener('click', () => {
+            if (currentQuantity > 1) {
+                currentQuantity--;
+                updateUI();
+            }
+        });
+
+        incrementBtn.addEventListener('click', () => {
+            currentQuantity++;
+            updateUI();
+        });
+
+        // Initialize UI
+        updateUI();
+
+        // Visual Feedback for checkboxes/radios
+        document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => {
+            input.closest('.active-ring').addEventListener('click', function(e) {
+                if(e.target !== input) {
+                    input.click();
+                }
+            });
+        });
+
+        // Sticky Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('bg-opacity-90', 'backdrop-blur-md');
+            } else {
+                header.classList.remove('bg-opacity-90', 'backdrop-blur-md');
+            }
+        });
+    </script>
+</body></html>

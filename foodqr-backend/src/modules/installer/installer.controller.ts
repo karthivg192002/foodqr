@@ -45,6 +45,13 @@ export class InstallerController {
     return this.service.createAdmin(dto);
   }
 
+  @Post('create-super-admin')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'One-time bootstrap: create the platform super-admin (fails if one already exists)' })
+  createSuperAdmin(@Body() dto: { name: string; email: string; password: string }) {
+    return this.service.createSuperAdmin(dto);
+  }
+
   @Post('finalize')
   @HttpCode(200)
   @ApiOperation({ summary: 'Finalize installation with site settings' })

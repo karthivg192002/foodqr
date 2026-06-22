@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Table 12 | Digital Menu</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Work+Sans:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#1c1b1b",
+                    "outline-variant": "#e4beb1",
+                    "tertiary": "#5d5f5f",
+                    "on-background": "#1b1c1c",
+                    "on-surface": "#1b1c1c",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#656464",
+                    "secondary-container": "#e5e2e1",
+                    "on-tertiary-container": "#2a2c2c",
+                    "background": "#fbf9f9",
+                    "inverse-surface": "#303031",
+                    "on-tertiary-fixed": "#1a1c1c",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed": "#e2e2e2",
+                    "on-error-container": "#93000a",
+                    "surface-tint": "#a73a00",
+                    "tertiary-fixed-dim": "#c6c6c7",
+                    "inverse-primary": "#ffb59a",
+                    "inverse-on-surface": "#f2f0f0",
+                    "on-primary-fixed": "#370e00",
+                    "secondary": "#5f5e5e",
+                    "outline": "#8f7065",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "surface-container-highest": "#e3e2e2",
+                    "surface-dim": "#dbdad9",
+                    "on-primary-fixed-variant": "#802a00",
+                    "error": "#ba1a1a",
+                    "surface": "#fbf9f9",
+                    "surface-bright": "#fbf9f9",
+                    "primary-fixed": "#ffdbce",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#e3e2e2",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#ff5c00",
+                    "on-primary": "#ffffff",
+                    "tertiary-container": "#929393",
+                    "secondary-fixed": "#e5e2e1",
+                    "error-container": "#ffdad6",
+                    "on-primary-container": "#521800",
+                    "primary-fixed-dim": "#ffb59a",
+                    "on-secondary-fixed-variant": "#474646",
+                    "surface-container-high": "#e9e8e7",
+                    "surface-container-low": "#f5f3f3",
+                    "surface-container": "#efeded",
+                    "on-surface-variant": "#5b4137",
+                    "primary": "#a73a00",
+                    "on-tertiary-fixed-variant": "#454747"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "md": "16px",
+                    "xs": "4px",
+                    "xl": "40px",
+                    "sm": "8px",
+                    "gutter": "16px",
+                    "container-margin": "20px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "body-md": ["Work Sans"],
+                    "label-bold": ["Work Sans"],
+                    "headline-xl": ["Plus Jakarta Sans"],
+                    "price-display": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-bold": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-xl": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "price-display": ["18px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #fbf9f9; color: #1b1c1c; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-margin h-16 bg-surface dark:bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.1)]">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" data-icon="location_on">location_on</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-on-surface dark:text-on-surface">Table 12</h1>
+</div>
+<div class="flex items-center gap-md">
+<button class="hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary" data-icon="shopping_bag">shopping_bag</span>
+</button>
+</div>
+</header>
+<main class="mt-20 px-container-margin">
+<!-- Search & Filter Bar -->
+<div class="relative mt-lg mb-md">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-secondary" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-4 pl-12 pr-md focus:ring-2 focus:ring-primary-container text-on-surface placeholder:text-secondary" placeholder="Search our flavors..." type="text"/>
+</div>
+<!-- Category Tabs (Horizontal Scroll) -->
+<nav class="flex overflow-x-auto gap-sm py-md hide-scrollbar sticky top-16 bg-surface z-40">
+<button class="px-lg py-2 rounded-full whitespace-nowrap bg-on-secondary-fixed text-on-secondary font-label-bold text-label-bold transition-all active:scale-95">Burgers</button>
+<button class="px-lg py-2 rounded-full whitespace-nowrap bg-secondary-fixed text-on-secondary-fixed-variant font-label-bold text-label-bold hover:bg-secondary-container transition-all">Sides</button>
+<button class="px-lg py-2 rounded-full whitespace-nowrap bg-secondary-fixed text-on-secondary-fixed-variant font-label-bold text-label-bold hover:bg-secondary-container transition-all">Drinks</button>
+<button class="px-lg py-2 rounded-full whitespace-nowrap bg-secondary-fixed text-on-secondary-fixed-variant font-label-bold text-label-bold hover:bg-secondary-container transition-all">Desserts</button>
+</nav>
+<!-- Menu Section: Burgers -->
+<section class="mt-md space-y-md">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-md">Signature Burgers</h2>
+<!-- Food Item 1 (Image Left) -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.06)] flex overflow-hidden p-3 gap-md hover:shadow-lg transition-shadow">
+<div class="w-32 h-32 rounded-xl overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A close-up gourmet smash burger with melting aged cheddar, crispy smoked bacon, and fresh arugula on a toasted brioche bun. The lighting is warm and dramatic, highlighting the texture of the seared beef patty against a dark, moody background, following a high-contrast premium dining aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1yNO534899dX8mDpumV_a7ExipMmJgJUOakuLxBe87tYdj_rzdWfvq-rLm5QitfzuD0zFggHmuueIYoBLzrXKwcQv8oZXWs9r_tSq271VGCuyu_1Fz06Kj_LpjOhQNc7kHa_p1gnZTqsYr1PAniGjwO1adrs9hZ7MDSReCahYIOX_9DPvSiDO-BHSeYhV8vlNm7Jts_B9FzOnWffKprTkYiYdar615Si3c_9HyaPlrwHTsQkZ4zTTqwuz5AomByhSsFKi8sHgNBkY"/>
+</div>
+<div class="flex flex-col justify-between flex-grow">
+<div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight">The Truffle Master</h3>
+<p class="text-secondary text-sm line-clamp-2 mt-1">Double Wagyu beef, black truffle aioli, caramelized onions, and Swiss cheese.</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-price-display text-price-display text-primary">$18.50</span>
+<button class="w-10 h-10 rounded-full border-2 border-primary-container text-primary-container flex items-center justify-center active:bg-primary-container active:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Food Item 2 (Image Right) -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.06)] flex flex-row-reverse overflow-hidden p-3 gap-md hover:shadow-lg transition-shadow">
+<div class="w-32 h-32 rounded-xl overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A vibrant vegetarian halloumi burger with grilled mediterranean vegetables, zesty pesto, and sun-dried tomatoes. Set in a bright, airy restaurant environment with soft afternoon sunlight catching the steam. The color palette is fresh with greens and warm orange tones, emphasizing a clean and high-quality fast-casual vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLpH247C_pkcXSZbPByLlDL19beeZOzhEKStyM7xKrwcKh9Ww_SzXKsZt2y9SEFz538UlO1ep3RlydjZR4OjvFojrS5hXRJb-jcolc9wSocrtWuGmDrbD159-a80dM3MnGRvDxDX5iXogDp7ICUQ0vpGNXI1bVnVRw-rNpOghySjTfOMYf4bec7dIux_UPrj25OvEAw2e_F4IQXyeC0YVJDcaZ6NoqA_Jg3HwZRa8VH8JgrwXxHpEXLTmz1JEtNm7CqIpJn-8DCU-s"/>
+</div>
+<div class="flex flex-col justify-between flex-grow">
+<div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight">Mediterranean Bliss</h3>
+<p class="text-secondary text-sm line-clamp-2 mt-1">Grilled halloumi, roasted bell peppers, pesto sauce, and fresh baby spinach.</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-price-display text-price-display text-primary">$16.00</span>
+<button class="w-10 h-10 rounded-full border-2 border-primary-container text-primary-container flex items-center justify-center active:bg-primary-container active:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Food Item 3 (Image Left) -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.06)] flex overflow-hidden p-3 gap-md hover:shadow-lg transition-shadow">
+<div class="w-32 h-32 rounded-xl overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A spicy Nashville hot chicken burger featuring a huge crispy fried thigh, tangy pickles, and creamy coleslaw on a buttery bun. The image captures the crunchy texture and vibrant red spice oil under warm studio lighting with a clean white minimalist background focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWql9pYU9sIM7zAnqspfxKfEnjztgn0-csQSolZCkQfLTQMU-iH-lnUeFGU6M0KyIu9LW3u1SeEehfk8F5mAMx9zAvl7Lngqy4Tq5LT47Jy0pWZht22hVHGO8vI79Ym1LWmXA5avxUxtxfaHyq1jhK0bYUgfYOYyywb4uhqEKUG6NwRVxu7qyQvF_ZRlSdkQVjHGFH8FIDoroAHxVNokD5Kj9UCyQskKVjH4_ealnyJFwEyr-umvEauWaEs7oLp8TU0MoIkubL4XIo"/>
+</div>
+<div class="flex flex-col justify-between flex-grow">
+<div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight">Nashville Heat</h3>
+<p class="text-secondary text-sm line-clamp-2 mt-1">Crispy buttermilk chicken, cayenne spice, house slaw, and garlic pickles.</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-price-display text-price-display text-primary">$15.50</span>
+<button class="w-10 h-10 rounded-full border-2 border-primary-container text-primary-container flex items-center justify-center active:bg-primary-container active:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Food Item 4 (Image Right) -->
+<div class="bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.06)] flex flex-row-reverse overflow-hidden p-3 gap-md hover:shadow-lg transition-shadow">
+<div class="w-32 h-32 rounded-xl overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A classic double cheeseburger with american cheese, ketchup, mustard, and finely diced onions. Styled in a nostalgic yet modern way, with crisp focus on the gooey cheese and soft bun, lit with bright, energetic high-key lighting that makes the food colors pop against a subtle gray background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9ba_mxnbGjK_I2QAi6nPIszZ59nYnMrzPEBbH5Fh0VoQdOOasRykb2gHK58rviz6zw0c3Qr4ADUfOu1RhPjqE3LmqbwNwASm0VBoaXCpyp80cTaQsFmNdhDp1kMcd0BPJil8TijJ-r_DtcrTBsND7SY7N-DU7ZOQEAop7AdBV2qe4qUsS3V-sElz4CU_C8oXyfL6-mnXWtZ4XYUiTnsq2CHAtXAObASVcs-R6MTBS67hoNTWwTTLIGjBQUtRGHfBwx-TeNrRhZJ9z"/>
+</div>
+<div class="flex flex-col justify-between flex-grow">
+<div>
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-tight">The Heritage Classic</h3>
+<p class="text-secondary text-sm line-clamp-2 mt-1">Simple and perfect. Double beef, double cheese, and our secret heritage sauce.</p>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-price-display text-price-display text-primary">$14.00</span>
+<button class="w-10 h-10 rounded-full border-2 border-primary-container text-primary-container flex items-center justify-center active:bg-primary-container active:text-white transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Floating Order Summary Bar -->
+<div class="fixed bottom-24 left-container-margin right-container-margin z-50">
+<div class="bg-on-secondary-fixed rounded-2xl p-4 flex items-center justify-between shadow-[0px_10px_30px_rgba(0,0,0,0.2)]">
+<div class="flex items-center gap-md">
+<div class="bg-primary-container text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</div>
+<span class="text-white font-label-bold text-label-bold">View Your Order</span>
+</div>
+<span class="text-white font-price-display text-price-display">$34.50</span>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-on-secondary-fixed dark:bg-on-secondary-fixed shadow-[0px_-4px_20px_rgba(0,0,0,0.15)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim hover:text-primary-fixed-dim active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-bold text-label-bold">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="font-label-bold text-label-bold">Menu</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim hover:text-primary-fixed-dim active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-label-bold text-label-bold">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary-fixed-dim hover:text-primary-fixed-dim active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-bold text-label-bold">Orders</span>
+</a>
+</nav>
+<script>
+        // Simple Micro-interaction for adding items
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if(this.innerHTML.includes('add')) {
+                    this.classList.add('scale-125', 'bg-primary-container', 'text-white');
+                    setTimeout(() => {
+                        this.classList.remove('scale-125', 'bg-primary-container', 'text-white');
+                    }, 200);
+                }
+            });
+        });
+
+        // Category Tab Switch logic
+        const tabs = document.querySelectorAll('nav[class*="overflow-x-auto"] button');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('bg-on-secondary-fixed', 'text-on-secondary');
+                    t.classList.add('bg-secondary-fixed', 'text-on-secondary-fixed-variant');
+                });
+                tab.classList.add('bg-on-secondary-fixed', 'text-on-secondary');
+                tab.classList.remove('bg-secondary-fixed', 'text-on-secondary-fixed-variant');
+            });
+        });
+    </script>
+</body></html>

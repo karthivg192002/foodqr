@@ -34,6 +34,7 @@ import { StaffDashboardComponent } from './staff-dashboard/staff-dashboard.compo
 import { RoleManagerComponent } from './role-manager/role-manager.component';
 import { AdminManagementComponent } from './admin-management/admin-management.component';
 import { TableOrdersComponent } from './table-orders/table-orders.component';
+import { SubscriptionComponent } from './subscription/subscription.component';
 
 const routes: Routes = [
   {
@@ -68,6 +69,7 @@ const routes: Routes = [
       { path: 'staff-dashboard',       component: StaffDashboardComponent },
       { path: 'role-manager',          component: RoleManagerComponent },
       { path: 'administrators',       component: AdminManagementComponent, canActivate: [AuthGuard], data: { roles: [UserRole.ADMIN] } },
+      { path: 'subscription',         component: SubscriptionComponent, canActivate: [AuthGuard], data: { roles: [UserRole.ADMIN] } },
     ],
   },
 ];
@@ -102,6 +104,7 @@ const routes: Routes = [
     RoleManagerComponent,
     AdminManagementComponent,
     TableOrdersComponent,
+    SubscriptionComponent,
   ],
   imports: [
     CommonModule,

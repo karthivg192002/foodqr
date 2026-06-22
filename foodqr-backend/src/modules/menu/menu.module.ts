@@ -10,9 +10,10 @@ import { ItemExtrasController } from './extras/item-extras.controller';
 import { CategoriesService } from './categories/categories.service';
 import { ItemsService } from './items/items.service';
 import { ItemExtrasService } from './extras/item-extras.service';
+import { TenantsModule } from '../tenants/tenants.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ItemCategory, Item, ItemVariation, ItemExtra])],
+  imports: [TypeOrmModule.forFeature([ItemCategory, Item, ItemVariation, ItemExtra]), TenantsModule],
   controllers: [CategoriesController, ItemsController, ItemExtrasController],
   providers: [CategoriesService, ItemsService, ItemExtrasService],
   exports: [CategoriesService, ItemsService, ItemExtrasService, TypeOrmModule],

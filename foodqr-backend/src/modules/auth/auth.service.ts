@@ -9,6 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from '../users/entities/user.entity';
 import { Order } from '../orders/entities/order.entity';
 import { OrderItem } from '../orders/entities/order-item.entity';
+import { Tenant, TenantStatus } from '../tenants/entities/tenant.entity';
+import { TenantUserIndex } from '../tenants/entities/tenant-user-index.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 import { UserRole, UserStatus, PaymentStatus } from '../../common/enums';
 import {
   LoginDto, RegisterDto, OtpRequestDto, OtpVerifyDto,
@@ -23,25 +26,89 @@ export class AuthService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Order) private orderRepo: Repository<Order>,
     @InjectRepository(OrderItem) private orderItemRepo: Repository<OrderItem>,
+    @InjectRepository(Tenant) private tenantRepo: Repository<Tenant>,
+    @InjectRepository(TenantUserIndex) private tenantUserIndexRepo: Repository<TenantUserIndex>,
+    private tenantConnections: TenantConnectionService,
     private jwtService: JwtService,
     private mailService: MailService,
     private smsService: SmsGatewaysService,
   ) {}
 
+  /**
+   * Single login URL for the whole platform.
+   *
+   * Two kinds of accounts share one login form:
+   *  - Super-admins and legacy/shared-DB tenant users (Phase 1) live directly
+   *    in the master `users` table and are matched by email there.
+   *  - Users of a tenant provisioned with its own physical database are NOT
+   *    in the master DB at all — only a denormalized {email -> tenantId}
+   *    pointer is, in `tenant_user_index`. We resolve the tenant from that
+   *    index, open (or reuse) a connection to that tenant's own database, and
+   *    validate the password against the authoritative user record there.
+   */
   async login(dto: LoginDto) {
-    const user = await this.userRepo.findOne({
+    const masterUser = await this.userRepo.findOne({
       where: { email: dto.email },
-      select: ['id', 'name', 'email', 'password', 'role', 'status', 'profileImage', 'balance'],
+      select: ['id', 'name', 'email', 'password', 'role', 'status', 'profileImage', 'balance', 'tenantId'],
+    });
+
+    if (masterUser) return this.loginMasterUser(masterUser, dto.password);
+
+    const indexEntry = await this.tenantUserIndexRepo.findOne({ where: { email: dto.email } });
+    if (indexEntry) return this.loginTenantDbUser(indexEntry, dto.password);
+
+    throw new UnauthorizedException('Invalid credentials');
+  }
+
+  private async loginMasterUser(user: User, password: string) {
+    if (user.status !== UserStatus.ACTIVE) throw new UnauthorizedException('Account is inactive');
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+
+    let tenant: Tenant | null = null;
+    if (user.role !== UserRole.SUPER_ADMIN && user.tenantId) {
+      tenant = await this.assertTenantUsable(user.tenantId);
+    }
+
+    const token = this.generateToken(user, tenant);
+    const { password: _p, ...userWithoutPassword } = user as any;
+    return { token, user: { ...userWithoutPassword, tenantCode: tenant?.code } };
+  }
+
+  private async loginTenantDbUser(indexEntry: TenantUserIndex, password: string) {
+    const tenant = await this.assertTenantUsable(indexEntry.tenantId);
+    if (!tenant.dbName) throw new UnauthorizedException('Tenant account not found');
+
+    const dataSource = await this.tenantConnections.getOrCreate(tenant.dbName);
+    const tenantUserRepo = dataSource.getRepository(User);
+    const user = await tenantUserRepo.findOne({
+      where: { id: indexEntry.userId },
+      select: ['id', 'name', 'email', 'password', 'role', 'status', 'profileImage', 'balance', 'branchId'],
     });
     if (!user) throw new UnauthorizedException('Invalid credentials');
     if (user.status !== UserStatus.ACTIVE) throw new UnauthorizedException('Account is inactive');
 
-    const isMatch = await bcrypt.compare(dto.password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    const token = this.generateToken(user);
-    const { password, ...userWithoutPassword } = user as any;
-    return { token, user: userWithoutPassword };
+    const token = this.jwtService.sign({
+      sub: user.id, email: user.email, role: user.role, tenantId: tenant.id, tenantCode: tenant.code,
+    });
+    const { password: _p, ...userWithoutPassword } = user as any;
+    return { token, user: { ...userWithoutPassword, tenantId: tenant.id, tenantCode: tenant.code } };
+  }
+
+  private async assertTenantUsable(tenantId: string): Promise<Tenant> {
+    const tenant = await this.tenantRepo.findOne({ where: { id: tenantId } });
+    if (!tenant) throw new UnauthorizedException('Tenant account not found');
+    if (tenant.status === TenantStatus.SUSPENDED) {
+      throw new UnauthorizedException('Your organization account is suspended. Contact support.');
+    }
+    if (tenant.status === TenantStatus.CANCELLED) {
+      throw new UnauthorizedException('Your organization account has been cancelled.');
+    }
+    return tenant;
   }
 
   async register(dto: RegisterDto) {
@@ -340,7 +407,13 @@ export class AuthService {
     return this.userRepo.save(user);
   }
 
-  private generateToken(user: User) {
-    return this.jwtService.sign({ sub: user.id, email: user.email, role: user.role });
+  private generateToken(user: User, tenant?: Tenant | null) {
+    return this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      tenantId: user.tenantId || undefined,
+      tenantCode: tenant?.code,
+    });
   }
 }

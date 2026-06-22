@@ -8,6 +8,8 @@ import { LoyaltyStamp } from './entities/loyalty-stamp.entity';
 import { LoyaltyReward } from './entities/loyalty-reward.entity';
 import { User } from '../users/entities/user.entity';
 import { LoyaltyStampCalculationType, LoyaltyRewardType, LoyaltyPeriodType } from '../../common/enums';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 export class CreateLoyaltyConfigurationDto {
   @IsString()
@@ -75,7 +77,14 @@ export class LoyaltyService {
     @InjectRepository(LoyaltyStamp) private stampRepo: Repository<LoyaltyStamp>,
     @InjectRepository(LoyaltyReward) private rewardRepo: Repository<LoyaltyReward>,
     @InjectRepository(User) private userRepo: Repository<User>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.programRepo = tenantAwareRepo(connections, LoyaltyProgram, programRepo);
+    this.configRepo = tenantAwareRepo(connections, LoyaltyConfiguration, configRepo);
+    this.stampRepo = tenantAwareRepo(connections, LoyaltyStamp, stampRepo);
+    this.rewardRepo = tenantAwareRepo(connections, LoyaltyReward, rewardRepo);
+    this.userRepo = tenantAwareRepo(connections, User, userRepo);
+  }
 
   async getPrograms() {
     return this.programRepo.find({ relations: ['configurations'], order: { createdAt: 'DESC' } });

@@ -1,5 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { TenantMiddleware } from './modules/tenants/tenant.middleware';
+import { TenantContextMiddleware } from './modules/tenants/connection/tenant-context.middleware';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
@@ -117,6 +118,6 @@ import { TenantsModule } from './modules/tenants/tenants.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TenantMiddleware).forRoutes('*');
+    consumer.apply(TenantMiddleware, TenantContextMiddleware).forRoutes('*');
   }
 }

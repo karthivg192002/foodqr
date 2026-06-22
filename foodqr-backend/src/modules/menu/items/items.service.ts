@@ -7,6 +7,8 @@ import { Item } from './entities/item.entity';
 import { ItemVariation } from '../variations/entities/item-variation.entity';
 import { ItemCategory } from '../categories/entities/item-category.entity';
 import { ItemType } from '../../../common/enums';
+import { TenantConnectionService } from '../../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../../tenants/connection/tenant-aware-repo';
 
 export class CreateItemDto {
   @IsString()
@@ -85,7 +87,12 @@ export class ItemsService {
     @InjectRepository(Item) private itemRepo: Repository<Item>,
     @InjectRepository(ItemVariation) private variationRepo: Repository<ItemVariation>,
     @InjectRepository(ItemCategory) private catRepo: Repository<ItemCategory>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.itemRepo = tenantAwareRepo(connections, Item, itemRepo);
+    this.variationRepo = tenantAwareRepo(connections, ItemVariation, variationRepo);
+    this.catRepo = tenantAwareRepo(connections, ItemCategory, catRepo);
+  }
 
   /** Returns the given categoryId plus all direct child category IDs. */
   private async resolveCategoryIds(categoryId: string): Promise<string[]> {

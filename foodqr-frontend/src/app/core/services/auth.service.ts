@@ -24,6 +24,7 @@ export class AuthService {
   get currentUser(): User | null { return this.currentUserSubject.value; }
   get token(): string | null { return localStorage.getItem('token'); }
   get isAuthenticated(): boolean { return !!this.token && !!this.currentUser; }
+  get isSuperAdmin(): boolean { return this.currentUser?.role === UserRole.SUPER_ADMIN; }
   get isAdmin(): boolean { return this.currentUser?.role === UserRole.ADMIN; }
   get isBranchManager(): boolean { return this.currentUser?.role === UserRole.BRANCH_MANAGER; }
   get isCustomer(): boolean { return this.currentUser?.role === UserRole.CUSTOMER; }
@@ -89,6 +90,7 @@ export class AuthService {
   getRedirectPath(): string {
     const role = this.currentUser?.role;
     switch (role) {
+      case UserRole.SUPER_ADMIN: return '/superadmin/dashboard';
       case UserRole.ADMIN:
       case UserRole.BRANCH_MANAGER: return '/admin/dashboard';
       case UserRole.CHEF:

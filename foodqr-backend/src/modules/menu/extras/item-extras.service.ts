@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { IsString, IsNumber, IsBoolean, IsOptional, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ItemExtra } from './entities/item-extra.entity';
+import { TenantConnectionService } from '../../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../../tenants/connection/tenant-aware-repo';
 
 export class CreateItemExtraDto {
   @IsString()
@@ -26,7 +28,10 @@ export class CreateItemExtraDto {
 export class ItemExtrasService {
   constructor(
     @InjectRepository(ItemExtra) private extraRepo: Repository<ItemExtra>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.extraRepo = tenantAwareRepo(connections, ItemExtra, extraRepo);
+  }
 
   async findByItem(itemId: string): Promise<ItemExtra[]> {
     return this.extraRepo.find({

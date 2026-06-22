@@ -1,0 +1,41 @@
+<div class="space-y-5 fade-in-up">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Billing</h1>
+      <p class="page-subtitle">Tenant subscription invoices, charged through the platform's active payment gateway</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="flex items-center justify-center py-20"><div class="spinner"></div></div>
+
+  <div *ngIf="!loading" class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr><th>Tenant</th><th>Plan</th><th>Period</th><th>Gateway</th><th style="text-align:right">Amount</th><th style="text-align:center">Status</th><th style="text-align:right">Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inv of invoices">
+          <td>{{ inv.tenant?.name || inv.tenantId }}</td>
+          <td>{{ inv.plan?.name || '—' }}</td>
+          <td style="font-size:12.5px;color:#64748b">{{ inv.periodStart | date:'mediumDate' }} – {{ inv.periodEnd | date:'mediumDate' }}</td>
+          <td style="text-transform:capitalize">{{ inv.gatewaySlug || '—' }}</td>
+          <td style="text-align:right">{{ inv.currency }} {{ inv.amount }}</td>
+          <td style="text-align:center">
+            <span [class]="inv.status==='paid' ? 'badge-success' : inv.status==='failed' ? 'badge-danger' : 'badge-orange'">{{ inv.status }}</span>
+          </td>
+          <td style="text-align:right">
+            <button *ngIf="inv.status==='pending'" (click)="markPaid(inv)" class="action-link action-link-blue">Mark Paid</button>
+          </td>
+        </tr>
+        <tr *ngIf="!invoices.length">
+          <td colspan="7">
+            <div class="empty-state">
+              <p class="empty-state-title">No invoices yet</p>
+              <p class="empty-state-desc">Generate an invoice from the Tenants page.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

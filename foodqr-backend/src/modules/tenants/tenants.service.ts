@@ -5,6 +5,9 @@ import { Tenant, TenantStatus } from './entities/tenant.entity';
 import { SaasPlan } from './entities/saas-plan.entity';
 import { User } from '../users/entities/user.entity';
 import { Order } from '../orders/entities/order.entity';
+import { Branch } from '../branches/entities/branch.entity';
+import { TenantProvisioningService } from './connection/tenant-provisioning.service';
+import { TenantConnectionService } from './connection/tenant-connection.service';
 
 @Injectable()
 export class TenantsService {
@@ -13,7 +16,20 @@ export class TenantsService {
     @InjectRepository(SaasPlan) private planRepo: Repository<SaasPlan>,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Order) private orderRepo: Repository<Order>,
+    @InjectRepository(Branch) private branchRepo: Repository<Branch>,
+    private provisioning: TenantProvisioningService,
+    private connections: TenantConnectionService,
   ) {}
+
+  private async generateUniqueCode(name: string): Promise<string> {
+    const base = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'tenant';
+    let code = base;
+    let suffix = 1;
+    while (await this.tenantRepo.findOne({ where: { code } })) {
+      code = `${base}-${suffix++}`;
+    }
+    return code;
+  }
 
   // ── Plans ────────────────────────────────────────────────────────────────
 
@@ -58,13 +74,44 @@ export class TenantsService {
     return tenant;
   }
 
-  async create(data: Partial<Tenant>) {
+  /**
+   * Creates a tenant record, then hands off to TenantProvisioningService to spin
+   * up the tenant's own physical database (CREATE DATABASE + full schema sync +
+   * default branch/admin seed). The super-admin gets back working admin
+   * credentials in the same response — there is no separate onboarding step.
+   */
+  async create(data: Partial<Tenant> & { adminName?: string; adminEmail?: string; adminPassword?: string }) {
     if (data.planId) await this.findOnePlan(data.planId);
+    const { adminName, adminEmail, adminPassword, ...tenantData } = data;
+
+    if (adminEmail) {
+      const exists = await this.userRepo.findOne({ where: { email: adminEmail } });
+      if (exists) throw new BadRequestException('Admin email already registered');
+    }
+
     const trialDays = 14;
     const trialEndsAt = new Date();
     trialEndsAt.setDate(trialEndsAt.getDate() + trialDays);
-    const tenant = this.tenantRepo.create({ ...data, trialEndsAt });
-    return this.tenantRepo.save(tenant);
+    const code = await this.generateUniqueCode(tenantData.name || 'tenant');
+    const tenant = await this.tenantRepo.save(this.tenantRepo.create({
+      ...tenantData, code, trialEndsAt, dbName: this.provisioning.toDbName(code),
+    }));
+
+    const { branch, adminCredentials } = await this.provisioning.provision(tenant.id, adminName, adminEmail, adminPassword);
+
+    return { tenant: await this.findOne(tenant.id), branch, adminCredentials };
+  }
+
+  retryProvisioning(tenantId: string) {
+    return this.provisioning.provision(tenantId);
+  }
+
+  runMigration(tenantId: string) {
+    return this.provisioning.runMigration(tenantId);
+  }
+
+  runMigrationForAllActive() {
+    return this.provisioning.runMigrationForAllActive();
   }
 
   async update(id: string, data: Partial<Tenant>) {
@@ -114,7 +161,7 @@ export class TenantsService {
   async getSuperAdminDashboard() {
     const [
       totalTenants, activeTenants, trialTenants, suspendedTenants,
-      totalUsers, totalOrders, plans,
+      masterUsers, masterOrders, plans, allTenants,
     ] = await Promise.all([
       this.tenantRepo.count(),
       this.tenantRepo.count({ where: { status: TenantStatus.ACTIVE } }),
@@ -123,7 +170,21 @@ export class TenantsService {
       this.userRepo.count(),
       this.orderRepo.count(),
       this.planRepo.find({ order: { monthlyPrice: 'ASC' } }),
+      this.tenantRepo.find({ where: { provisioningStatus: 'active' as any } }),
     ]);
+
+    // Master DB only holds super-admins + legacy/shared-DB tenants' data; physical-DB
+    // tenants' users/orders live in their own database, so we sum those in too.
+    let totalUsers = masterUsers;
+    let totalOrders = masterOrders;
+    for (const t of allTenants) {
+      if (!t.dbName) continue;
+      try {
+        const ds = await this.connections.getOrCreate(t.dbName);
+        totalUsers += await ds.getRepository(User).count();
+        totalOrders += await ds.getRepository(Order).count();
+      } catch { /* unreachable tenant DB — skip rather than fail the whole dashboard */ }
+    }
 
     const tenantsByPlan = await this.tenantRepo
       .createQueryBuilder('t')
@@ -159,6 +220,35 @@ export class TenantsService {
       tenantsByPlan,
       recentTenants,
       plans,
+    };
+  }
+
+  // ── Tenant self-service (for the tenant's own admin, not super-admin) ────
+
+  async getMyTenant(tenantId: string) {
+    const tenant = await this.findOne(tenantId);
+    let branchCount: number;
+    let staffCount: number;
+    if (tenant.dbName) {
+      const ds = await this.connections.getOrCreate(tenant.dbName);
+      [branchCount, staffCount] = await Promise.all([
+        ds.getRepository(Branch).count(),
+        ds.getRepository(User).count(),
+      ]);
+    } else {
+      [branchCount, staffCount] = await Promise.all([
+        this.branchRepo.count({ where: { tenantId } }),
+        this.userRepo.count({ where: { tenantId } }),
+      ]);
+    }
+    return {
+      tenant,
+      usage: {
+        branchCount,
+        staffCount,
+        maxBranches: tenant.plan?.maxBranches ?? null,
+        maxStaff: tenant.plan?.maxStaff ?? null,
+      },
     };
   }
 

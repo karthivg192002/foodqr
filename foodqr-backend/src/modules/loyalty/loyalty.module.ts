@@ -7,9 +7,10 @@ import { LoyaltyReward } from './entities/loyalty-reward.entity';
 import { User } from '../users/entities/user.entity';
 import { LoyaltyController } from './loyalty.controller';
 import { LoyaltyService } from './loyalty.service';
+import { TenantsModule } from '../tenants/tenants.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LoyaltyProgram, LoyaltyConfiguration, LoyaltyStamp, LoyaltyReward, User])],
+  imports: [TypeOrmModule.forFeature([LoyaltyProgram, LoyaltyConfiguration, LoyaltyStamp, LoyaltyReward, User]), TenantsModule],
   controllers: [LoyaltyController],
   providers: [LoyaltyService],
   exports: [LoyaltyService],

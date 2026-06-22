@@ -7,6 +7,8 @@ import { IsString, IsOptional, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import { DiningTable } from './entities/dining-table.entity';
 import { TableStatus } from '../../common/enums';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 export class CreateDiningTableDto {
   @IsString()
@@ -24,7 +26,12 @@ export class CreateDiningTableDto {
 
 @Injectable()
 export class DiningTablesService {
-  constructor(@InjectRepository(DiningTable) private tableRepo: Repository<DiningTable>) {}
+  constructor(
+    @InjectRepository(DiningTable) private tableRepo: Repository<DiningTable>,
+    connections: TenantConnectionService,
+  ) {
+    this.tableRepo = tenantAwareRepo(connections, DiningTable, tableRepo);
+  }
 
   async findAll(branchId?: string) {
     const where: any = {};

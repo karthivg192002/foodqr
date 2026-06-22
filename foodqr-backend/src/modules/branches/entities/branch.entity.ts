@@ -1,11 +1,20 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
+  ManyToOne, JoinColumn,
 } from 'typeorm';
+import { Tenant } from '../../tenants/entities/tenant.entity';
 
 @Entity('branches')
 export class Branch {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ nullable: true })
+  tenantId: string;
+
+  @ManyToOne(() => Tenant, { nullable: true })
+  @JoinColumn({ name: 'tenantId' })
+  tenant: Tenant;
 
   @Column()
   name: string;

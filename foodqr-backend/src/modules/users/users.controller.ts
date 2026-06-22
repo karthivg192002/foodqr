@@ -93,8 +93,8 @@ export class UsersController {
   createUser(@Body() body: {
     name: string; email?: string; phone?: string; password: string;
     role?: UserRole; branchId?: string; countryCode?: string;
-  }) {
-    return this.usersService.createUser(body);
+  }, @CurrentUser() currentUser: User) {
+    return this.usersService.createUser(body, currentUser.tenantId);
   }
 
   @Patch('admin/users/:id/password')
@@ -111,8 +111,9 @@ export class UsersController {
     @Query('search') search?: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
+    @CurrentUser() user?: User,
   ) {
-    return this.usersService.getCustomers(search, page, limit);
+    return this.usersService.getCustomers(search, page, limit, user?.tenantId);
   }
 
   @Get('admin/staff')
@@ -121,8 +122,9 @@ export class UsersController {
     @Query('search') search?: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
+    @CurrentUser() user?: User,
   ) {
-    return this.usersService.getStaff(search, page, limit);
+    return this.usersService.getStaff(search, page, limit, user?.tenantId);
   }
 
   @Get('admin/users/:id')
@@ -226,15 +228,15 @@ export class UsersController {
   /** Administrator-specific list (admin-only — mirrors super-admin access in the legacy system) */
   @Get('admin/administrators')
   @Roles(UserRole.ADMIN)
-  getAdministrators(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number) {
-    return this.usersService.getByRole(UserRole.ADMIN, search, page, limit);
+  getAdministrators(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number, @CurrentUser() user?: User) {
+    return this.usersService.getByRole(UserRole.ADMIN, search, page, limit, user?.tenantId);
   }
 
   /** Waiter-specific list, create, update, delete, password change, image, order history */
   @Get('admin/waiters')
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
-  getWaiters(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number) {
-    return this.usersService.getByRole(UserRole.WAITER, search, page, limit);
+  getWaiters(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number, @CurrentUser() user?: User) {
+    return this.usersService.getByRole(UserRole.WAITER, search, page, limit, user?.tenantId);
   }
 
   @Get('admin/waiters/:id/orders')
@@ -246,8 +248,8 @@ export class UsersController {
   /** Chef-specific */
   @Get('admin/chefs')
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
-  getChefs(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number) {
-    return this.usersService.getByRole(UserRole.CHEF, search, page, limit);
+  getChefs(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number, @CurrentUser() user?: User) {
+    return this.usersService.getByRole(UserRole.CHEF, search, page, limit, user?.tenantId);
   }
 
   @Get('admin/chefs/:id/orders')
@@ -259,15 +261,15 @@ export class UsersController {
   /** POS Operator-specific */
   @Get('admin/pos-operators')
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
-  getPosOperators(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number) {
-    return this.usersService.getByRole(UserRole.POS_OPERATOR, search, page, limit);
+  getPosOperators(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number, @CurrentUser() user?: User) {
+    return this.usersService.getByRole(UserRole.POS_OPERATOR, search, page, limit, user?.tenantId);
   }
 
   /** Branch Manager-specific */
   @Get('admin/branch-managers')
   @Roles(UserRole.ADMIN)
-  getBranchManagers(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number) {
-    return this.usersService.getByRole(UserRole.BRANCH_MANAGER, search, page, limit);
+  getBranchManagers(@Query('search') search?: string, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number, @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number, @CurrentUser() user?: User) {
+    return this.usersService.getByRole(UserRole.BRANCH_MANAGER, search, page, limit, user?.tenantId);
   }
 
   /** Export staff list (all non-customer roles) to Excel */

@@ -11,6 +11,13 @@ export enum TenantStatus {
   CANCELLED = 'cancelled',
 }
 
+export enum ProvisioningStatus {
+  PENDING = 'pending',
+  PROVISIONING = 'provisioning',
+  ACTIVE = 'active',
+  FAILED = 'failed',
+}
+
 @Entity('tenants')
 export class Tenant {
   @PrimaryGeneratedColumn('uuid')
@@ -18,6 +25,9 @@ export class Tenant {
 
   @Column({ unique: true })
   name: string;
+
+  @Column({ unique: true, nullable: true })
+  code: string;
 
   @Column({ nullable: true, unique: true })
   domain: string;
@@ -58,6 +68,20 @@ export class Tenant {
 
   @Column({ type: 'jsonb', nullable: true })
   metadata: Record<string, any>;
+
+  // ── Physical per-tenant database (same Postgres server/credentials as the
+  // master connection, isolated by database name) ──────────────────────────
+  @Column({ nullable: true })
+  dbName: string;
+
+  @Column({ type: 'enum', enum: ProvisioningStatus, default: ProvisioningStatus.PENDING })
+  provisioningStatus: ProvisioningStatus;
+
+  @Column({ nullable: true })
+  provisioningError: string;
+
+  @Column({ nullable: true })
+  lastMigrationAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;

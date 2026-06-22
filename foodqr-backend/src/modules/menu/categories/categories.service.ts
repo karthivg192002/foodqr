@@ -4,6 +4,8 @@ import { Repository, IsNull } from 'typeorm';
 import { IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ItemCategory } from './entities/item-category.entity';
+import { TenantConnectionService } from '../../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../../tenants/connection/tenant-aware-repo';
 
 export class CreateCategoryDto {
   @IsString()
@@ -33,7 +35,12 @@ export class CreateCategoryDto {
 
 @Injectable()
 export class CategoriesService {
-  constructor(@InjectRepository(ItemCategory) private catRepo: Repository<ItemCategory>) {}
+  constructor(
+    @InjectRepository(ItemCategory) private catRepo: Repository<ItemCategory>,
+    connections: TenantConnectionService,
+  ) {
+    this.catRepo = tenantAwareRepo(connections, ItemCategory, catRepo);
+  }
 
   async findAll(includeChildren = true) {
     const categories = await this.catRepo.find({

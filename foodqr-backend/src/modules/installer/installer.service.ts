@@ -78,6 +78,27 @@ export class InstallerService {
     return { message: 'Admin user created', userId: admin.id };
   }
 
+  /** One-time bootstrap: creates the platform's first super-admin. Refuses if one already exists. */
+  async createSuperAdmin(dto: { name: string; email: string; password: string }) {
+    const existingSuperAdmin = await this.userRepo.findOne({ where: { role: UserRole.SUPER_ADMIN } });
+    if (existingSuperAdmin) {
+      throw new BadRequestException('A super-admin account already exists');
+    }
+    const existingEmail = await this.userRepo.findOne({ where: { email: dto.email } });
+    if (existingEmail) throw new BadRequestException('Email already in use by another account');
+
+    const hashed = await bcrypt.hash(dto.password, 12);
+    const superAdmin = this.userRepo.create({
+      name: dto.name,
+      email: dto.email,
+      password: hashed,
+      role: UserRole.SUPER_ADMIN,
+      status: UserStatus.ACTIVE,
+    });
+    await this.userRepo.save(superAdmin);
+    return { message: 'Super-admin created. You can now log in at /auth/login and manage tenants from /superadmin.', userId: superAdmin.id };
+  }
+
   async finalize(dto: { businessName?: string; timezone?: string; currency?: string }) {
     const settings = [
       { key: 'installation_complete', value: 'true', group: 'system' },

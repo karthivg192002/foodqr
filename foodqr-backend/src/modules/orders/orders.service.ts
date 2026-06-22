@@ -19,6 +19,8 @@ import { EventsService } from '../events/events.service';
 import { DeliveryZonesService } from '../delivery-zones/delivery-zones.service';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto/order.dto';
 import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '../../common/enums';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class OrdersService {
@@ -38,7 +40,23 @@ export class OrdersService {
     private notificationsService: NotificationsService,
     private eventsService: EventsService,
     @Optional() private deliveryZonesService: DeliveryZonesService,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    // Every repo below transparently re-resolves to the current request's physical
+    // tenant database (if any) on each call — see tenantAwareRepo() for why this is
+    // a one-line change per repository instead of touching every method in this file.
+    this.orderRepo = tenantAwareRepo(connections, Order, orderRepo);
+    this.orderItemRepo = tenantAwareRepo(connections, OrderItem, orderItemRepo);
+    this.orderAddressRepo = tenantAwareRepo(connections, OrderAddress, orderAddressRepo);
+    this.itemRepo = tenantAwareRepo(connections, Item, itemRepo);
+    this.variationRepo = tenantAwareRepo(connections, ItemVariation, variationRepo);
+    this.userRepo = tenantAwareRepo(connections, User, userRepo);
+    this.offerRepo = tenantAwareRepo(connections, Offer, offerRepo);
+    this.offerItemRepo = tenantAwareRepo(connections, OfferItem, offerItemRepo);
+    this.settingRepo = tenantAwareRepo(connections, AppSetting, settingRepo);
+    this.stampRepo = tenantAwareRepo(connections, LoyaltyStamp, stampRepo);
+    this.loyaltyProgramRepo = tenantAwareRepo(connections, LoyaltyProgram, loyaltyProgramRepo);
+  }
 
   private async getSetting(key: string, defaultValue = '0'): Promise<string> {
     const s = await this.settingRepo.findOne({ where: { key } });

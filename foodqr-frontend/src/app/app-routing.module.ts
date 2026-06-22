@@ -17,6 +17,12 @@ const routes: Routes = [
     loadChildren: () => import('./features/admin/admin.module').then(m => m.AdminModule),
   },
   {
+    path: 'superadmin',
+    canActivate: [AuthGuard],
+    data: { roles: [UserRole.SUPER_ADMIN] },
+    loadChildren: () => import('./features/superadmin/superadmin.module').then(m => m.SuperadminModule),
+  },
+  {
     path: 'customer',
     canActivate: [AuthGuard],
     data: { roles: [UserRole.CUSTOMER] },

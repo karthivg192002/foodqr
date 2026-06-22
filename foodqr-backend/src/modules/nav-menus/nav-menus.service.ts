@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NavMenu } from './entities/nav-menu.entity';
 
-const SEED_ITEMS: Partial<NavMenu>[] = [
+export const NAV_MENU_SEED_ITEMS: Partial<NavMenu>[] = [
   // Overview
   { group: 'Overview', groupOrder: 1, name: 'Dashboard',     iconKey: 'home',        route: '/admin/dashboard',      external: false, roles: ['admin','branch_manager'],                        sortOrder: 1 },
   { group: 'Overview', groupOrder: 1, name: 'My Dashboard',  iconKey: 'home',        route: '/admin/staff-dashboard', external: false, roles: ['waiter','chef','staff'],                        sortOrder: 2 },
@@ -40,6 +40,7 @@ const SEED_ITEMS: Partial<NavMenu>[] = [
   { group: 'Configuration', groupOrder: 8, name: 'Roles & Permissions', iconKey: 'user-check', route: '/admin/roles-permissions', external: false, roles: ['admin'], sortOrder: 2 },
   { group: 'Configuration', groupOrder: 8, name: 'Role Manager',     iconKey: 'user-check', route: '/admin/role-manager',  external: false, roles: ['admin'], sortOrder: 3 },
   { group: 'Configuration', groupOrder: 8, name: 'Payment Gateways', iconKey: 'card',     route: '/admin/payment-gateways', external: false, roles: ['admin'], sortOrder: 4 },
+  { group: 'Configuration', groupOrder: 8, name: 'Subscription',    iconKey: 'card',     route: '/admin/subscription',     external: false, roles: ['admin'], sortOrder: 5 },
   // Customer Nav (mobile/desktop nav for logged-in customers)
   { group: 'Customer Nav', groupOrder: 9, name: 'Home',        iconKey: 'home',  route: '/customer/home',    external: false, roles: ['customer'], sortOrder: 1 },
   { group: 'Customer Nav', groupOrder: 9, name: 'Scan & Order', iconKey: 'qr',   route: '/customer/scan',    external: false, roles: ['customer'], sortOrder: 2 },
@@ -78,7 +79,7 @@ export class NavMenusService {
     const count = await this.repo.count();
     if (count > 0 && !force) return { message: 'Already seeded', count };
     if (force) await this.repo.clear();
-    const saved = await this.repo.save(SEED_ITEMS.map((s) => this.repo.create(s)));
+    const saved = await this.repo.save(NAV_MENU_SEED_ITEMS.map((s) => this.repo.create(s)));
     return { message: 'Seeded successfully', count: saved.length };
   }
 }

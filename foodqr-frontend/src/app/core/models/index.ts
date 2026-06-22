@@ -9,10 +9,13 @@ export interface User {
   balance: number;
   branchId?: string;
   branch?: Branch;
+  tenantId?: string;
+  tenantCode?: string;
   createdAt: string;
 }
 
 export enum UserRole {
+  SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
   CUSTOMER = 'customer',
   WAITER = 'waiter',
@@ -20,6 +23,95 @@ export enum UserRole {
   BRANCH_MANAGER = 'branch_manager',
   POS_OPERATOR = 'pos_operator',
   STAFF = 'staff',
+}
+
+export enum TenantStatus {
+  ACTIVE = 'active',
+  SUSPENDED = 'suspended',
+  TRIAL = 'trial',
+  CANCELLED = 'cancelled',
+}
+
+export interface SaasPlan {
+  id: string;
+  name: string;
+  description?: string;
+  monthlyPrice: number;
+  yearlyPrice?: number;
+  maxBranches: number;
+  maxStaff: number;
+  maxMenuItems: number;
+  maxOrdersPerMonth: number;
+  features?: string[];
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export enum ProvisioningStatus {
+  PENDING = 'pending',
+  PROVISIONING = 'provisioning',
+  ACTIVE = 'active',
+  FAILED = 'failed',
+}
+
+export interface Tenant {
+  id: string;
+  name: string;
+  code: string;
+  domain?: string;
+  email?: string;
+  phone?: string;
+  logo?: string;
+  planId?: string;
+  plan?: SaasPlan;
+  status: TenantStatus;
+  adminUserId?: string;
+  trialEndsAt?: string;
+  subscriptionEndsAt?: string;
+  suspendedAt?: string;
+  suspendReason?: string;
+  dbName?: string;
+  provisioningStatus: ProvisioningStatus;
+  provisioningError?: string;
+  lastMigrationAt?: string;
+  createdAt: string;
+}
+
+export enum InvoiceStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed',
+}
+
+export interface TenantInvoice {
+  id: string;
+  tenantId: string;
+  tenant?: Tenant;
+  planId?: string;
+  plan?: SaasPlan;
+  amount: number;
+  currency: string;
+  status: InvoiceStatus;
+  gatewaySlug?: string;
+  periodStart: string;
+  periodEnd: string;
+  paidAt?: string;
+  createdAt: string;
+}
+
+export interface SuperAdminDashboard {
+  summary: {
+    totalTenants: number;
+    activeTenants: number;
+    trialTenants: number;
+    suspendedTenants: number;
+    totalUsers: number;
+    totalOrders: number;
+    mrr: number;
+  };
+  tenantsByPlan: { planName: string; count: string }[];
+  recentTenants: Tenant[];
+  plans: SaasPlan[];
 }
 
 export interface Branch {

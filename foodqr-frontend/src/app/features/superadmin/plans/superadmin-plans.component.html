@@ -1,0 +1,100 @@
+<div class="space-y-5 fade-in-up">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Subscription Plans</h1>
+      <p class="page-subtitle">Define pricing tiers and usage limits for tenants</p>
+    </div>
+    <button (click)="openCreate()" class="btn-primary">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      New Plan
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="flex items-center justify-center py-20"><div class="spinner"></div></div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div *ngFor="let p of plans" class="card" style="padding:20px">
+      <div class="flex items-start justify-between">
+        <div>
+          <p style="font-size:15px;font-weight:700;color:#0f172a">{{ p.name }}</p>
+          <p style="font-size:12px;color:#94a3b8;margin-top:2px">{{ p.description || 'No description' }}</p>
+        </div>
+        <span [class]="p.isActive ? 'badge-success' : 'badge-danger'">{{ p.isActive ? 'Active' : 'Inactive' }}</span>
+      </div>
+      <p style="font-size:24px;font-weight:800;color:#0f172a;margin-top:14px">${{ p.monthlyPrice }}<span style="font-size:13px;font-weight:500;color:#94a3b8">/mo</span></p>
+      <ul style="font-size:13px;color:#334155;margin-top:10px" class="space-y-1.5">
+        <li>{{ p.maxBranches === -1 ? 'Unlimited' : p.maxBranches }} branches</li>
+        <li>{{ p.maxStaff === -1 ? 'Unlimited' : p.maxStaff }} staff seats</li>
+        <li>{{ p.maxMenuItems === -1 ? 'Unlimited' : p.maxMenuItems }} menu items</li>
+        <li>{{ p.maxOrdersPerMonth === -1 ? 'Unlimited' : p.maxOrdersPerMonth }} orders/month</li>
+      </ul>
+      <div class="flex items-center gap-2 mt-4">
+        <button (click)="openEdit(p)" class="btn-secondary btn-sm" style="flex:1">Edit</button>
+        <button (click)="remove(p)" class="action-link action-link-danger">Delete</button>
+      </div>
+    </div>
+    <div *ngIf="!plans.length" class="empty-state" style="grid-column:1/-1">
+      <p class="empty-state-title">No plans yet</p>
+      <p class="empty-state-desc">Create your first subscription plan.</p>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingId ? 'Edit Plan' : 'New Plan' }}</p>
+      <button (click)="showModal=false" class="modal-close-btn">×</button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="modal-body space-y-4 max-h-[65vh] overflow-y-auto">
+        <div class="form-group">
+          <label class="label">Plan Name <span style="color:#dc2626">*</span></label>
+          <input formControlName="name" class="input-field" placeholder="e.g. Pro">
+        </div>
+        <div class="form-group">
+          <label class="label">Description</label>
+          <input formControlName="description" class="input-field">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Monthly Price ($)</label>
+            <input type="number" formControlName="monthlyPrice" class="input-field">
+          </div>
+          <div class="form-group">
+            <label class="label">Yearly Price ($)</label>
+            <input type="number" formControlName="yearlyPrice" class="input-field">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Max Branches (-1 = unlimited)</label>
+            <input type="number" formControlName="maxBranches" class="input-field">
+          </div>
+          <div class="form-group">
+            <label class="label">Max Staff (-1 = unlimited)</label>
+            <input type="number" formControlName="maxStaff" class="input-field">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Max Menu Items (-1 = unlimited)</label>
+            <input type="number" formControlName="maxMenuItems" class="input-field">
+          </div>
+          <div class="form-group">
+            <label class="label">Max Orders/Month (-1 = unlimited)</label>
+            <input type="number" formControlName="maxOrdersPerMonth" class="input-field">
+          </div>
+        </div>
+        <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+          <input type="checkbox" formControlName="isActive" id="plan-active" class="w-4 h-4">
+          <label for="plan-active" style="font-size:13.5px;font-weight:500;color:#334155;cursor:pointer">Plan is active and assignable</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" (click)="showModal=false" class="btn-secondary btn-sm">Cancel</button>
+        <button type="submit" [disabled]="saving || form.invalid" class="btn-primary btn-sm">{{ saving ? 'Saving…' : (editingId ? 'Update Plan' : 'Create Plan') }}</button>
+      </div>
+    </form>
+  </div>
+</div>

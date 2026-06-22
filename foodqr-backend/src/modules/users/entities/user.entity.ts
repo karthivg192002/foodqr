@@ -4,6 +4,7 @@ import {
 } from 'typeorm';
 import { UserRole, UserStatus } from '../../../common/enums';
 import { Branch } from '../../branches/entities/branch.entity';
+import { Tenant } from '../../tenants/entities/tenant.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity('users')
@@ -45,6 +46,13 @@ export class User {
   @ManyToOne(() => Branch, { nullable: true })
   @JoinColumn({ name: 'branchId' })
   branch: Branch;
+
+  @Column({ nullable: true })
+  tenantId: string;
+
+  @ManyToOne(() => Tenant, { nullable: true })
+  @JoinColumn({ name: 'tenantId' })
+  tenant: Tenant;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   balance: number;

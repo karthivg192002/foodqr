@@ -10,6 +10,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators';
 import { UserRole } from '../../common/enums';
+import { TenantBillingService } from './billing/tenant-billing.service';
 
 @ApiTags('Super Admin — Tenancy')
 @ApiBearerAuth()
@@ -17,7 +18,10 @@ import { UserRole } from '../../common/enums';
 @Roles(UserRole.SUPER_ADMIN)
 @Controller('super-admin')
 export class TenantsController {
-  constructor(private readonly tenantsService: TenantsService) {}
+  constructor(
+    private readonly tenantsService: TenantsService,
+    private readonly billing: TenantBillingService,
+  ) {}
 
   // ── Dashboard ──────────────────────────────────────────────────────────
 
@@ -68,8 +72,8 @@ export class TenantsController {
   }
 
   @Post('tenants')
-  @ApiOperation({ summary: 'Create a new tenant' })
-  create(@Body() data: Partial<Tenant>) {
+  @ApiOperation({ summary: 'Create a new tenant — provisions a default branch and admin login in one step' })
+  create(@Body() data: Partial<Tenant> & { adminName?: string; adminEmail?: string; adminPassword?: string }) {
     return this.tenantsService.create(data);
   }
 
@@ -104,5 +108,45 @@ export class TenantsController {
   @ApiOperation({ summary: 'Permanently remove a tenant' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.tenantsService.remove(id);
+  }
+
+  // ── Tenant Database Management ────────────────────────────────────────
+
+  @Post('tenants/:id/retry-provisioning')
+  @ApiOperation({ summary: 'Retry provisioning a tenant whose database setup failed' })
+  retryProvisioning(@Param('id', ParseUUIDPipe) id: string) {
+    return this.tenantsService.retryProvisioning(id);
+  }
+
+  @Post('tenants/:id/run-migration')
+  @ApiOperation({ summary: "Re-sync a single tenant's database schema" })
+  runMigration(@Param('id', ParseUUIDPipe) id: string) {
+    return this.tenantsService.runMigration(id);
+  }
+
+  @Post('tenants/run-migration-all')
+  @ApiOperation({ summary: 'Re-sync the database schema for every provisioned tenant' })
+  runMigrationForAll() {
+    return this.tenantsService.runMigrationForAllActive();
+  }
+
+  // ── Billing ──────────────────────────────────────────────────────────────
+
+  @Get('invoices')
+  @ApiOperation({ summary: 'List invoices across all tenants' })
+  listInvoices() {
+    return this.billing.listAll();
+  }
+
+  @Post('tenants/:id/invoices')
+  @ApiOperation({ summary: "Generate an invoice for a tenant's current plan" })
+  generateInvoice(@Param('id', ParseUUIDPipe) id: string, @Body() body: { months?: number }) {
+    return this.billing.generateInvoice(id, body.months || 1);
+  }
+
+  @Post('invoices/:invoiceId/mark-paid')
+  @ApiOperation({ summary: 'Mark an invoice as paid' })
+  markInvoicePaid(@Param('invoiceId', ParseUUIDPipe) invoiceId: string) {
+    return this.billing.markPaid(invoiceId);
   }
 }

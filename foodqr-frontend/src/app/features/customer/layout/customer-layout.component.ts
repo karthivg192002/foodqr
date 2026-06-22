@@ -10,7 +10,7 @@ interface CustomerNavItem {
 }
 
 const DEFAULT_NAV_ITEMS: CustomerNavItem[] = [
-  { label: 'Home', icon: 'home', route: '/customer/home' },
+  { label: 'Menu', icon: 'home', route: '/customer/home' },
   { label: 'Scan', icon: 'qr', route: '/customer/scan' },
   { label: 'Orders', icon: 'orders', route: '/customer/orders' },
   { label: 'Rewards', icon: 'star', route: '/customer/loyalty' },

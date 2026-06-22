@@ -18,6 +18,7 @@ import { TimeSlotsModule } from '../time-slots/time-slots.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { DiningTablesModule } from '../dining-tables/dining-tables.module';
 import { DeliveryZonesModule } from '../delivery-zones/delivery-zones.module';
+import { TenantsModule } from '../tenants/tenants.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { DeliveryZonesModule } from '../delivery-zones/delivery-zones.module';
     NotificationsModule,
     DiningTablesModule,
     DeliveryZonesModule,
+    TenantsModule,
   ],
   controllers: [OrdersController, TableOrderController],
   providers: [OrdersService],

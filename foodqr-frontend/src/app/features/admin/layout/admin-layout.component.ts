@@ -94,6 +94,7 @@ export class AdminLayoutComponent implements OnInit {
       heading: 'Configuration',
       items: [
         { label: 'Settings', icon: 'settings', route: '/admin/settings', roles: [UserRole.ADMIN] },
+        { label: 'Subscription', icon: 'card', route: '/admin/subscription', roles: [UserRole.ADMIN] },
         { label: 'Roles & Permissions', icon: 'user-check', route: '/admin/roles-permissions', roles: [UserRole.ADMIN] },
         { label: 'Role Manager', icon: 'user-check', route: '/admin/role-manager', roles: [UserRole.ADMIN] },
         { label: 'Payment Gateways', icon: 'card', route: '/admin/payment-gateways', roles: [UserRole.ADMIN] },

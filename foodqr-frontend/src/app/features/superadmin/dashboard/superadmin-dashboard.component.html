@@ -1,0 +1,80 @@
+<div class="space-y-5 fade-in-up">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Platform Dashboard</h1>
+      <p class="page-subtitle">Aggregate view across all tenants</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="flex items-center justify-center py-20">
+    <div class="spinner"></div>
+  </div>
+
+  <ng-container *ngIf="!loading && data">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="stat-card">
+        <p class="stat-label">Total Tenants</p>
+        <p class="stat-value">{{ data.summary.totalTenants }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Active</p>
+        <p class="stat-value" style="color:#16a34a">{{ data.summary.activeTenants }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Trial</p>
+        <p class="stat-value" style="color:#d97706">{{ data.summary.trialTenants }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Suspended</p>
+        <p class="stat-value" style="color:#dc2626">{{ data.summary.suspendedTenants }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Total Users</p>
+        <p class="stat-value">{{ data.summary.totalUsers }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Total Orders</p>
+        <p class="stat-value">{{ data.summary.totalOrders }}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">MRR</p>
+        <p class="stat-value">${{ data.summary.mrr | number:'1.0-2' }}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div class="table-container">
+        <div class="px-5 py-4" style="border-bottom:1px solid #f1f5f9">
+          <p style="font-size:14px;font-weight:600;color:#0f172a">Recent Tenants</p>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Plan</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let t of data.recentTenants">
+              <td>{{ t.name }}</td>
+              <td>{{ t.plan?.name || '—' }}</td>
+              <td><span class="badge-plain">{{ t.status }}</span></td>
+            </tr>
+            <tr *ngIf="!data.recentTenants.length"><td colspan="3" class="empty-state-desc">No tenants yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-container">
+        <div class="px-5 py-4" style="border-bottom:1px solid #f1f5f9">
+          <p style="font-size:14px;font-weight:600;color:#0f172a">Tenants by Plan</p>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Plan</th><th style="text-align:right">Tenants</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let p of data.tenantsByPlan">
+              <td>{{ p.planName || 'Unassigned' }}</td>
+              <td style="text-align:right">{{ p.count }}</td>
+            </tr>
+            <tr *ngIf="!data.tenantsByPlan.length"><td colspan="2" class="empty-state-desc">No data yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</div>
