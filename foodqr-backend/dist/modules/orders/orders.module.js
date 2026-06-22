@@ -27,6 +27,7 @@ const time_slots_module_1 = require("../time-slots/time-slots.module");
 const notifications_module_1 = require("../notifications/notifications.module");
 const dining_tables_module_1 = require("../dining-tables/dining-tables.module");
 const delivery_zones_module_1 = require("../delivery-zones/delivery-zones.module");
+const tenants_module_1 = require("../tenants/tenants.module");
 let OrdersModule = class OrdersModule {
 };
 exports.OrdersModule = OrdersModule;
@@ -38,6 +39,7 @@ exports.OrdersModule = OrdersModule = __decorate([
             notifications_module_1.NotificationsModule,
             dining_tables_module_1.DiningTablesModule,
             delivery_zones_module_1.DeliveryZonesModule,
+            tenants_module_1.TenantsModule,
         ],
         controllers: [orders_controller_1.OrdersController, table_order_controller_1.TableOrderController],
         providers: [orders_service_1.OrdersService],

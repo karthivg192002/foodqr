@@ -19,6 +19,9 @@ export class Order {
   @Column({ nullable: true })
   token: string;
 
+  @Column({ nullable: true, type: 'int' })
+  dailyToken: number;
+
   @Column({ nullable: true })
   userId: string;
 

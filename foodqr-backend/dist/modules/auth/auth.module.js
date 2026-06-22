@@ -18,6 +18,9 @@ const jwt_strategy_1 = require("./strategies/jwt.strategy");
 const user_entity_1 = require("../users/entities/user.entity");
 const order_entity_1 = require("../orders/entities/order.entity");
 const order_item_entity_1 = require("../orders/entities/order-item.entity");
+const tenant_entity_1 = require("../tenants/entities/tenant.entity");
+const tenant_user_index_entity_1 = require("../tenants/entities/tenant-user-index.entity");
+const tenants_module_1 = require("../tenants/tenants.module");
 const mail_module_1 = require("../mail/mail.module");
 const sms_gateways_module_1 = require("../sms-gateways/sms-gateways.module");
 let AuthModule = class AuthModule {
@@ -26,10 +29,11 @@ exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, order_entity_1.Order, order_item_entity_1.OrderItem]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, order_entity_1.Order, order_item_entity_1.OrderItem, tenant_entity_1.Tenant, tenant_user_index_entity_1.TenantUserIndex]),
             passport_1.PassportModule,
             mail_module_1.MailModule,
             sms_gateways_module_1.SmsGatewaysModule,
+            tenants_module_1.TenantsModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: (config) => ({

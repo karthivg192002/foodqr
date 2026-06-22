@@ -95,17 +95,17 @@ let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
     }
-    createUser(body) {
-        return this.usersService.createUser(body);
+    createUser(body, currentUser) {
+        return this.usersService.createUser(body, currentUser.tenantId);
     }
     changePassword(id, body) {
         return this.usersService.changeUserPassword(id, body.password);
     }
-    getCustomers(search, page, limit) {
-        return this.usersService.getCustomers(search, page, limit);
+    getCustomers(search, page, limit, user) {
+        return this.usersService.getCustomers(search, page, limit, user?.tenantId);
     }
-    getStaff(search, page, limit) {
-        return this.usersService.getStaff(search, page, limit);
+    getStaff(search, page, limit, user) {
+        return this.usersService.getStaff(search, page, limit, user?.tenantId);
     }
     findOne(id) {
         return this.usersService.findOne(id);
@@ -160,26 +160,26 @@ let UsersController = class UsersController {
     getCountryCodes() {
         return { data: COUNTRY_CODES };
     }
-    getAdministrators(search, page, limit) {
-        return this.usersService.getByRole(enums_1.UserRole.ADMIN, search, page, limit);
+    getAdministrators(search, page, limit, user) {
+        return this.usersService.getByRole(enums_1.UserRole.ADMIN, search, page, limit, user?.tenantId);
     }
-    getWaiters(search, page, limit) {
-        return this.usersService.getByRole(enums_1.UserRole.WAITER, search, page, limit);
+    getWaiters(search, page, limit, user) {
+        return this.usersService.getByRole(enums_1.UserRole.WAITER, search, page, limit, user?.tenantId);
     }
     getWaiterOrders(id, page, limit) {
         return this.usersService.getStaffOrders(id, page, limit);
     }
-    getChefs(search, page, limit) {
-        return this.usersService.getByRole(enums_1.UserRole.CHEF, search, page, limit);
+    getChefs(search, page, limit, user) {
+        return this.usersService.getByRole(enums_1.UserRole.CHEF, search, page, limit, user?.tenantId);
     }
     getChefOrders(id, page, limit) {
         return this.usersService.getStaffOrders(id, page, limit);
     }
-    getPosOperators(search, page, limit) {
-        return this.usersService.getByRole(enums_1.UserRole.POS_OPERATOR, search, page, limit);
+    getPosOperators(search, page, limit, user) {
+        return this.usersService.getByRole(enums_1.UserRole.POS_OPERATOR, search, page, limit, user?.tenantId);
     }
-    getBranchManagers(search, page, limit) {
-        return this.usersService.getByRole(enums_1.UserRole.BRANCH_MANAGER, search, page, limit);
+    getBranchManagers(search, page, limit, user) {
+        return this.usersService.getByRole(enums_1.UserRole.BRANCH_MANAGER, search, page, limit, user?.tenantId);
     }
     async exportStaffExcel(res) {
         return this.usersService.exportStaffExcel(res);
@@ -202,8 +202,9 @@ __decorate([
     (0, common_1.Post)('admin/users'),
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, decorators_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, user_entity_1.User]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "createUser", null);
 __decorate([
@@ -223,8 +224,9 @@ __decorate([
     __param(0, (0, common_1.Query)('search')),
     __param(1, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
     __param(2, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __param(3, (0, decorators_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:paramtypes", [String, Number, Number, user_entity_1.User]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getCustomers", null);
 __decorate([
@@ -233,8 +235,9 @@ __decorate([
     __param(0, (0, common_1.Query)('search')),
     __param(1, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
     __param(2, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __param(3, (0, decorators_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:paramtypes", [String, Number, Number, user_entity_1.User]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getStaff", null);
 __decorate([
@@ -346,8 +349,9 @@ __decorate([
     __param(0, (0, common_1.Query)('search')),
     __param(1, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
     __param(2, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __param(3, (0, decorators_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:paramtypes", [String, Number, Number, user_entity_1.User]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getAdministrators", null);
 __decorate([
@@ -356,8 +360,9 @@ __decorate([
     __param(0, (0, common_1.Query)('search')),
     __param(1, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
     __param(2, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __param(3, (0, decorators_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:paramtypes", [String, Number, Number, user_entity_1.User]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getWaiters", null);
 __decorate([
@@ -376,8 +381,9 @@ __decorate([
     __param(0, (0, common_1.Query)('search')),
     __param(1, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
     __param(2, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __param(3, (0, decorators_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:paramtypes", [String, Number, Number, user_entity_1.User]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getChefs", null);
 __decorate([
@@ -396,8 +402,9 @@ __decorate([
     __param(0, (0, common_1.Query)('search')),
     __param(1, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
     __param(2, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __param(3, (0, decorators_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:paramtypes", [String, Number, Number, user_entity_1.User]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getPosOperators", null);
 __decorate([
@@ -406,8 +413,9 @@ __decorate([
     __param(0, (0, common_1.Query)('search')),
     __param(1, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
     __param(2, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __param(3, (0, decorators_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:paramtypes", [String, Number, Number, user_entity_1.User]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "getBranchManagers", null);
 __decorate([

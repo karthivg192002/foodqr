@@ -20,9 +20,11 @@ const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const user_entity_1 = require("../../users/entities/user.entity");
+const tenant_entity_1 = require("../../tenants/entities/tenant.entity");
+const tenant_connection_service_1 = require("../../tenants/connection/tenant-connection.service");
 const enums_1 = require("../../../common/enums");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
-    constructor(config, userRepo) {
+    constructor(config, userRepo, tenantRepo, tenantConnections) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
                 passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -33,12 +35,36 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
             passReqToCallback: false,
         });
         this.userRepo = userRepo;
+        this.tenantRepo = tenantRepo;
+        this.tenantConnections = tenantConnections;
     }
     async validate(payload) {
-        const user = await this.userRepo.findOne({ where: { id: payload.sub } });
+        if (!payload.tenantId) {
+            const user = await this.userRepo.findOne({ where: { id: payload.sub } });
+            if (!user || user.status !== enums_1.UserStatus.ACTIVE) {
+                throw new common_1.UnauthorizedException('User not found or inactive');
+            }
+            return user;
+        }
+        const tenant = await this.tenantRepo.findOne({ where: { id: payload.tenantId } });
+        if (!tenant)
+            throw new common_1.UnauthorizedException('Tenant account not found');
+        if (tenant.status === tenant_entity_1.TenantStatus.SUSPENDED || tenant.status === tenant_entity_1.TenantStatus.CANCELLED) {
+            throw new common_1.UnauthorizedException('Your organization account is no longer active.');
+        }
+        if (!tenant.dbName) {
+            const user = await this.userRepo.findOne({ where: { id: payload.sub } });
+            if (!user || user.status !== enums_1.UserStatus.ACTIVE) {
+                throw new common_1.UnauthorizedException('User not found or inactive');
+            }
+            return user;
+        }
+        const dataSource = await this.tenantConnections.getOrCreate(tenant.dbName);
+        const user = await dataSource.getRepository(user_entity_1.User).findOne({ where: { id: payload.sub } });
         if (!user || user.status !== enums_1.UserStatus.ACTIVE) {
             throw new common_1.UnauthorizedException('User not found or inactive');
         }
+        user.tenantId = tenant.id;
         return user;
     }
 };
@@ -46,7 +72,10 @@ exports.JwtStrategy = JwtStrategy;
 exports.JwtStrategy = JwtStrategy = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __param(2, (0, typeorm_1.InjectRepository)(tenant_entity_1.Tenant)),
     __metadata("design:paramtypes", [config_1.ConfigService,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], JwtStrategy);
 //# sourceMappingURL=jwt.strategy.js.map

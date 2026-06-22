@@ -14,12 +14,14 @@ const users_service_1 = require("./users.service");
 const user_entity_1 = require("./entities/user.entity");
 const order_entity_1 = require("../orders/entities/order.entity");
 const address_entity_1 = require("../addresses/entities/address.entity");
+const tenant_user_index_entity_1 = require("../tenants/entities/tenant-user-index.entity");
+const tenants_module_1 = require("../tenants/tenants.module");
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
 exports.UsersModule = UsersModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, order_entity_1.Order, address_entity_1.Address])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, order_entity_1.Order, address_entity_1.Address, tenant_user_index_entity_1.TenantUserIndex]), tenants_module_1.TenantsModule],
         controllers: [users_controller_1.UsersController],
         providers: [users_service_1.UsersService],
         exports: [users_service_1.UsersService, typeorm_1.TypeOrmModule],

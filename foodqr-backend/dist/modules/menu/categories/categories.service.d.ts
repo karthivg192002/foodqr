@@ -1,5 +1,6 @@
 import { Repository } from 'typeorm';
 import { ItemCategory } from './entities/item-category.entity';
+import { TenantConnectionService } from '../../tenants/connection/tenant-connection.service';
 export declare class CreateCategoryDto {
     name: string;
     description?: string;
@@ -12,7 +13,7 @@ export declare class CreateCategoryDto {
 }
 export declare class CategoriesService {
     private catRepo;
-    constructor(catRepo: Repository<ItemCategory>);
+    constructor(catRepo: Repository<ItemCategory>, connections: TenantConnectionService);
     findAll(includeChildren?: boolean): Promise<ItemCategory[]>;
     findAllFlat(): Promise<ItemCategory[]>;
     findOne(id: string): Promise<ItemCategory>;

@@ -5,6 +5,7 @@ import { LoyaltyStamp } from './entities/loyalty-stamp.entity';
 import { LoyaltyReward } from './entities/loyalty-reward.entity';
 import { User } from '../users/entities/user.entity';
 import { LoyaltyStampCalculationType, LoyaltyRewardType, LoyaltyPeriodType } from '../../common/enums';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class CreateLoyaltyConfigurationDto {
     name?: string;
     calculationType: LoyaltyStampCalculationType;
@@ -29,7 +30,7 @@ export declare class LoyaltyService {
     private stampRepo;
     private rewardRepo;
     private userRepo;
-    constructor(programRepo: Repository<LoyaltyProgram>, configRepo: Repository<LoyaltyConfiguration>, stampRepo: Repository<LoyaltyStamp>, rewardRepo: Repository<LoyaltyReward>, userRepo: Repository<User>);
+    constructor(programRepo: Repository<LoyaltyProgram>, configRepo: Repository<LoyaltyConfiguration>, stampRepo: Repository<LoyaltyStamp>, rewardRepo: Repository<LoyaltyReward>, userRepo: Repository<User>, connections: TenantConnectionService);
     getPrograms(): Promise<LoyaltyProgram[]>;
     getActiveProgram(): Promise<LoyaltyProgram>;
     createProgram(data: CreateLoyaltyProgramDto): Promise<LoyaltyProgram>;

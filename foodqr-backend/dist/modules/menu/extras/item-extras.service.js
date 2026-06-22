@@ -19,6 +19,8 @@ const typeorm_2 = require("typeorm");
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const item_extra_entity_1 = require("./entities/item-extra.entity");
+const tenant_connection_service_1 = require("../../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../../tenants/connection/tenant-aware-repo");
 class CreateItemExtraDto {
 }
 exports.CreateItemExtraDto = CreateItemExtraDto;
@@ -49,8 +51,9 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateItemExtraDto.prototype, "status", void 0);
 let ItemExtrasService = class ItemExtrasService {
-    constructor(extraRepo) {
+    constructor(extraRepo, connections) {
         this.extraRepo = extraRepo;
+        this.extraRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_extra_entity_1.ItemExtra, extraRepo);
     }
     async findByItem(itemId) {
         return this.extraRepo.find({
@@ -87,6 +90,7 @@ exports.ItemExtrasService = ItemExtrasService;
 exports.ItemExtrasService = ItemExtrasService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(item_extra_entity_1.ItemExtra)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], ItemExtrasService);
 //# sourceMappingURL=item-extras.service.js.map

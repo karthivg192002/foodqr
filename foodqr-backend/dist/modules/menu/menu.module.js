@@ -19,12 +19,13 @@ const item_extras_controller_1 = require("./extras/item-extras.controller");
 const categories_service_1 = require("./categories/categories.service");
 const items_service_1 = require("./items/items.service");
 const item_extras_service_1 = require("./extras/item-extras.service");
+const tenants_module_1 = require("../tenants/tenants.module");
 let MenuModule = class MenuModule {
 };
 exports.MenuModule = MenuModule;
 exports.MenuModule = MenuModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([item_category_entity_1.ItemCategory, item_entity_1.Item, item_variation_entity_1.ItemVariation, item_extra_entity_1.ItemExtra])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([item_category_entity_1.ItemCategory, item_entity_1.Item, item_variation_entity_1.ItemVariation, item_extra_entity_1.ItemExtra]), tenants_module_1.TenantsModule],
         controllers: [categories_controller_1.CategoriesController, items_controller_1.ItemsController, item_extras_controller_1.ItemExtrasController],
         providers: [categories_service_1.CategoriesService, items_service_1.ItemsService, item_extras_service_1.ItemExtrasService],
         exports: [categories_service_1.CategoriesService, items_service_1.ItemsService, item_extras_service_1.ItemExtrasService, typeorm_1.TypeOrmModule],

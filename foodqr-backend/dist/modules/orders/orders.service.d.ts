@@ -16,6 +16,7 @@ import { EventsService } from '../events/events.service';
 import { DeliveryZonesService } from '../delivery-zones/delivery-zones.service';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto/order.dto';
 import { PaymentStatus } from '../../common/enums';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class OrdersService {
     private orderRepo;
     private orderItemRepo;
@@ -32,7 +33,7 @@ export declare class OrdersService {
     private notificationsService;
     private eventsService;
     private deliveryZonesService;
-    constructor(orderRepo: Repository<Order>, orderItemRepo: Repository<OrderItem>, orderAddressRepo: Repository<OrderAddress>, itemRepo: Repository<Item>, variationRepo: Repository<ItemVariation>, userRepo: Repository<User>, offerRepo: Repository<Offer>, offerItemRepo: Repository<OfferItem>, settingRepo: Repository<AppSetting>, stampRepo: Repository<LoyaltyStamp>, loyaltyProgramRepo: Repository<LoyaltyProgram>, timeSlotsService: TimeSlotsService, notificationsService: NotificationsService, eventsService: EventsService, deliveryZonesService: DeliveryZonesService);
+    constructor(orderRepo: Repository<Order>, orderItemRepo: Repository<OrderItem>, orderAddressRepo: Repository<OrderAddress>, itemRepo: Repository<Item>, variationRepo: Repository<ItemVariation>, userRepo: Repository<User>, offerRepo: Repository<Offer>, offerItemRepo: Repository<OfferItem>, settingRepo: Repository<AppSetting>, stampRepo: Repository<LoyaltyStamp>, loyaltyProgramRepo: Repository<LoyaltyProgram>, timeSlotsService: TimeSlotsService, notificationsService: NotificationsService, eventsService: EventsService, deliveryZonesService: DeliveryZonesService, connections: TenantConnectionService);
     private getSetting;
     private calculateDeliveryCharge;
     private applyOffer;

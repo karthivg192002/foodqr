@@ -22,33 +22,84 @@ const uuid_1 = require("uuid");
 const user_entity_1 = require("../users/entities/user.entity");
 const order_entity_1 = require("../orders/entities/order.entity");
 const order_item_entity_1 = require("../orders/entities/order-item.entity");
+const tenant_entity_1 = require("../tenants/entities/tenant.entity");
+const tenant_user_index_entity_1 = require("../tenants/entities/tenant-user-index.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
 const enums_1 = require("../../common/enums");
 const mail_service_1 = require("../mail/mail.service");
 const sms_gateways_service_1 = require("../sms-gateways/sms-gateways.service");
 let AuthService = class AuthService {
-    constructor(userRepo, orderRepo, orderItemRepo, jwtService, mailService, smsService) {
+    constructor(userRepo, orderRepo, orderItemRepo, tenantRepo, tenantUserIndexRepo, tenantConnections, jwtService, mailService, smsService) {
         this.userRepo = userRepo;
         this.orderRepo = orderRepo;
         this.orderItemRepo = orderItemRepo;
+        this.tenantRepo = tenantRepo;
+        this.tenantUserIndexRepo = tenantUserIndexRepo;
+        this.tenantConnections = tenantConnections;
         this.jwtService = jwtService;
         this.mailService = mailService;
         this.smsService = smsService;
     }
     async login(dto) {
-        const user = await this.userRepo.findOne({
+        const masterUser = await this.userRepo.findOne({
             where: { email: dto.email },
-            select: ['id', 'name', 'email', 'password', 'role', 'status', 'profileImage', 'balance'],
+            select: ['id', 'name', 'email', 'password', 'role', 'status', 'profileImage', 'balance', 'tenantId'],
+        });
+        if (masterUser)
+            return this.loginMasterUser(masterUser, dto.password);
+        const indexEntry = await this.tenantUserIndexRepo.findOne({ where: { email: dto.email } });
+        if (indexEntry)
+            return this.loginTenantDbUser(indexEntry, dto.password);
+        throw new common_1.UnauthorizedException('Invalid credentials');
+    }
+    async loginMasterUser(user, password) {
+        if (user.status !== enums_1.UserStatus.ACTIVE)
+            throw new common_1.UnauthorizedException('Account is inactive');
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch)
+            throw new common_1.UnauthorizedException('Invalid credentials');
+        let tenant = null;
+        if (user.role !== enums_1.UserRole.SUPER_ADMIN && user.tenantId) {
+            tenant = await this.assertTenantUsable(user.tenantId);
+        }
+        const token = this.generateToken(user, tenant);
+        const { password: _p, ...userWithoutPassword } = user;
+        return { token, user: { ...userWithoutPassword, tenantCode: tenant?.code } };
+    }
+    async loginTenantDbUser(indexEntry, password) {
+        const tenant = await this.assertTenantUsable(indexEntry.tenantId);
+        if (!tenant.dbName)
+            throw new common_1.UnauthorizedException('Tenant account not found');
+        const dataSource = await this.tenantConnections.getOrCreate(tenant.dbName);
+        const tenantUserRepo = dataSource.getRepository(user_entity_1.User);
+        const user = await tenantUserRepo.findOne({
+            where: { id: indexEntry.userId },
+            select: ['id', 'name', 'email', 'password', 'role', 'status', 'profileImage', 'balance', 'branchId'],
         });
         if (!user)
             throw new common_1.UnauthorizedException('Invalid credentials');
         if (user.status !== enums_1.UserStatus.ACTIVE)
             throw new common_1.UnauthorizedException('Account is inactive');
-        const isMatch = await bcrypt.compare(dto.password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch)
             throw new common_1.UnauthorizedException('Invalid credentials');
-        const token = this.generateToken(user);
-        const { password, ...userWithoutPassword } = user;
-        return { token, user: userWithoutPassword };
+        const token = this.jwtService.sign({
+            sub: user.id, email: user.email, role: user.role, tenantId: tenant.id, tenantCode: tenant.code,
+        });
+        const { password: _p, ...userWithoutPassword } = user;
+        return { token, user: { ...userWithoutPassword, tenantId: tenant.id, tenantCode: tenant.code } };
+    }
+    async assertTenantUsable(tenantId) {
+        const tenant = await this.tenantRepo.findOne({ where: { id: tenantId } });
+        if (!tenant)
+            throw new common_1.UnauthorizedException('Tenant account not found');
+        if (tenant.status === tenant_entity_1.TenantStatus.SUSPENDED) {
+            throw new common_1.UnauthorizedException('Your organization account is suspended. Contact support.');
+        }
+        if (tenant.status === tenant_entity_1.TenantStatus.CANCELLED) {
+            throw new common_1.UnauthorizedException('Your organization account has been cancelled.');
+        }
+        return tenant;
     }
     async register(dto) {
         const exists = await this.userRepo.findOne({ where: { email: dto.email } });
@@ -316,8 +367,14 @@ let AuthService = class AuthService {
         });
         return this.userRepo.save(user);
     }
-    generateToken(user) {
-        return this.jwtService.sign({ sub: user.id, email: user.email, role: user.role });
+    generateToken(user, tenant) {
+        return this.jwtService.sign({
+            sub: user.id,
+            email: user.email,
+            role: user.role,
+            tenantId: user.tenantId || undefined,
+            tenantCode: tenant?.code,
+        });
     }
 };
 exports.AuthService = AuthService;
@@ -326,9 +383,14 @@ exports.AuthService = AuthService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __param(1, (0, typeorm_1.InjectRepository)(order_entity_1.Order)),
     __param(2, (0, typeorm_1.InjectRepository)(order_item_entity_1.OrderItem)),
+    __param(3, (0, typeorm_1.InjectRepository)(tenant_entity_1.Tenant)),
+    __param(4, (0, typeorm_1.InjectRepository)(tenant_user_index_entity_1.TenantUserIndex)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService,
         jwt_1.JwtService,
         mail_service_1.MailService,
         sms_gateways_service_1.SmsGatewaysService])

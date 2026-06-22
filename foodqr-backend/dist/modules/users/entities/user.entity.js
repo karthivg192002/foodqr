@@ -13,6 +13,7 @@ exports.User = void 0;
 const typeorm_1 = require("typeorm");
 const enums_1 = require("../../../common/enums");
 const branch_entity_1 = require("../../branches/entities/branch.entity");
+const tenant_entity_1 = require("../../tenants/entities/tenant.entity");
 const class_transformer_1 = require("class-transformer");
 let User = class User {
 };
@@ -67,6 +68,15 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'branchId' }),
     __metadata("design:type", branch_entity_1.Branch)
 ], User.prototype, "branch", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "tenantId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => tenant_entity_1.Tenant, { nullable: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'tenantId' }),
+    __metadata("design:type", tenant_entity_1.Tenant)
+], User.prototype, "tenant", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0 }),
     __metadata("design:type", Number)

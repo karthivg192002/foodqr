@@ -7,6 +7,7 @@ export declare class Order {
     id: string;
     orderSerialNo: string;
     token: string;
+    dailyToken: number;
     userId: string;
     user: User;
     branchId: string;

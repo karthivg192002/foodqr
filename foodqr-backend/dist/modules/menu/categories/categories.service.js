@@ -19,6 +19,8 @@ const typeorm_2 = require("typeorm");
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const item_category_entity_1 = require("./entities/item-category.entity");
+const tenant_connection_service_1 = require("../../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../../tenants/connection/tenant-aware-repo");
 class CreateCategoryDto {
 }
 exports.CreateCategoryDto = CreateCategoryDto;
@@ -63,8 +65,9 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateCategoryDto.prototype, "sortOrder", void 0);
 let CategoriesService = class CategoriesService {
-    constructor(catRepo) {
+    constructor(catRepo, connections) {
         this.catRepo = catRepo;
+        this.catRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_category_entity_1.ItemCategory, catRepo);
     }
     async findAll(includeChildren = true) {
         const categories = await this.catRepo.find({
@@ -155,6 +158,7 @@ exports.CategoriesService = CategoriesService;
 exports.CategoriesService = CategoriesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(item_category_entity_1.ItemCategory)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], CategoriesService);
 //# sourceMappingURL=categories.service.js.map

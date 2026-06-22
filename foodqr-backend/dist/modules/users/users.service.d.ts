@@ -2,14 +2,21 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Order } from '../orders/entities/order.entity';
 import { Address } from '../addresses/entities/address.entity';
+import { TenantUserIndex } from '../tenants/entities/tenant-user-index.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 import { UserRole } from '../../common/enums';
 import { UpdateUserDto, UpdateDeviceTokenDto } from './dto/user.dto';
 export declare class UsersService {
     private userRepo;
     private orderRepo;
     private addressRepo;
-    constructor(userRepo: Repository<User>, orderRepo: Repository<Order>, addressRepo: Repository<Address>);
-    findAll(role?: UserRole, search?: string, page?: number, limit?: number): Promise<{
+    private tenantUserIndexRepo;
+    private connections;
+    constructor(userRepo: Repository<User>, orderRepo: Repository<Order>, addressRepo: Repository<Address>, tenantUserIndexRepo: Repository<TenantUserIndex>, connections: TenantConnectionService);
+    private get repo();
+    private get orders();
+    private get addresses();
+    findAll(role?: UserRole, search?: string, page?: number, limit?: number, tenantId?: string): Promise<{
         data: User[];
         total: number;
         page: number;
@@ -24,14 +31,14 @@ export declare class UsersService {
     remove(id: string): Promise<{
         message: string;
     }>;
-    getCustomers(search?: string, page?: number, limit?: number): Promise<{
+    getCustomers(search?: string, page?: number, limit?: number, tenantId?: string): Promise<{
         data: User[];
         total: number;
         page: number;
         limit: number;
         pages: number;
     }>;
-    getStaff(search?: string, page?: number, limit?: number): Promise<{
+    getStaff(search?: string, page?: number, limit?: number, tenantId?: string): Promise<{
         data: User[];
         total: number;
         page: number;
@@ -46,7 +53,7 @@ export declare class UsersService {
         role?: UserRole;
         branchId?: string;
         countryCode?: string;
-    }): Promise<any>;
+    }, tenantId?: string): Promise<any>;
     changeUserPassword(id: string, newPassword: string): Promise<{
         message: string;
     }>;
@@ -64,7 +71,7 @@ export declare class UsersService {
         limit: number;
         pages: number;
     }>;
-    getByRole(role: UserRole, search?: string, page?: number, limit?: number): Promise<{
+    getByRole(role: UserRole, search?: string, page?: number, limit?: number, tenantId?: string): Promise<{
         data: User[];
         total: number;
         page: number;

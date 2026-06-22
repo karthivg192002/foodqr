@@ -1,5 +1,6 @@
 import { UserRole, UserStatus } from '../../../common/enums';
 import { Branch } from '../../branches/entities/branch.entity';
+import { Tenant } from '../../tenants/entities/tenant.entity';
 export declare class User {
     id: string;
     name: string;
@@ -13,6 +14,8 @@ export declare class User {
     profileImage: string;
     branchId: string;
     branch: Branch;
+    tenantId: string;
+    tenant: Tenant;
     balance: number;
     isGuest: boolean;
     emailVerifiedAt: Date;

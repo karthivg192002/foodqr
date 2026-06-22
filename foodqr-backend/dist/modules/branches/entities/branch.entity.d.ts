@@ -1,5 +1,8 @@
+import { Tenant } from '../../tenants/entities/tenant.entity';
 export declare class Branch {
     id: string;
+    tenantId: string;
+    tenant: Tenant;
     name: string;
     slug: string;
     address: string;

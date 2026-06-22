@@ -12,13 +12,23 @@ interface CustomerNavItem {
   route: string;
 }
 
-const DEFAULT_NAV_ITEMS: CustomerNavItem[] = [
-  { label: 'Home', icon: 'home', route: '/customer/home' },
-  { label: 'Menu', icon: 'menu', route: '/customer/menu' },
-  { label: 'Scan', icon: 'qr', route: '/customer/scan' },
-  { label: 'Orders', icon: 'orders', route: '/customer/orders' },
-  { label: 'Rewards', icon: 'star', route: '/customer/loyalty' },
-  { label: 'Profile', icon: 'user', route: '/customer/dashboard' },
+/** Desktop sidebar — operational navigation */
+const DESKTOP_NAV_ITEMS: CustomerNavItem[] = [
+  { label: 'Home',    icon: 'home',   route: '/customer/home' },
+  { label: 'Orders',  icon: 'orders', route: '/customer/orders' },
+  { label: 'Scan',    icon: 'qr',     route: '/customer/scan' },
+  { label: 'Rewards', icon: 'star',   route: '/customer/loyalty' },
+  { label: 'Account', icon: 'user',   route: '/customer/dashboard' },
+];
+
+/** Mobile bottom nav — discovery + quick-action focused.
+ *  Cart is the elevated centre action; the other 4 are rendered as regular tabs. */
+const MOBILE_NAV_ITEMS: CustomerNavItem[] = [
+  { label: 'Home',       icon: 'home',   route: '/customer/home' },
+  { label: 'Search',     icon: 'search', route: '/customer/menu' },
+  { label: 'Cart',       icon: 'cart',   route: '/customer/cart' },
+  { label: 'Assistance', icon: 'chat',   route: '/customer/chat' },
+  { label: 'Profile',    icon: 'user',   route: '/customer/dashboard' },
 ];
 
 @Component({
@@ -26,9 +36,9 @@ const DEFAULT_NAV_ITEMS: CustomerNavItem[] = [
   templateUrl: './customer-layout.component.html',
 })
 export class CustomerLayoutComponent implements OnInit {
-  navItems: CustomerNavItem[] = DEFAULT_NAV_ITEMS;
+  navItems: CustomerNavItem[] = DESKTOP_NAV_ITEMS;
+  mobileNavItems: CustomerNavItem[] = MOBILE_NAV_ITEMS;
   branding$ = this.themeService.branding$;
-  /** Cart/checkout has its own full-screen footer (Place Order bar) — hide the nav chrome that would otherwise stack on top of it. */
   hideNavChrome = false;
 
   constructor(
@@ -47,32 +57,47 @@ export class CustomerLayoutComponent implements OnInit {
           .filter((i) => !i.external)
           .map((i) => ({ label: i.name, icon: i.iconKey, route: i.route }));
       },
-      error: () => { /* fall back to DEFAULT_NAV_ITEMS already set */ },
+      error: () => {},
     });
 
-    this.hideNavChrome = this.router.url.startsWith('/customer/cart') || this.router.url.startsWith('/customer/item');
-    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e: any) => {
-      this.hideNavChrome = e.urlAfterRedirects.startsWith('/customer/cart') || e.urlAfterRedirects.startsWith('/customer/item');
-    });
+    this.hideNavChrome = this.isHiddenRoute(this.router.url);
+    this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe((e: any) => {
+        this.hideNavChrome = this.isHiddenRoute(e.urlAfterRedirects);
+      });
   }
 
-  get sideNavItems(): CustomerNavItem[] {
-    return this.navItems.filter((i) => i.route !== '/customer/scan');
+  private isHiddenRoute(url: string): boolean {
+    return url.startsWith('/customer/cart') || url.startsWith('/customer/item');
   }
 
-  get scanItem(): CustomerNavItem | undefined {
-    return this.navItems.find((i) => i.route === '/customer/scan');
+  /** Left two tabs on the mobile bottom bar (Home, Search). */
+  get mobileLeftItems(): CustomerNavItem[] {
+    return this.mobileNavItems.filter((i) => i.icon !== 'cart').slice(0, 2);
   }
 
-  /** Maps this layout's legacy icon keys (also used by the backend-driven nav-menus API) to Material Symbols names. */
+  /** Right two tabs on the mobile bottom bar (Assistance, Profile). */
+  get mobileRightItems(): CustomerNavItem[] {
+    return this.mobileNavItems.filter((i) => i.icon !== 'cart').slice(2);
+  }
+
+  /** Elevated centre action on the mobile bottom bar (Cart). */
+  get mobileCenterItem(): CustomerNavItem | undefined {
+    return this.mobileNavItems.find((i) => i.icon === 'cart');
+  }
+
   matIcon(key: string): string {
     const map: Record<string, string> = {
-      home: 'home',
-      menu: 'restaurant_menu',
-      qr: 'qr_code_scanner',
+      home:   'home',
+      menu:   'restaurant_menu',
+      qr:     'qr_code_scanner',
       orders: 'receipt_long',
-      star: 'redeem',
-      user: 'person',
+      star:   'redeem',
+      user:   'person',
+      search: 'search',
+      cart:   'shopping_bag',
+      chat:   'support_agent',
     };
     return map[key] || 'circle';
   }

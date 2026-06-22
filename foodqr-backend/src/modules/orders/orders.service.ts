@@ -258,9 +258,19 @@ export class OrdersService {
         ? dto.paymentMethod
         : null);
 
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const tokenResult = await this.orderRepo
+      .createQueryBuilder('o')
+      .select('MAX(o.dailyToken)', 'max')
+      .where('o.createdAt >= :start', { start: todayStart })
+      .getRawOne();
+    const dailyToken = ((tokenResult?.max as number) ?? 0) + 1;
+
     const order = this.orderRepo.create({
       orderSerialNo: 'ORD-' + Date.now().toString().slice(-8),
       token: uuidv4().split('-')[0].toUpperCase(),
+      dailyToken,
       userId: resolvedUserId,
       orderType: dto.orderType,
       paymentMethod: dto.paymentMethod,

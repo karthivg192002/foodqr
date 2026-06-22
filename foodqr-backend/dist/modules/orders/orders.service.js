@@ -33,8 +33,10 @@ const notifications_service_1 = require("../notifications/notifications.service"
 const events_service_1 = require("../events/events.service");
 const delivery_zones_service_1 = require("../delivery-zones/delivery-zones.service");
 const enums_1 = require("../../common/enums");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let OrdersService = class OrdersService {
-    constructor(orderRepo, orderItemRepo, orderAddressRepo, itemRepo, variationRepo, userRepo, offerRepo, offerItemRepo, settingRepo, stampRepo, loyaltyProgramRepo, timeSlotsService, notificationsService, eventsService, deliveryZonesService) {
+    constructor(orderRepo, orderItemRepo, orderAddressRepo, itemRepo, variationRepo, userRepo, offerRepo, offerItemRepo, settingRepo, stampRepo, loyaltyProgramRepo, timeSlotsService, notificationsService, eventsService, deliveryZonesService, connections) {
         this.orderRepo = orderRepo;
         this.orderItemRepo = orderItemRepo;
         this.orderAddressRepo = orderAddressRepo;
@@ -50,6 +52,17 @@ let OrdersService = class OrdersService {
         this.notificationsService = notificationsService;
         this.eventsService = eventsService;
         this.deliveryZonesService = deliveryZonesService;
+        this.orderRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, order_entity_1.Order, orderRepo);
+        this.orderItemRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, order_item_entity_1.OrderItem, orderItemRepo);
+        this.orderAddressRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, order_address_entity_1.OrderAddress, orderAddressRepo);
+        this.itemRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_entity_1.Item, itemRepo);
+        this.variationRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_variation_entity_1.ItemVariation, variationRepo);
+        this.userRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, user_entity_1.User, userRepo);
+        this.offerRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, offer_entity_1.Offer, offerRepo);
+        this.offerItemRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, offer_item_entity_1.OfferItem, offerItemRepo);
+        this.settingRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, app_setting_entity_1.AppSetting, settingRepo);
+        this.stampRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, loyalty_stamp_entity_1.LoyaltyStamp, stampRepo);
+        this.loyaltyProgramRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, loyalty_program_entity_1.LoyaltyProgram, loyaltyProgramRepo);
     }
     async getSetting(key, defaultValue = '0') {
         const s = await this.settingRepo.findOne({ where: { key } });
@@ -210,9 +223,18 @@ let OrdersService = class OrdersService {
             || (![enums_1.PaymentMethod.CASH_ON_DELIVERY, enums_1.PaymentMethod.E_WALLET].includes(dto.paymentMethod)
                 ? dto.paymentMethod
                 : null);
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const tokenResult = await this.orderRepo
+            .createQueryBuilder('o')
+            .select('MAX(o.dailyToken)', 'max')
+            .where('o.createdAt >= :start', { start: todayStart })
+            .getRawOne();
+        const dailyToken = (tokenResult?.max ?? 0) + 1;
         const order = this.orderRepo.create({
             orderSerialNo: 'ORD-' + Date.now().toString().slice(-8),
             token: (0, uuid_1.v4)().split('-')[0].toUpperCase(),
+            dailyToken,
             userId: resolvedUserId,
             orderType: dto.orderType,
             paymentMethod: dto.paymentMethod,
@@ -587,6 +609,7 @@ exports.OrdersService = OrdersService = __decorate([
         time_slots_service_1.TimeSlotsService,
         notifications_service_1.NotificationsService,
         events_service_1.EventsService,
-        delivery_zones_service_1.DeliveryZonesService])
+        delivery_zones_service_1.DeliveryZonesService,
+        tenant_connection_service_1.TenantConnectionService])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

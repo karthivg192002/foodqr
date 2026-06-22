@@ -3,6 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
 import { Order } from '../orders/entities/order.entity';
 import { OrderItem } from '../orders/entities/order-item.entity';
+import { Tenant } from '../tenants/entities/tenant.entity';
+import { TenantUserIndex } from '../tenants/entities/tenant-user-index.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 import { LoginDto, RegisterDto, OtpRequestDto, OtpVerifyDto, ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto } from './dto/auth.dto';
 import { MailService } from '../mail/mail.service';
 import { SmsGatewaysService } from '../sms-gateways/sms-gateways.service';
@@ -10,14 +13,20 @@ export declare class AuthService {
     private userRepo;
     private orderRepo;
     private orderItemRepo;
+    private tenantRepo;
+    private tenantUserIndexRepo;
+    private tenantConnections;
     private jwtService;
     private mailService;
     private smsService;
-    constructor(userRepo: Repository<User>, orderRepo: Repository<Order>, orderItemRepo: Repository<OrderItem>, jwtService: JwtService, mailService: MailService, smsService: SmsGatewaysService);
+    constructor(userRepo: Repository<User>, orderRepo: Repository<Order>, orderItemRepo: Repository<OrderItem>, tenantRepo: Repository<Tenant>, tenantUserIndexRepo: Repository<TenantUserIndex>, tenantConnections: TenantConnectionService, jwtService: JwtService, mailService: MailService, smsService: SmsGatewaysService);
     login(dto: LoginDto): Promise<{
         token: string;
         user: any;
     }>;
+    private loginMasterUser;
+    private loginTenantDbUser;
+    private assertTenantUsable;
     register(dto: RegisterDto): Promise<{
         token: string;
         user: any;

@@ -18,6 +18,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const class_validator_1 = require("class-validator");
 const branch_entity_1 = require("./entities/branch.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
 class CreateBranchDto {
 }
 exports.CreateBranchDto = CreateBranchDto;
@@ -86,40 +87,53 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateBranchDto.prototype, "status", void 0);
 let BranchesService = class BranchesService {
-    constructor(branchRepo) {
+    constructor(branchRepo, connections) {
         this.branchRepo = branchRepo;
+        this.connections = connections;
     }
-    findAll() {
-        return this.branchRepo.find({ where: { status: true }, order: { isDefault: 'DESC', createdAt: 'ASC' } });
+    get repo() {
+        return this.connections.repoOrDefault(branch_entity_1.Branch, this.branchRepo);
     }
-    async findOne(id) {
-        const branch = await this.branchRepo.findOne({ where: { id } });
+    findAll(tenantId) {
+        const where = { status: true };
+        if (tenantId && !this.connections.hasTenantContext())
+            where.tenantId = tenantId;
+        return this.repo.find({ where, order: { isDefault: 'DESC', createdAt: 'ASC' } });
+    }
+    async findOne(id, tenantId) {
+        const where = { id };
+        if (tenantId && !this.connections.hasTenantContext())
+            where.tenantId = tenantId;
+        const branch = await this.repo.findOne({ where });
         if (!branch)
             throw new common_1.NotFoundException('Branch not found');
         return branch;
     }
-    async create(dto) {
+    async create(dto, tenantId) {
         const slug = dto.slug || dto.name.toLowerCase().replace(/\s+/g, '-');
-        const branch = this.branchRepo.create({ ...dto, slug });
-        return this.branchRepo.save(branch);
+        const scopedTenantId = this.connections.hasTenantContext() ? undefined : tenantId;
+        const branch = this.repo.create({ ...dto, slug, tenantId: scopedTenantId });
+        return this.repo.save(branch);
     }
-    async update(id, dto) {
-        await this.findOne(id);
-        await this.branchRepo.update(id, dto);
-        return this.findOne(id);
+    async update(id, dto, tenantId) {
+        await this.findOne(id, tenantId);
+        await this.repo.update(id, dto);
+        return this.findOne(id, tenantId);
     }
-    async remove(id) {
-        await this.findOne(id);
-        await this.branchRepo.delete(id);
+    async remove(id, tenantId) {
+        await this.findOne(id, tenantId);
+        await this.repo.delete(id);
         return { message: 'Branch deleted' };
     }
-    async setDefault(id) {
-        await this.branchRepo.update({}, { isDefault: false });
-        await this.branchRepo.update(id, { isDefault: true });
-        return this.findOne(id);
+    async setDefault(id, tenantId) {
+        await this.findOne(id, tenantId);
+        const scope = tenantId && !this.connections.hasTenantContext() ? { tenantId } : {};
+        await this.repo.update(scope, { isDefault: false });
+        await this.repo.update(id, { isDefault: true });
+        return this.findOne(id, tenantId);
     }
     async exportExcel(res) {
-        const branches = await this.branchRepo.find({ order: { isDefault: 'DESC', name: 'ASC' } });
+        const branches = await this.repo.find({ order: { isDefault: 'DESC', name: 'ASC' } });
         const headers = ['Name', 'City', 'Country', 'Phone', 'Email', 'Status', 'Default'];
         const rows = branches.map((b) => [b.name, b.city || '', b.country || '', b.phone || '', b.email || '', b.status ? 'Active' : 'Inactive', b.isDefault ? 'Yes' : 'No']);
         const ths = headers.map((h) => `<th style="background:#f97316;color:white;padding:6px 10px;border:1px solid #ddd">${h}</th>`).join('');
@@ -133,6 +147,7 @@ exports.BranchesService = BranchesService;
 exports.BranchesService = BranchesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(branch_entity_1.Branch)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], BranchesService);
 //# sourceMappingURL=branches.service.js.map

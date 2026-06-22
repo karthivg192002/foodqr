@@ -3,6 +3,7 @@ import { Item } from './entities/item.entity';
 import { ItemVariation } from '../variations/entities/item-variation.entity';
 import { ItemCategory } from '../categories/entities/item-category.entity';
 import { ItemType } from '../../../common/enums';
+import { TenantConnectionService } from '../../tenants/connection/tenant-connection.service';
 export declare class CreateItemDto {
     name: string;
     description?: string;
@@ -37,7 +38,7 @@ export declare class ItemsService {
     private itemRepo;
     private variationRepo;
     private catRepo;
-    constructor(itemRepo: Repository<Item>, variationRepo: Repository<ItemVariation>, catRepo: Repository<ItemCategory>);
+    constructor(itemRepo: Repository<Item>, variationRepo: Repository<ItemVariation>, catRepo: Repository<ItemCategory>, connections: TenantConnectionService);
     private resolveCategoryIds;
     findAll(search?: string, categoryId?: string, isFeatured?: boolean, page?: number, limit?: number): Promise<{
         data: Item[];

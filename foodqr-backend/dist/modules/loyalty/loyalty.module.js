@@ -16,12 +16,13 @@ const loyalty_reward_entity_1 = require("./entities/loyalty-reward.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 const loyalty_controller_1 = require("./loyalty.controller");
 const loyalty_service_1 = require("./loyalty.service");
+const tenants_module_1 = require("../tenants/tenants.module");
 let LoyaltyModule = class LoyaltyModule {
 };
 exports.LoyaltyModule = LoyaltyModule;
 exports.LoyaltyModule = LoyaltyModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([loyalty_program_entity_1.LoyaltyProgram, loyalty_configuration_entity_1.LoyaltyConfiguration, loyalty_stamp_entity_1.LoyaltyStamp, loyalty_reward_entity_1.LoyaltyReward, user_entity_1.User])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([loyalty_program_entity_1.LoyaltyProgram, loyalty_configuration_entity_1.LoyaltyConfiguration, loyalty_stamp_entity_1.LoyaltyStamp, loyalty_reward_entity_1.LoyaltyReward, user_entity_1.User]), tenants_module_1.TenantsModule],
         controllers: [loyalty_controller_1.LoyaltyController],
         providers: [loyalty_service_1.LoyaltyService],
         exports: [loyalty_service_1.LoyaltyService],

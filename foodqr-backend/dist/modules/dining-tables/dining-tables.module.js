@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const dining_table_entity_1 = require("./entities/dining-table.entity");
 const dining_tables_controller_1 = require("./dining-tables.controller");
 const dining_tables_service_1 = require("./dining-tables.service");
+const tenants_module_1 = require("../tenants/tenants.module");
 let DiningTablesModule = class DiningTablesModule {
 };
 exports.DiningTablesModule = DiningTablesModule;
 exports.DiningTablesModule = DiningTablesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([dining_table_entity_1.DiningTable])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([dining_table_entity_1.DiningTable]), tenants_module_1.TenantsModule],
         controllers: [dining_tables_controller_1.DiningTablesController],
         providers: [dining_tables_service_1.DiningTablesService],
         exports: [dining_tables_service_1.DiningTablesService, typeorm_1.TypeOrmModule],

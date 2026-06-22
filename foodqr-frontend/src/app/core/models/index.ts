@@ -177,6 +177,7 @@ export interface Order {
   id: string;
   orderSerialNo: string;
   token: string;
+  dailyToken?: number;
   userId?: string;
   user?: User;
   diningTableId?: string;

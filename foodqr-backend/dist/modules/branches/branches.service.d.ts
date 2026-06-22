@@ -1,5 +1,6 @@
 import { Repository } from 'typeorm';
 import { Branch } from './entities/branch.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class CreateBranchDto {
     name: string;
     slug?: string;
@@ -17,14 +18,16 @@ export declare class CreateBranchDto {
 }
 export declare class BranchesService {
     private branchRepo;
-    constructor(branchRepo: Repository<Branch>);
-    findAll(): Promise<Branch[]>;
-    findOne(id: string): Promise<Branch>;
-    create(dto: CreateBranchDto): Promise<Branch>;
-    update(id: string, dto: Partial<CreateBranchDto>): Promise<Branch>;
-    remove(id: string): Promise<{
+    private connections;
+    constructor(branchRepo: Repository<Branch>, connections: TenantConnectionService);
+    private get repo();
+    findAll(tenantId?: string): Promise<Branch[]>;
+    findOne(id: string, tenantId?: string): Promise<Branch>;
+    create(dto: CreateBranchDto, tenantId?: string): Promise<Branch>;
+    update(id: string, dto: Partial<CreateBranchDto>, tenantId?: string): Promise<Branch>;
+    remove(id: string, tenantId?: string): Promise<{
         message: string;
     }>;
-    setDefault(id: string): Promise<Branch>;
+    setDefault(id: string, tenantId?: string): Promise<Branch>;
     exportExcel(res: any): Promise<void>;
 }

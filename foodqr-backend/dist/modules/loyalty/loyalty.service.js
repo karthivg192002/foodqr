@@ -23,6 +23,8 @@ const loyalty_stamp_entity_1 = require("./entities/loyalty-stamp.entity");
 const loyalty_reward_entity_1 = require("./entities/loyalty-reward.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 const enums_1 = require("../../common/enums");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 class CreateLoyaltyConfigurationDto {
 }
 exports.CreateLoyaltyConfigurationDto = CreateLoyaltyConfigurationDto;
@@ -98,12 +100,17 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateLoyaltyProgramDto.prototype, "autoResetStamps", void 0);
 let LoyaltyService = class LoyaltyService {
-    constructor(programRepo, configRepo, stampRepo, rewardRepo, userRepo) {
+    constructor(programRepo, configRepo, stampRepo, rewardRepo, userRepo, connections) {
         this.programRepo = programRepo;
         this.configRepo = configRepo;
         this.stampRepo = stampRepo;
         this.rewardRepo = rewardRepo;
         this.userRepo = userRepo;
+        this.programRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, loyalty_program_entity_1.LoyaltyProgram, programRepo);
+        this.configRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, loyalty_configuration_entity_1.LoyaltyConfiguration, configRepo);
+        this.stampRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, loyalty_stamp_entity_1.LoyaltyStamp, stampRepo);
+        this.rewardRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, loyalty_reward_entity_1.LoyaltyReward, rewardRepo);
+        this.userRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, user_entity_1.User, userRepo);
     }
     async getPrograms() {
         return this.programRepo.find({ relations: ['configurations'], order: { createdAt: 'DESC' } });
@@ -258,6 +265,7 @@ exports.LoyaltyService = LoyaltyService = __decorate([
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], LoyaltyService);
 //# sourceMappingURL=loyalty.service.js.map

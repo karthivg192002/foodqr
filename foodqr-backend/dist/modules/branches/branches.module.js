@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const branches_controller_1 = require("./branches.controller");
 const branches_service_1 = require("./branches.service");
 const branch_entity_1 = require("./entities/branch.entity");
+const tenants_module_1 = require("../tenants/tenants.module");
 let BranchesModule = class BranchesModule {
 };
 exports.BranchesModule = BranchesModule;
 exports.BranchesModule = BranchesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([branch_entity_1.Branch])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([branch_entity_1.Branch]), tenants_module_1.TenantsModule],
         controllers: [branches_controller_1.BranchesController],
         providers: [branches_service_1.BranchesService],
         exports: [branches_service_1.BranchesService, typeorm_1.TypeOrmModule],

@@ -2,27 +2,42 @@
 
   <!-- ═══════════════ DESKTOP SIDEBAR ═══════════════ -->
   <aside class="hidden lg:flex lg:flex-col flex-shrink-0 sticky top-0 h-screen"
-    style="width:220px;background:#1c1b1b;border-right:1px solid #303031">
-    <div class="flex items-center px-5" style="height:64px;border-bottom:1px solid #303031">
+    style="width:240px;background:linear-gradient(180deg,#1a1210 0%,#1c1b1b 60%,#1e1d1d 100%);border-right:1px solid #303031">
+
+    <!-- Top accent line -->
+    <div style="height:3px;background:linear-gradient(90deg,#a73a00,#ff5c00,#ffb59a);flex-shrink:0"></div>
+
+    <!-- Brand header -->
+    <div class="flex items-center px-5" style="height:61px;border-bottom:1px solid #303031;background:linear-gradient(135deg,rgba(167,58,0,0.15),rgba(255,92,0,0.05))">
       <app-logo [iconSize]="32" nameClass="font-jakarta font-extrabold text-white tracking-tight text-base"></app-logo>
     </div>
 
-    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+    <!-- Nav -->
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
       <a *ngFor="let item of navItems" [routerLink]="item.route" routerLinkActive #rla="routerLinkActive"
-        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-work font-semibold transition-colors"
-        [class]="rla.isActive ? 'bg-cust-primary-container text-cust-on-primary' : 'text-cust-secondary-fixed-dim hover:text-white hover:bg-white/5'">
-        <span class="material-symbols-outlined text-[20px]" [style.font-variation-settings]="rla.isActive ? &quot;'FILL' 1&quot; : &quot;'FILL' 0&quot;">{{ matIcon(item.icon) }}</span>
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-work font-semibold transition-all duration-150 relative"
+        [class]="rla.isActive
+          ? 'cust-sidebar-active'
+          : 'text-cust-secondary-fixed-dim hover:text-white hover:bg-white/5'">
+        <span *ngIf="rla.isActive" class="absolute left-0 inset-y-2 w-[3px] rounded-r-full" style="background:#ff5c00"></span>
+        <span class="material-symbols-outlined text-[20px]"
+          [style.font-variation-settings]="rla.isActive ? '\'FILL\' 1' : '\'FILL\' 0'">{{ matIcon(item.icon) }}</span>
         {{ item.label }}
       </a>
     </nav>
 
-    <div class="px-3 pb-4">
-      <a routerLink="/customer/cart"
-        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-work font-semibold text-cust-secondary-fixed-dim hover:text-white hover:bg-white/5 transition-colors relative">
-        <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+    <!-- Cart (desktop footer shortcut) -->
+    <div class="px-3 pb-4 pt-2" style="border-top:1px solid #2a2929">
+      <a routerLink="/customer/cart" routerLinkActive #cartRla="routerLinkActive"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-work font-semibold transition-all duration-150 relative"
+        [class]="cartRla.isActive ? 'cust-sidebar-active' : 'text-cust-secondary-fixed-dim hover:text-white hover:bg-white/5'">
+        <span *ngIf="cartRla.isActive" class="absolute left-0 inset-y-2 w-[3px] rounded-r-full" style="background:#ff5c00"></span>
+        <span class="material-symbols-outlined text-[20px]"
+          [style.font-variation-settings]="cartRla.isActive ? '\'FILL\' 1' : '\'FILL\' 0'">shopping_bag</span>
         Cart
         <span *ngIf="cartService.count > 0"
-          class="ml-auto w-5 h-5 bg-cust-primary-container text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+          class="ml-auto w-5 h-5 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none"
+          style="background:#ff5c00">
           {{ cartService.count }}
         </span>
       </a>
@@ -33,56 +48,105 @@
   <div class="flex-1 flex flex-col min-w-0">
 
     <!-- Mobile top app bar -->
-    <header class="lg:hidden fixed top-0 w-full z-50 flex justify-between items-center px-5 h-16 bg-cust-surface shadow-cust-banner">
-      <div class="flex items-center gap-2 text-cust-primary">
-        <span class="material-symbols-outlined">location_on</span>
-        <span class="font-jakarta font-bold text-lg text-cust-on-surface">{{ (branding$ | async)?.productName }}</span>
+    <header class="lg:hidden fixed top-0 inset-x-0 z-50 flex justify-between items-center px-5 h-16 bg-cust-surface shadow-cust-banner">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px]" style="color:#a73a00">location_on</span>
+        <span class="font-jakarta font-bold text-[17px] text-cust-on-surface">{{ (branding$ | async)?.productName }}</span>
       </div>
-      <a routerLink="/customer/cart" class="relative text-cust-secondary hover:opacity-80 transition-opacity active:scale-95">
-        <span class="material-symbols-outlined">shopping_bag</span>
-        <span *ngIf="cartService.count > 0"
-          class="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 bg-cust-primary-container text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
-          {{ cartService.count }}
-        </span>
+      <div class="flex items-center gap-3">
+        <a routerLink="/customer/orders" class="text-cust-secondary hover:opacity-70 transition-opacity active:scale-90">
+          <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+        </a>
+        <a routerLink="/customer/cart" class="relative text-cust-secondary hover:opacity-70 transition-opacity active:scale-90">
+          <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+          <span *ngIf="cartService.count > 0"
+            class="absolute -top-1.5 -right-1.5 w-4 h-4 text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none"
+            style="background:#ff5c00">
+            {{ cartService.count }}
+          </span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Desktop top bar -->
+    <header class="hidden lg:flex items-center justify-between px-8 border-b"
+      style="height:56px;background:#fff;border-color:#e8e5e4;box-shadow:0 1px 3px rgba(0,0,0,0.04);flex-shrink:0">
+      <div class="flex items-center gap-2 text-[13px]" style="color:#8f7065">
+        <span class="material-symbols-outlined text-[16px]">location_on</span>
+        <span class="font-work font-medium">Dine in / Takeaway</span>
+      </div>
+      <a routerLink="/customer/menu"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-work font-medium transition-all"
+        style="background:#f5f3f3;color:#5b4137;border:1px solid #e4beb1"
+        onmouseover="this.style.background='#efeded'" onmouseout="this.style.background='#f5f3f3'">
+        <span class="material-symbols-outlined text-[16px]">search</span>
+        Search menu…
       </a>
     </header>
 
     <!-- Content -->
-    <main class="flex-1 max-w-7xl mx-auto w-full lg:px-6 pt-16 lg:pt-0"
-      [class.pb-44]="!cartService.isEmpty && !hideNavChrome" [class.pb-24]="cartService.isEmpty && !hideNavChrome">
+    <main class="flex-1 w-full pt-16 lg:pt-0"
+      [class.pb-44]="!cartService.isEmpty && !hideNavChrome"
+      [class.pb-24]="cartService.isEmpty && !hideNavChrome">
       <router-outlet></router-outlet>
     </main>
 
-    <!-- Floating "View Cart" bar -->
+    <!-- Floating "View Cart" bar (mobile only, when cart has items) -->
     <div *ngIf="!cartService.isEmpty && !hideNavChrome" class="fixed bottom-24 left-4 right-4 z-40 lg:hidden">
       <a routerLink="/customer/cart"
-        class="w-full bg-cust-on-secondary-fixed text-white h-16 rounded-2xl shadow-cust-modal flex items-center justify-between px-5 active:scale-[0.98] transition-transform">
+        class="flex items-center justify-between w-full h-16 px-5 rounded-2xl shadow-cust-modal text-white active:scale-[0.98] transition-transform"
+        style="background:#1c1b1b">
         <div class="flex items-center gap-3">
-          <span class="bg-cust-primary-container text-white px-3 py-1 rounded-lg font-work font-semibold text-sm">{{ cartService.count }}</span>
+          <span class="px-3 py-1 rounded-lg font-work font-bold text-sm" style="background:#ff5c00">
+            {{ cartService.count }}
+          </span>
           <span class="font-work font-semibold">View Cart</span>
         </div>
         <span class="font-jakarta font-bold">{{ cartService.total | fqrCurrency }}</span>
       </a>
     </div>
 
-    <!-- Mobile bottom nav -->
-    <nav *ngIf="!hideNavChrome" class="fixed bottom-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-cust-on-secondary-fixed shadow-cust-nav rounded-t-2xl lg:hidden">
-      <a *ngFor="let item of sideNavItems" [routerLink]="item.route" routerLinkActive #ra="routerLinkActive"
-        class="flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-full transition-all active:scale-90"
-        [class]="ra.isActive ? 'bg-cust-primary-container text-cust-on-primary-container' : 'text-cust-secondary-fixed-dim'">
-        <span class="material-symbols-outlined text-[22px]" [style.font-variation-settings]="ra.isActive ? &quot;'FILL' 1&quot; : &quot;'FILL' 0&quot;">{{ matIcon(item.icon) }}</span>
-        <span class="font-work text-[11px] font-semibold">{{ item.label }}</span>
+    <!-- ═══════ MOBILE BOTTOM NAV ═══════ -->
+    <nav *ngIf="!hideNavChrome"
+      class="lg:hidden fixed bottom-0 inset-x-0 z-50 flex justify-around items-center px-1 pt-2"
+      style="background:#1c1b1b;border-top:1px solid #303031;border-radius:18px 18px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,0.18);padding-bottom:max(0.5rem,env(safe-area-inset-bottom))">
+
+      <!-- Left: Home, Search -->
+      <a *ngFor="let item of mobileLeftItems" [routerLink]="item.route" routerLinkActive #rl="routerLinkActive"
+        class="flex flex-col items-center justify-center gap-[3px] px-4 py-1.5 rounded-2xl transition-all duration-150 active:scale-90 min-w-[56px]"
+        [class]="rl.isActive ? 'text-cust-primary-fixed' : 'text-cust-secondary-fixed-dim'">
+        <span class="material-symbols-outlined text-[22px]"
+          [style.font-variation-settings]="rl.isActive ? '\'FILL\' 1' : '\'FILL\' 0'">{{ matIcon(item.icon) }}</span>
+        <span class="font-work text-[10px] font-semibold">{{ item.label }}</span>
       </a>
 
-      <!-- Scan — elevated center action -->
-      <a *ngIf="scanItem" [routerLink]="scanItem.route" routerLinkActive #scanActive="routerLinkActive"
-        class="flex flex-col items-center relative" style="margin-top:-26px">
-        <div class="w-13 h-13 rounded-full flex items-center justify-center shadow-cust-modal transition-transform"
-          [class]="scanActive.isActive ? 'scale-105' : ''"
-          style="background:linear-gradient(135deg,#a73a00,#ff5c00);border:3px solid #1c1b1b">
-          <span class="material-symbols-outlined text-white text-[22px]">qr_code_scanner</span>
+      <!-- Centre: Cart (elevated) -->
+      <a *ngIf="mobileCenterItem as center" [routerLink]="center.route" routerLinkActive #cartActive="routerLinkActive"
+        class="flex flex-col items-center relative" style="margin-top:-28px">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center transition-all duration-150 relative"
+          [class]="cartActive.isActive ? 'scale-105' : ''"
+          style="background:linear-gradient(135deg,#a73a00,#ff5c00);border:3px solid #1c1b1b;box-shadow:0 4px 16px rgba(255,92,0,0.4)">
+          <span class="material-symbols-outlined text-white text-[22px]"
+            [style.font-variation-settings]="cartActive.isActive ? '\'FILL\' 1' : '\'FILL\' 0'">shopping_bag</span>
+          <span *ngIf="cartService.count > 0"
+            class="absolute -top-0.5 -right-0.5 w-5 h-5 text-white text-[9px] font-bold rounded-full flex items-center justify-center"
+            style="background:#ef4444;border:2px solid #1c1b1b">
+            {{ cartService.count > 9 ? '9+' : cartService.count }}
+          </span>
         </div>
-        <span class="font-work text-[11px] font-semibold mt-0.5" [class]="scanActive.isActive ? 'text-cust-primary-fixed-dim' : 'text-cust-secondary-fixed-dim'">{{ scanItem.label }}</span>
+        <span class="font-work text-[10px] font-semibold mt-1"
+          [class]="cartActive.isActive ? 'text-cust-primary-fixed-dim' : 'text-cust-secondary-fixed-dim'">
+          {{ center.label }}
+        </span>
+      </a>
+
+      <!-- Right: Assistance, Profile -->
+      <a *ngFor="let item of mobileRightItems" [routerLink]="item.route" routerLinkActive #rr="routerLinkActive"
+        class="flex flex-col items-center justify-center gap-[3px] px-4 py-1.5 rounded-2xl transition-all duration-150 active:scale-90 min-w-[56px]"
+        [class]="rr.isActive ? 'text-cust-primary-fixed' : 'text-cust-secondary-fixed-dim'">
+        <span class="material-symbols-outlined text-[22px]"
+          [style.font-variation-settings]="rr.isActive ? '\'FILL\' 1' : '\'FILL\' 0'">{{ matIcon(item.icon) }}</span>
+        <span class="font-work text-[10px] font-semibold">{{ item.label }}</span>
       </a>
     </nav>
   </div>

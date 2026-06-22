@@ -1,187 +1,621 @@
-<div class="min-h-screen bg-gray-100 flex flex-col">
-  <!-- Top bar -->
-  <header class="bg-white border-b px-6 h-14 flex items-center justify-between">
+<div class="h-screen flex flex-col bg-gray-100" style="font-family:'Inter',sans-serif">
+
+  <!-- ══ TOP BAR ══════════════════════════════════════════ -->
+  <header class="bg-white border-b px-5 h-14 flex items-center justify-between flex-shrink-0">
     <div class="flex items-center gap-3">
-      <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-        <span class="text-white text-sm font-bold">POS</span>
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#f97316,#ea580c)">
+        <span class="text-white text-xs font-black tracking-wide">POS</span>
       </div>
-      <span class="font-bold text-gray-900 text-lg">Point of Sale</span>
+      <span class="font-bold text-gray-900 text-base">Point of Sale</span>
     </div>
     <div class="flex items-center gap-3">
       <div class="relative">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <input [(ngModel)]="search" (ngModelChange)="loadItems()" placeholder="Search items..."
-          class="pl-9 pr-4 py-2 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 w-64">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input [(ngModel)]="search" (ngModelChange)="loadItems()" placeholder="Search items…"
+          class="pl-9 pr-4 py-2 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 w-56">
       </div>
     </div>
   </header>
 
+  <!-- ══ BODY ════════════════════════════════════════════ -->
   <div class="flex flex-1 overflow-hidden">
-    <!-- Left: Menu Panel -->
+
+    <!-- ── LEFT: Menu ─────────────────────────────────── -->
     <div class="flex-1 flex flex-col overflow-hidden">
+
       <!-- Category tabs -->
-      <div class="bg-white border-b px-4 py-2 flex gap-2 overflow-x-auto scrollbar-none">
-        <button (click)="selectedCategory = ''; loadItems()"
-          [class]="!selectedCategory ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'"
-          class="flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium">All</button>
-        <button *ngFor="let cat of categories" (click)="selectedCategory = cat.id; loadItems()"
-          [class]="selectedCategory === cat.id ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'"
-          class="flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium">{{ cat.name }}</button>
+      <div class="bg-white border-b px-4 py-2 flex gap-2 overflow-x-auto" style="scrollbar-width:none">
+        <button (click)="selectedCategory='';loadItems()"
+          class="flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
+          [class]="!selectedCategory ? 'bg-orange-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'">
+          All
+        </button>
+        <button *ngFor="let cat of categories" (click)="selectedCategory=cat.id;loadItems()"
+          class="flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
+          [class]="selectedCategory===cat.id ? 'bg-orange-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'">
+          {{ cat.name }}
+        </button>
       </div>
 
       <!-- Items grid -->
       <div class="flex-1 overflow-y-auto p-4">
-        <div *ngIf="loading" class="flex justify-center py-10">
-          <div class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+        <div *ngIf="loading" class="flex justify-center py-16">
+          <div class="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           <button *ngFor="let item of items" (click)="addToCart(item)"
-            class="bg-white rounded-xl p-3 text-left hover:shadow-md transition-all hover:border-orange-300 border border-transparent relative">
-            <div class="w-full h-24 bg-gray-100 rounded-lg overflow-hidden mb-2">
+            class="bg-white rounded-2xl p-3 text-left hover:shadow-lg transition-all border-2 relative group"
+            [class]="getCartQty(item.id) > 0 ? 'border-orange-400' : 'border-transparent hover:border-orange-200'">
+            <div class="w-full aspect-square bg-gray-100 rounded-xl overflow-hidden mb-2">
               <img *ngIf="item.thumbImage" [src]="item.thumbImage" class="w-full h-full object-cover">
               <div *ngIf="!item.thumbImage" class="w-full h-full flex items-center justify-center text-3xl">🍽️</div>
             </div>
-            <p class="font-medium text-gray-900 text-sm truncate">{{ item.name }}</p>
-            <p class="text-orange-600 font-bold text-sm mt-0.5">{{ item.price | fqrCurrency }}</p>
+            <p class="font-semibold text-gray-900 text-sm truncate leading-tight">{{ item.name }}</p>
+            <p class="text-orange-500 font-bold text-sm mt-0.5">{{ item.price | fqrCurrency }}</p>
             <span *ngIf="getCartQty(item.id) > 0"
-              class="absolute top-2 right-2 w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+              class="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black text-white"
+              style="background:#f97316;box-shadow:0 2px 6px rgba(249,115,22,0.5)">
               {{ getCartQty(item.id) }}
             </span>
           </button>
         </div>
-        <p *ngIf="!loading && !items.length" class="text-center text-gray-400 py-8">No items found</p>
+        <p *ngIf="!loading && !items.length" class="text-center text-gray-400 py-10 text-sm">No items found</p>
       </div>
     </div>
 
-    <!-- Right: Cart Panel -->
+    <!-- ── RIGHT: Cart Panel ──────────────────────────── -->
     <div class="w-80 xl:w-96 bg-white border-l flex flex-col">
-      <div class="px-4 py-3 border-b flex items-center justify-between">
-        <h2 class="font-bold text-gray-900">Current Order</h2>
-        <div class="flex items-center gap-2">
-          <button (click)="showCustomerForm = true" class="text-xs text-blue-500 font-medium hover:text-blue-600">+ Customer</button>
-          <button *ngIf="!cartService.isEmpty" (click)="cartService.clear()" class="text-xs text-red-500 font-medium">Clear</button>
+
+      <!-- Customer row -->
+      <div class="flex items-center gap-2 px-4 py-3 border-b flex-shrink-0">
+        <div class="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border text-sm min-w-0"
+          style="border-color:#e5e7eb">
+          <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span class="truncate font-medium" [class]="posCustomer ? 'text-gray-800' : 'text-gray-400'">
+            {{ posCustomer ? posCustomer.name : 'Walking Customer' }}
+          </span>
+          <button *ngIf="posCustomer" (click)="posCustomer=null" class="ml-auto text-gray-300 hover:text-gray-500 flex-shrink-0 text-base leading-none">✕</button>
         </div>
+        <button (click)="showCustomerForm=true"
+          class="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-bold text-white flex-shrink-0"
+          style="background:#1d4ed8">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+          </svg>
+          Add
+        </button>
       </div>
-      <!-- Customer badge -->
-      <div *ngIf="posCustomer" class="px-4 py-2 bg-blue-50 border-b flex items-center justify-between">
-        <span class="text-xs text-blue-700 font-medium">{{ posCustomer.name }}<span *ngIf="posCustomer.phone"> · {{ posCustomer.phone }}</span></span>
-        <button (click)="posCustomer = null" class="text-xs text-blue-400 hover:text-blue-600">✕</button>
+
+      <!-- Order Type selector -->
+      <div class="px-4 py-3 border-b flex-shrink-0">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Select Order Type</p>
+        <div class="flex gap-1.5">
+          <button *ngFor="let t of [
+            {val: OrderType.DINING_TABLE, label: 'Dine-In'},
+            {val: OrderType.TAKEAWAY,     label: 'Takeaway'},
+            {val: OrderType.POS,          label: 'POS'}
+          ]"
+            (click)="orderType=t.val; selectedTableId=''; showTableDropdown=false"
+            class="flex-1 py-2 rounded-xl text-xs font-bold transition-all border-2"
+            [class]="orderType===t.val
+              ? 'bg-blue-50 border-blue-500 text-blue-700'
+              : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'">
+            {{ t.label }}
+          </button>
+        </div>
+
+        <!-- Table dropdown (Dine-In only) -->
+        <div *ngIf="orderType===OrderType.DINING_TABLE" class="mt-2 relative">
+          <button (click)="showTableDropdown=!showTableDropdown"
+            class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all"
+            [class]="selectedTableId ? 'border-blue-400 text-gray-800 bg-blue-50' : 'border-gray-200 text-gray-500 bg-gray-50 hover:border-gray-300'">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4" [class]="selectedTableId ? 'text-blue-500' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M8 14h8M8 18h5"/>
+              </svg>
+              {{ selectedTableName }}
+            </div>
+            <svg class="w-4 h-4 text-gray-400 transition-transform" [class.rotate-180]="showTableDropdown"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <!-- Dropdown list -->
+          <div *ngIf="showTableDropdown"
+            class="absolute top-full left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-20 overflow-hidden"
+            style="border-color:#e5e7eb;max-height:180px;overflow-y:auto">
+            <div *ngIf="!tables.length" class="px-4 py-3 text-sm text-gray-400 text-center">No tables configured</div>
+            <button *ngFor="let table of tables"
+              (click)="selectedTableId=table.id; showTableDropdown=false"
+              class="w-full text-left px-4 py-2.5 text-sm hover:bg-orange-50 transition-all flex items-center gap-2"
+              [class]="selectedTableId===table.id ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-700'">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" [class]="selectedTableId===table.id ? 'text-blue-400' : 'text-gray-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              {{ table.name }}
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Items list header -->
+      <div class="flex items-center px-4 py-2 flex-shrink-0"
+        style="background:#f8fafc;border-bottom:1px solid #f1f5f9">
+        <span class="flex-1 text-xs font-bold text-gray-400 uppercase tracking-wide">Item</span>
+        <span class="w-20 text-center text-xs font-bold text-gray-400 uppercase tracking-wide">Qty</span>
+        <span class="w-16 text-right text-xs font-bold text-gray-400 uppercase tracking-wide">Price</span>
       </div>
 
       <!-- Cart items -->
-      <div class="flex-1 overflow-y-auto px-3 py-2">
-        <div *ngIf="cartService.isEmpty" class="text-center py-10 text-gray-400">
-          <div class="text-4xl mb-2">🛒</div>
-          <p class="text-sm">Add items to start an order</p>
+      <div class="flex-1 overflow-y-auto">
+        <div *ngIf="!cartItems.length" class="flex flex-col items-center justify-center h-full gap-3" style="opacity:0.5">
+          <div class="text-5xl">🛒</div>
+          <p class="text-sm text-gray-400 font-medium">Add items to start an order</p>
         </div>
 
-        <div *ngFor="let item of cartService.items" class="flex items-center gap-2 py-2 border-b">
+        <div *ngFor="let ci of cartItems" class="flex items-center gap-2 px-4 py-2.5 border-b border-gray-50">
+          <button (click)="cartService.removeItem(ci.item.id, ci.variation?.id)"
+            class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors hover:bg-red-50"
+            style="color:#ef4444">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 3h6l1 1h4v2H4V4h4L9 3zm-5 5h16l-1.5 13H5.5L4 8zm5 3v7h2v-7H9zm4 0v7h2v-7h-2z"/>
+            </svg>
+          </button>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 truncate">{{ item.item.name }}</p>
-            <p *ngIf="item.variation" class="text-xs text-gray-500">{{ item.variation.name }}</p>
-            <p class="text-xs text-orange-600 font-semibold">{{ getItemPrice(item) | fqrCurrency }}</p>
+            <p class="text-sm font-semibold text-gray-800 truncate">{{ ci.item.name }}</p>
+            <p *ngIf="ci.variation" class="text-xs text-gray-400">{{ ci.variation.name }}</p>
           </div>
-          <div class="flex items-center gap-1.5 bg-gray-100 rounded-lg px-1.5 py-0.5">
-            <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity - 1)"
-              class="text-gray-600 font-bold w-5 h-5 flex items-center justify-center">−</button>
-            <span class="text-gray-900 font-semibold text-sm w-5 text-center">{{ item.quantity }}</span>
-            <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity + 1)"
-              class="text-gray-600 font-bold w-5 h-5 flex items-center justify-center">+</button>
+          <div class="flex items-center gap-1 rounded-xl px-1 py-1 flex-shrink-0" style="background:#f1f5f9">
+            <button (click)="cartService.updateQuantity(ci.item.id, ci.variation?.id, ci.quantity-1)"
+              class="w-6 h-6 rounded-lg bg-white flex items-center justify-center text-gray-500 font-bold text-base shadow-sm hover:bg-orange-50 hover:text-orange-500 transition-colors">
+              −
+            </button>
+            <span class="w-6 text-center text-sm font-bold text-gray-800">{{ ci.quantity }}</span>
+            <button (click)="cartService.updateQuantity(ci.item.id, ci.variation?.id, ci.quantity+1)"
+              class="w-6 h-6 rounded-lg bg-white flex items-center justify-center text-gray-500 font-bold text-base shadow-sm hover:bg-orange-50 hover:text-orange-500 transition-colors">
+              +
+            </button>
           </div>
-          <p class="text-sm font-bold w-14 text-right">{{ getItemPrice(item) * item.quantity | fqrCurrency }}</p>
+          <span class="w-16 text-right text-sm font-bold text-gray-800">{{ getItemPrice(ci) * ci.quantity | fqrCurrency }}</span>
         </div>
       </div>
 
-      <!-- Order settings + total + pay -->
-      <div class="border-t p-4 space-y-3">
-        <!-- Order type -->
-        <div class="flex gap-2">
-          <button *ngFor="let type of [OrderType.POS, OrderType.TAKEAWAY, OrderType.DINING_TABLE]"
-            (click)="orderType = type"
-            [class]="orderType === type ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-gray-200 text-gray-600'"
-            class="flex-1 border-2 rounded-lg py-1.5 text-xs font-medium capitalize">
-            {{ type === 'dining_table' ? 'Table' : type }}
-          </button>
+      <!-- Bottom: discount + summary + buttons -->
+      <div class="border-t flex-shrink-0">
+
+        <!-- Discount row (visible when cart is not empty) -->
+        <div *ngIf="cartItems.length" class="px-4 py-3 border-b" style="background:#f8fafc">
+          <div class="flex items-center gap-2">
+            <!-- Discount type dropdown -->
+            <div class="relative flex-shrink-0">
+              <button (click)="showDiscountMenu=!showDiscountMenu"
+                class="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold text-gray-600 bg-white hover:border-gray-300 transition-all"
+                style="border-color:#e5e7eb;min-width:110px">
+                {{ discountType === 'percentage' ? 'Percentage' : 'Fixed' }}
+                <svg class="w-3.5 h-3.5 text-gray-400 transition-transform" [class.rotate-180]="showDiscountMenu"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div *ngIf="showDiscountMenu"
+                class="absolute bottom-full left-0 mb-1 bg-white border rounded-xl shadow-xl z-20 overflow-hidden"
+                style="border-color:#e5e7eb;min-width:120px">
+                <button (click)="discountType='percentage';showDiscountMenu=false"
+                  class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors font-medium"
+                  [class]="discountType==='percentage' ? 'text-teal-600 bg-teal-50' : 'text-gray-700'">
+                  Percentage
+                </button>
+                <button (click)="discountType='fixed';showDiscountMenu=false"
+                  class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors font-medium"
+                  [class]="discountType==='fixed' ? 'text-teal-600 bg-teal-50' : 'text-gray-700'">
+                  Fixed
+                </button>
+              </div>
+            </div>
+            <!-- Amount input -->
+            <input [(ngModel)]="discountInput"
+              [placeholder]="discountType==='percentage' ? 'e.g. 10%' : 'e.g. 50'"
+              type="number" min="0"
+              class="flex-1 border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white"
+              style="border-color:#e5e7eb">
+            <!-- Apply + Clear -->
+            <button (click)="applyDiscount()"
+              class="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
+              style="background:#0d9488">
+              Apply
+            </button>
+            <button *ngIf="appliedDiscount > 0" (click)="clearDiscount()"
+              class="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <!-- Payment method -->
-        <div class="flex gap-2">
-          <button *ngFor="let pm of [PaymentMethod.CASH_ON_DELIVERY, PaymentMethod.E_WALLET, PaymentMethod.STRIPE]"
-            (click)="paymentMethod = pm"
-            [class]="paymentMethod === pm ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-gray-200 text-gray-600'"
-            class="flex-1 border-2 rounded-lg py-1.5 text-xs font-medium">
-            {{ pm === 'cash_on_delivery' ? 'Cash' : pm === 'e_wallet' ? 'Wallet' : 'Card' }}
-          </button>
+        <!-- Summary -->
+        <div class="px-4 py-3 space-y-1 border-b">
+          <div class="flex justify-between text-sm text-gray-500">
+            <span>Sub Total</span>
+            <span class="font-medium">{{ subtotal | fqrCurrency }}</span>
+          </div>
+          <div class="flex justify-between text-sm" [class]="appliedDiscount > 0 ? 'text-green-600' : 'text-gray-400'">
+            <span>Discount</span>
+            <span class="font-medium">{{ appliedDiscount > 0 ? '−' : '' }}{{ appliedDiscount | fqrCurrency }}</span>
+          </div>
+          <div class="flex justify-between font-bold text-base pt-2 border-t" style="border-color:#f1f5f9">
+            <span class="text-gray-900">Total</span>
+            <span style="color:#1d4ed8">{{ orderTotal | fqrCurrency }}</span>
+          </div>
         </div>
 
-        <!-- Cash change calculator (cash only) -->
-        <div *ngIf="paymentMethod === 'cash_on_delivery'" class="bg-gray-50 rounded-xl p-3 space-y-2">
-          <label class="text-xs font-medium text-gray-600">Cash Received ($)</label>
-          <input [(ngModel)]="receivedAmount" type="number" min="0" step="0.01"
-            class="w-full border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-          <div *ngIf="receivedAmount > 0" class="flex justify-between text-sm pt-1 border-t border-gray-200">
-            <span class="font-medium" [class]="isSufficient ? 'text-green-600' : 'text-red-500'">
-              {{ isSufficient ? 'Change' : 'Short by' }}
+        <!-- Action buttons -->
+        <div class="px-4 py-3 flex gap-3">
+          <button (click)="cartService.clear(); clearDiscount()"
+            [disabled]="!cartItems.length"
+            class="flex-1 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95"
+            [class]="!cartItems.length ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-white'"
+            [style]="!cartItems.length ? '' : 'background:#ef4444'">
+            Cancel
+          </button>
+          <button (click)="openPaymentModal()"
+            [disabled]="!cartItems.length || placing"
+            class="flex-1 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95"
+            [class]="!cartItems.length ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-white'"
+            [style]="!cartItems.length ? '' : 'background:#16a34a'">
+            {{ placing ? 'Processing…' : 'Order' }}
+          </button>
+        </div>
+      </div>
+    </div><!-- end right panel -->
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAYMENT MODAL
+══════════════════════════════════════════════════════ -->
+<div *ngIf="showPaymentModal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+  style="background:rgba(0,0,0,0.55)">
+  <div class="bg-white rounded-3xl shadow-2xl w-full overflow-hidden" style="max-width:420px">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b">
+      <h2 class="font-bold text-gray-900 text-lg">Order Payment</h2>
+      <button (click)="showPaymentModal=false"
+        class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="px-6 py-4 space-y-4">
+
+      <!-- Total -->
+      <div class="flex items-center justify-between px-4 py-3 rounded-2xl" style="background:#eff6ff;border:1px solid #bfdbfe">
+        <span class="text-sm font-semibold text-gray-600">Total Amount</span>
+        <span style="font-size:24px;font-weight:900;color:#1d4ed8;letter-spacing:-0.03em">{{ orderTotal | fqrCurrency }}</span>
+      </div>
+
+      <!-- Payment method grid -->
+      <div>
+        <p class="text-sm font-semibold text-gray-700 mb-3">Select Payment Method</p>
+        <div class="grid grid-cols-4 gap-2">
+          <button *ngFor="let gw of activeGateways"
+            (click)="selectedGateway=gw.slug"
+            class="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl border-2 transition-all"
+            [class]="selectedGateway===gw.slug
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-100 bg-gray-50 hover:border-gray-200'">
+            <!-- Icon -->
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+              [class]="selectedGateway===gw.slug ? 'bg-blue-100' : 'bg-white'">
+              <!-- Cash -->
+              <svg *ngIf="gw.slug==='cash'" class="w-5 h-5" [class]="selectedGateway===gw.slug ? 'text-blue-600' : 'text-gray-500'"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              <!-- Card -->
+              <svg *ngIf="gw.slug==='card' || gw.slug==='stripe'" class="w-5 h-5" [class]="selectedGateway===gw.slug ? 'text-blue-600' : 'text-gray-500'"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+              </svg>
+              <!-- UPI / mobile -->
+              <svg *ngIf="gw.isUpi" class="w-5 h-5" [class]="selectedGateway===gw.slug ? 'text-blue-600' : 'text-gray-500'"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              <!-- Other -->
+              <svg *ngIf="!['cash','card','stripe'].includes(gw.slug) && !gw.isUpi" class="w-5 h-5"
+                [class]="selectedGateway===gw.slug ? 'text-blue-600' : 'text-gray-500'"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <span class="text-[11px] font-semibold leading-tight text-center"
+              [class]="selectedGateway===gw.slug ? 'text-blue-700' : 'text-gray-500'">
+              {{ gw.name }}
             </span>
-            <span class="font-bold" [class]="isSufficient ? 'text-green-600' : 'text-red-500'">
-              {{ (isSufficient ? changeAmount : orderTotal - receivedAmount) | fqrCurrency }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Cash: received amount + numpad -->
+      <ng-container *ngIf="isCash">
+        <div>
+          <p class="text-sm font-semibold text-gray-700 mb-2">Enter Received Amount</p>
+          <!-- Typeable input (keyboard or numpad) -->
+          <input #cashInput
+            [(ngModel)]="receivedAmount"
+            type="text" inputmode="decimal" placeholder="Enter amount…"
+            class="w-full px-4 py-3 rounded-2xl border-2 text-right font-bold text-2xl mb-3 focus:outline-none transition-all"
+            [class]="receivedNum > 0 ? (isSufficient ? 'border-green-400 text-green-700 bg-green-50 focus:border-green-500' : 'border-red-400 text-red-600 bg-red-50 focus:border-red-500') : 'border-gray-200 text-gray-800 focus:border-blue-400'"
+            style="font-variant-numeric:tabular-nums;letter-spacing:-0.02em">
+          <!-- Change info -->
+          <div *ngIf="receivedNum > 0" class="flex justify-between text-sm mb-3 px-1"
+            [class]="isSufficient ? 'text-green-600' : 'text-red-500'">
+            <span class="font-medium">{{ isSufficient ? 'Change to give' : 'Short by' }}</span>
+            <span class="font-bold">
+              {{ isSufficient ? (change | fqrCurrency) : ((orderTotal - receivedNum) | fqrCurrency) }}
             </span>
           </div>
-          <p *ngIf="receivedAmount > 0 && !isSufficient" class="text-xs text-red-500">Insufficient cash received</p>
+          <!-- Numpad (click to append; also works alongside keyboard) -->
+          <div class="grid grid-cols-4 gap-2">
+            <button *ngFor="let key of ['1','2','3','⌫','4','5','6','','7','8','9','','00','0','.','C']"
+              (click)="key && numpad(key)"
+              [disabled]="!key"
+              class="py-3.5 rounded-2xl font-bold text-base transition-all active:scale-95"
+              [class]="!key ? 'opacity-0 pointer-events-none' :
+                       key==='⌫' ? 'bg-red-50 text-red-500 hover:bg-red-100' :
+                       key==='C' ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' :
+                       'bg-gray-50 text-gray-800 hover:bg-gray-100 border border-gray-100'">
+              {{ key }}
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Card: reference / transaction ID text field -->
+      <ng-container *ngIf="selectedGateway === 'card'">
+        <div>
+          <label class="text-sm font-semibold text-gray-700 block mb-2">Card Reference / Transaction ID</label>
+          <input [(ngModel)]="cardReference"
+            type="text" placeholder="e.g. TXN123456789"
+            class="w-full px-4 py-3 rounded-2xl border-2 text-sm font-medium focus:outline-none focus:border-blue-400 transition-all"
+            style="border-color:#e5e7eb;color:#1e293b">
+          <p class="text-xs text-gray-400 mt-1.5 px-1">Optional — enter the card terminal receipt number</p>
+        </div>
+      </ng-container>
+
+      <!-- UPI: QR code -->
+      <ng-container *ngIf="isUpiSelected">
+        <div class="flex flex-col items-center gap-3 py-2">
+          <p class="text-sm font-semibold text-gray-700">Scan QR to Pay</p>
+          <div *ngIf="upiQrUrl" class="p-3 rounded-2xl bg-white border-2 border-gray-100 shadow-sm">
+            <img [src]="upiQrUrl" alt="UPI QR Code" class="w-48 h-48">
+          </div>
+          <div *ngIf="!upiQrUrl"
+            class="flex flex-col items-center justify-center w-48 h-48 rounded-2xl border-2 border-dashed border-gray-200 gap-2">
+            <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+            </svg>
+            <p class="text-xs text-gray-400 text-center">Configure UPI VPA in payment<br>gateway settings</p>
+          </div>
+          <p class="text-xs text-gray-400">Amount: <strong class="text-gray-700">{{ orderTotal | fqrCurrency }}</strong></p>
+        </div>
+      </ng-container>
+
+      <!-- Confirm button -->
+      <button (click)="confirmPayment()" [disabled]="placing || (isCash && !isSufficient && receivedNum > 0)"
+        class="w-full py-4 rounded-2xl font-bold text-white text-base transition-all active:scale-95"
+        [style]="placing ? 'background:#9ca3af;cursor:not-allowed' :
+                 (isCash && receivedNum > 0 && !isSufficient) ? 'background:#9ca3af;cursor:not-allowed' :
+                 'background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 16px rgba(22,163,74,0.35)'">
+        {{ placing ? 'Processing…' : 'Confirm Payment' }}
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     ORDER SUCCESS — RECEIPT + TOKEN
+══════════════════════════════════════════════════════ -->
+<div *ngIf="lastOrder" class="fixed inset-0 z-50 flex items-center justify-center p-3"
+  style="background:rgba(0,0,0,0.70)">
+  <div class="bg-white rounded-3xl shadow-2xl flex overflow-hidden" style="max-width:680px;width:100%;max-height:92vh">
+
+    <!-- LEFT: Token + actions -->
+    <div class="flex flex-col items-center justify-between px-8 py-8 flex-shrink-0"
+      style="width:220px;background:linear-gradient(170deg,#0f172a 0%,#1e293b 100%)">
+
+      <!-- Brand -->
+      <div class="text-center">
+        <div class="w-10 h-10 rounded-2xl flex items-center justify-center mx-auto mb-2"
+          style="background:linear-gradient(135deg,#f97316,#ea580c)">
+          <span class="text-white text-xs font-black">POS</span>
+        </div>
+        <p style="font-size:13px;font-weight:800;color:#f1f5f9">FoodQR</p>
+        <p style="font-size:10px;color:#475569;margin-top:2px">Order Placed!</p>
+      </div>
+
+      <!-- TOKEN badge -->
+      <div class="flex flex-col items-center">
+        <p style="font-size:9px;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:#475569;margin-bottom:10px">TOKEN NO.</p>
+        <div class="flex flex-col items-center justify-center w-32 h-32 rounded-3xl"
+          style="background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(249,115,22,0.05));border:2px solid rgba(249,115,22,0.40)">
+          <p style="font-size:10px;font-weight:800;letter-spacing:2px;color:#f97316;text-transform:uppercase">TOKEN</p>
+          <p style="font-size:54px;font-weight:900;color:#fb923c;line-height:1;letter-spacing:-2px;font-variant-numeric:tabular-nums">
+            {{ lastOrder.dailyToken ?? '—' }}
+          </p>
+        </div>
+        <p style="font-size:10px;color:#334155;margin-top:8px;text-align:center;line-height:1.5">
+          Show this token to<br>collect your order
+        </p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="w-full space-y-2">
+        <button (click)="printBill()"
+          class="w-full py-3 rounded-2xl font-bold text-white text-sm transition-all active:scale-95 flex items-center justify-center gap-2"
+          style="background:linear-gradient(135deg,#f97316,#ea580c);box-shadow:0 4px 12px rgba(234,88,12,0.35)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+          </svg>
+          Print Bill
+        </button>
+        <button (click)="newOrder()"
+          class="w-full py-3 rounded-2xl font-bold text-sm transition-all active:scale-95"
+          style="background:rgba(255,255,255,0.07);color:#94a3b8;border:1px solid rgba(255,255,255,0.10)">
+          New Order
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Bill / Receipt preview -->
+    <div class="flex-1 overflow-y-auto" style="background:#f8fafc">
+
+      <!-- Bill header -->
+      <div class="px-6 py-5 border-b" style="background:#fff">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 style="font-size:16px;font-weight:800;color:#0f172a">Receipt</h2>
+            <p style="font-size:12px;color:#94a3b8;margin-top:1px">#{{ lastOrder.orderSerialNo }}</p>
+          </div>
+          <div class="text-right">
+            <p style="font-size:12px;font-weight:600;color:#475569">{{ lastOrder.createdAt | date:'d MMM y' }}</p>
+            <p style="font-size:11px;color:#94a3b8">{{ lastOrder.createdAt | date:'h:mm a' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 space-y-4">
+
+        <!-- Order info pills -->
+        <div class="flex flex-wrap gap-2">
+          <span class="px-3 py-1 rounded-xl text-xs font-semibold"
+            style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd">
+            {{ lastOrder.orderType?.replace('_',' ') | titlecase }}
+          </span>
+          <span *ngIf="receiptTableLabel" class="px-3 py-1 rounded-xl text-xs font-semibold"
+            style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0">
+            {{ receiptTableLabel }}
+          </span>
+          <span *ngIf="receiptCustomerName" class="px-3 py-1 rounded-xl text-xs font-semibold"
+            style="background:#faf5ff;color:#7c3aed;border:1px solid #e9d5ff">
+            {{ receiptCustomerName }}
+          </span>
+          <span class="px-3 py-1 rounded-xl text-xs font-semibold"
+            style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa">
+            {{ receiptPaymentLabel }}
+          </span>
+        </div>
+
+        <!-- Items table -->
+        <div class="rounded-2xl overflow-hidden border" style="border-color:#e5e7eb">
+          <!-- Header -->
+          <div class="grid grid-cols-12 gap-2 px-4 py-2.5" style="background:#f8fafc">
+            <span class="col-span-6 text-xs font-bold text-gray-400 uppercase tracking-wide">Item</span>
+            <span class="col-span-2 text-center text-xs font-bold text-gray-400 uppercase tracking-wide">Qty</span>
+            <span class="col-span-2 text-right text-xs font-bold text-gray-400 uppercase tracking-wide">Unit</span>
+            <span class="col-span-2 text-right text-xs font-bold text-gray-400 uppercase tracking-wide">Total</span>
+          </div>
+          <!-- Items -->
+          <div *ngFor="let item of receiptItems; let i = index"
+            class="grid grid-cols-12 gap-2 px-4 py-3 border-t items-center"
+            [style]="i % 2 === 0 ? 'background:#fff;border-color:#f1f5f9' : 'background:#fafafa;border-color:#f1f5f9'">
+            <span class="col-span-6 text-sm font-medium text-gray-800 truncate">{{ item.name }}</span>
+            <span class="col-span-2 text-center text-sm text-gray-500 font-semibold">×{{ item.qty }}</span>
+            <span class="col-span-2 text-right text-sm text-gray-500">{{ item.unitPrice | fqrCurrency }}</span>
+            <span class="col-span-2 text-right text-sm font-bold text-gray-800">{{ item.total | fqrCurrency }}</span>
+          </div>
         </div>
 
         <!-- Totals -->
-        <div class="space-y-1 text-sm">
-          <div class="flex justify-between text-gray-600">
-            <span>Items ({{ cartService.count }})</span>
-            <span>{{ cartService.total | fqrCurrency }}</span>
+        <div class="rounded-2xl overflow-hidden border" style="border-color:#e5e7eb">
+          <div class="flex justify-between px-4 py-2.5 border-b" style="border-color:#f1f5f9">
+            <span class="text-sm text-gray-500">Subtotal</span>
+            <span class="text-sm font-semibold text-gray-700">{{ lastOrder.subtotal | fqrCurrency }}</span>
           </div>
-          <div class="flex justify-between font-bold text-base pt-2 border-t">
-            <span>Total</span>
-            <span class="text-orange-600">{{ cartService.total | fqrCurrency }}</span>
+          <div *ngIf="+lastOrder.discount > 0" class="flex justify-between px-4 py-2.5 border-b" style="border-color:#f1f5f9">
+            <span class="text-sm text-green-600">Discount</span>
+            <span class="text-sm font-semibold text-green-600">−{{ lastOrder.discount | fqrCurrency }}</span>
+          </div>
+          <div *ngIf="+lastOrder.totalTax > 0" class="flex justify-between px-4 py-2.5 border-b" style="border-color:#f1f5f9">
+            <span class="text-sm text-gray-500">Tax</span>
+            <span class="text-sm font-semibold text-gray-700">{{ lastOrder.totalTax | fqrCurrency }}</span>
+          </div>
+          <div class="flex justify-between px-4 py-3" style="background:#f0fdf4">
+            <span class="font-bold text-gray-900">Total Paid</span>
+            <span style="font-size:18px;font-weight:900;color:#15803d;letter-spacing:-0.03em">{{ lastOrder.total | fqrCurrency }}</span>
           </div>
         </div>
 
-        <button (click)="placeOrder()" [disabled]="placing || cartService.isEmpty"
-          class="w-full py-3.5 rounded-xl font-bold text-white text-base"
-          [class]="cartService.isEmpty ? 'bg-gray-300 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'">
-          <ng-container *ngIf="placing">Processing...</ng-container>
-          <ng-container *ngIf="!placing">Charge {{ cartService.total | fqrCurrency }}</ng-container>
-        </button>
-
-        <!-- Last order confirmation -->
-        <div *ngIf="lastOrder" class="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-center">
-          <p class="text-green-700 font-medium">✅ Order #{{ lastOrder.orderSerialNo }} placed!</p>
-          <p class="text-green-600 text-xs mt-1">Payment: {{ paymentLabel(lastOrder.paymentMethod) }}</p>
+        <!-- Cash change row (if cash) -->
+        <div *ngIf="isCash && receivedNum > 0"
+          class="flex items-center justify-between px-4 py-3 rounded-2xl"
+          style="background:#fffbeb;border:1px solid #fde68a">
+          <div>
+            <p class="text-xs font-bold text-amber-700 uppercase tracking-wide">Cash Received</p>
+            <p class="text-sm font-semibold text-amber-900 mt-0.5">{{ receivedNum | fqrCurrency }}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-bold text-amber-700 uppercase tracking-wide">Change</p>
+            <p class="text-sm font-semibold text-amber-900 mt-0.5">{{ change | fqrCurrency }}</p>
+          </div>
         </div>
+
+        <!-- Footer -->
+        <div class="text-center py-3">
+          <p style="font-size:12px;color:#94a3b8">Thank you for your visit! Come again soon ♥</p>
+          <p style="font-size:10px;color:#cbd5e1;margin-top:4px">Powered by FoodQR</p>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
 
-<!-- Quick Customer Modal -->
-<div *ngIf="showCustomerForm" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
-    <div class="flex items-center justify-between p-5 border-b">
+<!-- ══════════════════════════════════════════════════════
+     CUSTOMER MODAL
+══════════════════════════════════════════════════════ -->
+<div *ngIf="showCustomerForm" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+  style="background:rgba(0,0,0,0.55)">
+  <div class="bg-white rounded-3xl shadow-2xl w-full" style="max-width:360px">
+    <div class="flex items-center justify-between px-6 py-4 border-b">
       <h2 class="font-bold text-gray-900">Quick Customer</h2>
-      <button (click)="showCustomerForm = false" class="text-gray-400 hover:text-gray-600">✕</button>
+      <button (click)="showCustomerForm=false" class="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
     </div>
-    <div class="p-5 space-y-3">
+    <div class="px-6 py-5 space-y-3">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-        <input [(ngModel)]="customerForm.name" placeholder="Customer name" class="input-field w-full">
+        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Name *</label>
+        <input [(ngModel)]="customerForm.name" placeholder="Customer name"
+          class="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+          style="border-color:#e5e7eb">
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-        <input [(ngModel)]="customerForm.phone" placeholder="+1 234 567 8900" class="input-field w-full">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input [(ngModel)]="customerForm.email" type="email" placeholder="optional@email.com" class="input-field w-full">
+        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Phone</label>
+        <input [(ngModel)]="customerForm.phone" placeholder="+91 9876543210"
+          class="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+          style="border-color:#e5e7eb">
       </div>
       <div class="flex gap-3 pt-1">
-        <button (click)="createPosCustomer()" [disabled]="customerSaving" class="btn-primary flex-1">{{ customerSaving ? 'Saving...' : 'Add Customer' }}</button>
-        <button (click)="showCustomerForm = false" class="btn-secondary flex-1">Cancel</button>
+        <button (click)="createPosCustomer()" [disabled]="customerSaving"
+          class="flex-1 py-3 rounded-2xl font-bold text-white text-sm transition-all active:scale-95"
+          style="background:linear-gradient(135deg,#f97316,#ea580c)">
+          {{ customerSaving ? 'Saving…' : 'Add Customer' }}
+        </button>
+        <button (click)="showCustomerForm=false"
+          class="flex-1 py-3 rounded-2xl font-bold text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all">
+          Cancel
+        </button>
       </div>
     </div>
   </div>

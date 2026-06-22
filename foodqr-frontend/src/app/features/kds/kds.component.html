@@ -1,84 +1,489 @@
-<div class="min-h-screen bg-gray-900 p-4">
-  <div class="flex items-center justify-between mb-6">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
-        <span class="text-white font-bold">KDS</span>
+<div class="flex flex-col h-screen overflow-hidden" style="background:#060c18;font-family:'Inter',sans-serif">
+
+  <!-- ══════════════════════════════════════════════
+       HEADER
+  ══════════════════════════════════════════════ -->
+  <header class="flex items-center justify-between gap-4 px-5 py-0 flex-shrink-0"
+    style="height:64px;background:#0a1120;border-bottom:1px solid rgba(255,255,255,0.06);box-shadow:0 2px 20px rgba(0,0,0,0.4)">
+
+    <!-- Brand -->
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <div class="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+        style="background:linear-gradient(135deg,#f97316,#ea580c);box-shadow:0 4px 16px rgba(234,88,12,0.40)">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
       </div>
       <div>
-        <h1 class="text-white font-bold text-xl">Kitchen Display</h1>
-        <div class="flex items-center gap-1.5 mt-0.5">
-          <div [class]="realtimeConnected ? 'bg-green-400 animate-pulse' : 'bg-gray-500'"
-            class="w-2 h-2 rounded-full"></div>
-          <p class="text-gray-400 text-xs">{{ realtimeConnected ? 'Live updates' : 'Polling every 30s' }}</p>
-        </div>
+        <p style="font-size:15px;font-weight:800;color:#f1f5f9;letter-spacing:-0.01em;line-height:1.2">Kitchen Display</p>
+        <p style="font-size:10px;color:#334155;font-weight:500">Real-time order management</p>
       </div>
     </div>
-    <div class="flex items-center gap-2 text-green-400">
-      <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-      <span class="text-sm font-medium">Live</span>
+
+    <!-- Filter pills (center) -->
+    <div class="flex items-center gap-2">
+      <!-- All -->
+      <button (click)="activeFilter='all'"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all duration-150 active:scale-95"
+        [style]="activeFilter==='all'
+          ? 'background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 4px 14px rgba(99,102,241,0.4)'
+          : 'background:rgba(255,255,255,0.05);color:#64748b;border:1px solid rgba(255,255,255,0.07)'">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+        All Orders
+        <span class="px-1.5 py-0.5 rounded-md text-[10px] font-black"
+          [style]="activeFilter==='all' ? 'background:rgba(255,255,255,0.2);color:#fff' : 'background:rgba(255,255,255,0.08);color:#64748b'">
+          {{ orders.length }}
+        </span>
+      </button>
+      <!-- Confirmed -->
+      <button (click)="activeFilter='confirmed'"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all duration-150 active:scale-95"
+        [style]="activeFilter==='confirmed'
+          ? 'background:rgba(59,130,246,0.20);color:#60a5fa;border:1px solid rgba(59,130,246,0.40);box-shadow:0 2px 10px rgba(59,130,246,0.20)'
+          : 'background:rgba(255,255,255,0.05);color:#64748b;border:1px solid rgba(255,255,255,0.07)'">
+        <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#3b82f6"></span>
+        Confirmed
+        <span class="px-1.5 py-0.5 rounded-md text-[10px] font-black"
+          [style]="activeFilter==='confirmed' ? 'background:rgba(59,130,246,0.25);color:#93c5fd' : 'background:rgba(255,255,255,0.08);color:#64748b'">
+          {{ confirmedCount }}
+        </span>
+      </button>
+      <!-- Preparing -->
+      <button (click)="activeFilter='preparing'"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all duration-150 active:scale-95"
+        [style]="activeFilter==='preparing'
+          ? 'background:rgba(249,115,22,0.18);color:#fb923c;border:1px solid rgba(249,115,22,0.40);box-shadow:0 2px 10px rgba(249,115,22,0.15)'
+          : 'background:rgba(255,255,255,0.05);color:#64748b;border:1px solid rgba(255,255,255,0.07)'">
+        <span class="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" style="background:#f97316"></span>
+        Preparing
+        <span class="px-1.5 py-0.5 rounded-md text-[10px] font-black"
+          [style]="activeFilter==='preparing' ? 'background:rgba(249,115,22,0.25);color:#fdba74' : 'background:rgba(255,255,255,0.08);color:#64748b'">
+          {{ preparingCount }}
+        </span>
+      </button>
+      <!-- Done -->
+      <button (click)="activeFilter='done'"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all duration-150 active:scale-95"
+        [style]="activeFilter==='done'
+          ? 'background:rgba(34,197,94,0.16);color:#4ade80;border:1px solid rgba(34,197,94,0.40);box-shadow:0 2px 10px rgba(34,197,94,0.12)'
+          : 'background:rgba(255,255,255,0.05);color:#64748b;border:1px solid rgba(255,255,255,0.07)'">
+        <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#22c55e"></span>
+        Done
+        <span class="px-1.5 py-0.5 rounded-md text-[10px] font-black"
+          [style]="activeFilter==='done' ? 'background:rgba(34,197,94,0.20);color:#86efac' : 'background:rgba(255,255,255,0.08);color:#64748b'">
+          {{ readyCount }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Search + LIVE + Dashboard -->
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style="color:#334155" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          [value]="searchQuery"
+          (input)="searchQuery = $any($event.target).value"
+          placeholder="Search order…"
+          style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#e2e8f0;font-size:12px;padding:8px 14px 8px 32px;border-radius:12px;width:180px;outline:none">
+      </div>
+      <div class="flex items-center gap-2 px-3 py-2 rounded-xl"
+        [style]="realtimeConnected
+          ? 'background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.28)'
+          : 'background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.28)'">
+        <span class="w-2 h-2 rounded-full flex-shrink-0"
+          [class.animate-pulse]="realtimeConnected"
+          [style]="realtimeConnected ? 'background:#22c55e' : 'background:#f59e0b'"></span>
+        <span style="font-size:11px;font-weight:800;letter-spacing:0.08em"
+          [style.color]="realtimeConnected ? '#4ade80' : '#fbbf24'">
+          {{ realtimeConnected ? 'LIVE' : 'POLLING' }}
+        </span>
+      </div>
+      <!-- Dashboard button -->
+      <a routerLink="/admin/dashboard"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all active:scale-95"
+        style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);color:#94a3b8;font-size:12px;font-weight:700;letter-spacing:0.02em;text-decoration:none">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        Dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════
+       TAB STRIP
+  ══════════════════════════════════════════════ -->
+  <div class="flex items-center gap-2 px-5 flex-shrink-0"
+    style="height:48px;background:#0a1120;border-bottom:1px solid rgba(255,255,255,0.05)">
+
+    <button (click)="activeTab='items-board'"
+      class="flex items-center gap-2 px-5 py-2 rounded-xl text-[12px] font-bold transition-all duration-150 active:scale-95"
+      [style]="activeTab==='items-board'
+        ? 'background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;box-shadow:0 4px 16px rgba(234,88,12,0.38)'
+        : 'background:rgba(255,255,255,0.04);color:#475569'">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+      Items Board
+    </button>
+
+    <button (click)="activeTab='today-orders'"
+      class="flex items-center gap-2 px-5 py-2 rounded-xl text-[12px] font-bold transition-all duration-150 active:scale-95"
+      [style]="activeTab==='today-orders'
+        ? 'background:rgba(255,255,255,0.10);color:#e2e8f0;border:1px solid rgba(255,255,255,0.14)'
+        : 'background:rgba(255,255,255,0.04);color:#475569'">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+      </svg>
+      Today's Orders
+    </button>
+
+    <div *ngIf="loading" class="flex items-center gap-2 ml-2">
+      <div class="w-3.5 h-3.5 rounded-full border-2 border-t-transparent animate-spin"
+        style="border-color:rgba(249,115,22,0.3);border-top-color:#f97316"></div>
+      <span style="font-size:11px;color:#334155">Loading…</span>
     </div>
   </div>
 
-  <div *ngIf="loading" class="flex justify-center py-10">
-    <div class="animate-spin w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full"></div>
-  </div>
+  <!-- ══════════════════════════════════════════════
+       CONTENT
+  ══════════════════════════════════════════════ -->
+  <div class="flex-1 flex overflow-hidden">
 
-  <div *ngIf="!loading && !orders.length" class="text-center py-20">
-    <div class="text-6xl mb-4">✅</div>
-    <p class="text-gray-400 text-lg font-medium">All caught up! No pending orders.</p>
-  </div>
+    <!-- ─────────────────── ITEMS BOARD ─────────────────── -->
+    <ng-container *ngIf="activeTab==='items-board'">
 
-  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-    <div *ngFor="let order of orders" [ngClass]="statusColor(order.status)"
-      class="rounded-2xl border-2 p-4 flex flex-col gap-3">
+      <!-- Left sidebar: aggregated items -->
+      <div class="flex flex-col flex-shrink-0 overflow-hidden"
+        style="width:248px;background:#0a1120;border-right:1px solid rgba(255,255,255,0.05)">
 
-      <div class="flex items-center justify-between">
-        <span class="font-bold text-gray-900 text-lg">#{{ order.orderSerialNo }}</span>
-        <span class="text-xs font-semibold uppercase px-2 py-1 rounded-full"
-          [ngClass]="order.status === 'pending' ? 'bg-yellow-200 text-yellow-800' : order.status === 'accepted' ? 'bg-blue-200 text-blue-800' : order.status === 'preparing' ? 'bg-orange-200 text-orange-800' : 'bg-green-200 text-green-800'">
-          {{ order.status }}
+        <!-- Sidebar header -->
+        <div class="flex items-center justify-between px-4 py-3 flex-shrink-0"
+          style="border-bottom:1px solid rgba(255,255,255,0.05)">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4" style="color:#f97316" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            <span style="font-size:12px;font-weight:800;color:#cbd5e1;letter-spacing:0.04em">ITEMS BOARD</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-lg"
+            style="font-size:11px;font-weight:800;background:rgba(249,115,22,0.15);color:#fb923c;border:1px solid rgba(249,115,22,0.28)">
+            {{ aggregatedItems.length }}
+          </span>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!aggregatedItems.length" class="flex-1 flex flex-col items-center justify-center gap-3" style="opacity:0.4">
+          <svg class="w-12 h-12" style="color:#1e293b" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+          <p style="font-size:12px;color:#334155;font-weight:500">No pending items</p>
+        </div>
+
+        <!-- Item list -->
+        <div *ngIf="aggregatedItems.length" class="flex-1 overflow-y-auto py-2 px-2">
+          <div *ngFor="let item of aggregatedItems; let i = index"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1.5 transition-all"
+            style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)">
+            <!-- Rank badge -->
+            <div class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+              [style]="i === 0 ? 'background:linear-gradient(135deg,#f97316,#ea580c)' :
+                       i === 1 ? 'background:linear-gradient(135deg,#64748b,#475569)' :
+                       i === 2 ? 'background:linear-gradient(135deg,#92400e,#78350f)' :
+                       'background:rgba(255,255,255,0.06)'">
+              <span style="font-size:9px;font-weight:900;color:#fff">{{ i + 1 }}</span>
+            </div>
+            <!-- Name + orders -->
+            <div class="flex-1 min-w-0">
+              <p class="truncate" style="font-size:12px;font-weight:600;color:#e2e8f0">{{ item.name }}</p>
+              <p style="font-size:10px;color:#334155;margin-top:1px">{{ item.orders }} order{{ item.orders !== 1 ? 's' : '' }}</p>
+            </div>
+            <!-- Quantity ball -->
+            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+              style="background:linear-gradient(135deg,#f97316,#ea580c);box-shadow:0 2px 8px rgba(234,88,12,0.35)">
+              <span style="font-size:13px;font-weight:900;color:#fff">{{ item.total }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: order sections -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-5">
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="flex flex-col items-center justify-center py-24 gap-4">
+          <div class="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin"
+            style="border-color:rgba(249,115,22,0.25);border-top-color:#f97316"></div>
+          <p style="font-size:13px;color:#334155">Loading orders…</p>
+        </div>
+
+        <ng-container *ngIf="!loading">
+
+          <!-- ── DINE-IN ── -->
+          <div>
+            <div class="flex items-center gap-2.5 mb-3">
+              <div class="w-6 h-6 rounded-lg flex items-center justify-center" style="background:rgba(99,102,241,0.18)">
+                <svg class="w-3.5 h-3.5" style="color:#818cf8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 6h18M8 14h8M8 18h5"/>
+                </svg>
+              </div>
+              <span style="font-size:10px;font-weight:900;letter-spacing:0.12em;color:#475569;text-transform:uppercase">Dine-In Orders</span>
+              <span class="px-2 py-0.5 rounded-full"
+                style="font-size:10px;font-weight:800;background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.25)">
+                {{ dineInOrders.length }}
+              </span>
+            </div>
+
+            <div *ngIf="!dineInOrders.length"
+              class="flex flex-col items-center justify-center py-10 rounded-2xl"
+              style="background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.07)">
+              <svg class="w-10 h-10 mb-2" style="color:#1e293b" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+              </svg>
+              <p style="font-size:12px;color:#1e293b;font-weight:500">No dine-in orders</p>
+            </div>
+
+            <div *ngIf="dineInOrders.length" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
+              <ng-container *ngFor="let order of dineInOrders">
+                <ng-container *ngTemplateOutlet="orderCard; context:{order:order}"></ng-container>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- ── TAKEAWAY ── -->
+          <div>
+            <div class="flex items-center gap-2.5 mb-3">
+              <div class="w-6 h-6 rounded-lg flex items-center justify-center" style="background:rgba(249,115,22,0.15)">
+                <svg class="w-3.5 h-3.5" style="color:#f97316" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+              </div>
+              <span style="font-size:10px;font-weight:900;letter-spacing:0.12em;color:#475569;text-transform:uppercase">Takeaway / Delivery</span>
+              <span class="px-2 py-0.5 rounded-full"
+                style="font-size:10px;font-weight:800;background:rgba(249,115,22,0.15);color:#f97316;border:1px solid rgba(249,115,22,0.25)">
+                {{ takeawayOrders.length }}
+              </span>
+            </div>
+
+            <div *ngIf="!takeawayOrders.length"
+              class="flex flex-col items-center justify-center py-10 rounded-2xl"
+              style="background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.07)">
+              <svg class="w-10 h-10 mb-2" style="color:#1e293b" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+              </svg>
+              <p style="font-size:12px;color:#1e293b;font-weight:500">No takeaway orders</p>
+            </div>
+
+            <div *ngIf="takeawayOrders.length" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
+              <ng-container *ngFor="let order of takeawayOrders">
+                <ng-container *ngTemplateOutlet="orderCard; context:{order:order}"></ng-container>
+              </ng-container>
+            </div>
+          </div>
+
+        </ng-container>
+      </div>
+    </ng-container>
+
+    <!-- ─────────────────── TODAY'S ORDERS ─────────────────── -->
+    <ng-container *ngIf="activeTab==='today-orders'">
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+
+        <!-- Stat cards -->
+        <div class="grid grid-cols-4 gap-3">
+          <div class="flex items-center gap-3 rounded-2xl p-4"
+            style="background:#0a1120;border:1px solid rgba(255,255,255,0.06)">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.20)">
+              <svg class="w-5 h-5" style="color:#818cf8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <div>
+              <p style="font-size:26px;font-weight:900;color:#f1f5f9;line-height:1;letter-spacing:-0.04em">{{ orders.length }}</p>
+              <p style="font-size:10px;color:#334155;font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em">Total Active</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 rounded-2xl p-4"
+            style="background:#0a1120;border:1px solid rgba(245,158,11,0.18)">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.20)">
+              <span class="w-3.5 h-3.5 rounded-full" style="background:#f59e0b"></span>
+            </div>
+            <div>
+              <p style="font-size:26px;font-weight:900;color:#fbbf24;line-height:1;letter-spacing:-0.04em">{{ pendingCount }}</p>
+              <p style="font-size:10px;color:#78350f;font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em">Pending</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 rounded-2xl p-4"
+            style="background:#0a1120;border:1px solid rgba(249,115,22,0.18)">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style="background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.20)">
+              <span class="w-3.5 h-3.5 rounded-full animate-pulse" style="background:#f97316"></span>
+            </div>
+            <div>
+              <p style="font-size:26px;font-weight:900;color:#fb923c;line-height:1;letter-spacing:-0.04em">{{ preparingCount }}</p>
+              <p style="font-size:10px;color:#9a3412;font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em">Preparing</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 rounded-2xl p-4"
+            style="background:#0a1120;border:1px solid rgba(34,197,94,0.18)">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.20)">
+              <svg class="w-5 h-5" style="color:#22c55e" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <div>
+              <p style="font-size:26px;font-weight:900;color:#4ade80;line-height:1;letter-spacing:-0.04em">{{ readyCount }}</p>
+              <p style="font-size:10px;color:#14532d;font-weight:600;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em">Ready</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="flex justify-center py-16">
+          <div class="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin"
+            style="border-color:rgba(249,115,22,0.25);border-top-color:#f97316"></div>
+        </div>
+
+        <!-- Empty -->
+        <div *ngIf="!loading && !filteredOrders.length"
+          class="flex flex-col items-center py-20 gap-4">
+          <div class="w-20 h-20 rounded-3xl flex items-center justify-center"
+            style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06)">
+            <svg class="w-10 h-10" style="color:#1e293b" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="text-center">
+            <p style="font-size:16px;color:#334155;font-weight:700">All caught up!</p>
+            <p style="font-size:12px;color:#1e293b;margin-top:4px">No active orders right now</p>
+          </div>
+        </div>
+
+        <!-- Order grid -->
+        <div *ngIf="!loading && filteredOrders.length"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          <ng-container *ngFor="let order of filteredOrders">
+            <ng-container *ngTemplateOutlet="orderCard; context:{order:order}"></ng-container>
+          </ng-container>
+        </div>
+
+      </div>
+    </ng-container>
+
+  </div><!-- end content -->
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ORDER CARD TEMPLATE — premium dark
+══════════════════════════════════════════════ -->
+<ng-template #orderCard let-order="order">
+  <div class="flex flex-col rounded-2xl overflow-hidden transition-all duration-200"
+    [style]="'background:#0d1628;border-left:3px solid ' + statusBorder(order.status) + ';border-top:1px solid rgba(255,255,255,0.06);border-right:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);box-shadow:' + statusGlow(order.status)"
+    onmouseover="this.style.transform='translateY(-2px)';this.style.background='#111d38'"
+    onmouseout="this.style.transform='translateY(0)';this.style.background='#0d1628'">
+
+    <!-- Top: token + info row -->
+    <div class="flex items-start gap-3 px-4 pt-4 pb-3"
+      style="border-bottom:1px solid rgba(255,255,255,0.05)">
+
+      <!-- Token badge -->
+      <div class="flex flex-col items-center justify-center w-14 h-14 rounded-xl flex-shrink-0"
+        [style]="'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07)'">
+        <span style="font-size:8px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;line-height:1;color:#334155">TOKEN</span>
+        <span style="font-size:22px;font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums"
+          [style.color]="tokenColor(order.status)">
+          {{ order.dailyToken ?? '—' }}
         </span>
       </div>
 
-      <div class="text-xs text-gray-500 font-medium">
-        {{ order.orderType | uppercase }} · {{ order.createdAt | date:'h:mm a' }}
-      </div>
-
-      <!-- Items list -->
-      <div class="space-y-1 flex-1">
-        <div *ngFor="let item of order.items" class="flex justify-between text-sm">
-          <span class="font-medium text-gray-800">{{ item.itemName }}</span>
-          <span class="font-bold text-gray-900">x{{ item.quantity }}</span>
+      <!-- Order info -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <p style="font-size:13px;font-weight:800;color:#cbd5e1;letter-spacing:-0.01em;line-height:1.2"
+            class="truncate">
+            #{{ order.orderSerialNo }}
+          </p>
+          <span class="px-2 py-0.5 rounded-lg flex-shrink-0"
+            style="font-size:10px;font-weight:800"
+            [style]="statusChipStyle(order.status)">
+            {{ statusLabel(order.status) }}
+          </span>
+        </div>
+        <p style="font-size:11px;color:#475569;margin-top:3px;font-weight:500">
+          {{ orderTypeLabel(order.orderType) }}<span *ngIf="order.diningTable"> · {{ order.diningTable?.name }}</span>
+        </p>
+        <!-- Time + elapsed -->
+        <div class="flex items-center gap-2 mt-1.5">
+          <span style="font-size:10px;color:#334155">{{ order.createdAt | date:'h:mm a' }}</span>
+          <span class="w-1 h-1 rounded-full" style="background:#1e293b"></span>
+          <span style="font-size:10px;font-weight:700"
+            [style.color]="elapsedColor(order.createdAt)">
+            ⏱ {{ elapsedLabel(order.createdAt) }}
+          </span>
         </div>
       </div>
+    </div>
 
-      <!-- Special notes -->
-      <div *ngIf="order.orderNote" class="text-xs bg-white/60 rounded-lg p-2 text-gray-700 italic">
-        📝 {{ order.orderNote }}
+    <!-- Items -->
+    <div class="px-4 py-3 flex-1 space-y-2">
+      <div *ngFor="let item of order.items" class="flex items-center justify-between gap-2">
+        <span style="font-size:12px;color:#94a3b8;font-weight:500" class="truncate">{{ item.itemName }}</span>
+        <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+          style="font-size:10px;font-weight:900;background:rgba(255,255,255,0.07);color:#e2e8f0;border:1px solid rgba(255,255,255,0.10)">
+          {{ item.quantity }}
+        </span>
       </div>
+    </div>
 
-      <!-- Actions -->
-      <div class="flex gap-2 mt-2">
-        <button *ngIf="order.status === OrderStatus.PENDING"
-          (click)="updateStatus(order.id, OrderStatus.ACCEPTED)"
-          class="flex-1 bg-blue-500 text-white text-sm font-semibold py-2 rounded-xl">
-          Accept
-        </button>
-        <button *ngIf="order.status === OrderStatus.ACCEPTED"
-          (click)="updateStatus(order.id, OrderStatus.PREPARING)"
-          class="flex-1 bg-orange-500 text-white text-sm font-semibold py-2 rounded-xl">
-          Start Preparing
-        </button>
-        <button *ngIf="order.status === OrderStatus.PREPARING"
-          (click)="updateStatus(order.id, OrderStatus.PREPARED)"
-          class="flex-1 bg-green-500 text-white text-sm font-semibold py-2 rounded-xl">
-          Mark Ready
-        </button>
-        <button *ngIf="order.status === OrderStatus.PREPARED"
-          class="flex-1 bg-gray-300 text-gray-600 text-sm font-semibold py-2 rounded-xl cursor-default">
-          Ready for Pickup
-        </button>
+    <!-- Note -->
+    <div *ngIf="order.orderNote" class="mx-4 mb-2 px-3 py-2 rounded-xl"
+      style="background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.18)">
+      <p style="font-size:10px;color:#d97706;font-weight:500">📝 {{ order.orderNote }}</p>
+    </div>
+
+    <!-- Action button -->
+    <div class="px-4 pb-4 flex-shrink-0">
+      <button *ngIf="order.status === OrderStatus.PENDING"
+        (click)="updateStatus(order.id, OrderStatus.ACCEPTED)"
+        class="w-full py-3 rounded-xl text-[13px] font-bold text-white transition-all active:scale-95"
+        style="background:linear-gradient(135deg,#3b82f6,#2563eb);box-shadow:0 4px 14px rgba(37,99,235,0.38)">
+        Accept Order
+      </button>
+      <button *ngIf="order.status === OrderStatus.ACCEPTED"
+        (click)="updateStatus(order.id, OrderStatus.PREPARING)"
+        class="w-full py-3 rounded-xl text-[13px] font-bold text-white transition-all active:scale-95"
+        style="background:linear-gradient(135deg,#f97316,#ea580c);box-shadow:0 4px 14px rgba(234,88,12,0.38)">
+        Start Preparing
+      </button>
+      <button *ngIf="order.status === OrderStatus.PREPARING"
+        (click)="updateStatus(order.id, OrderStatus.PREPARED)"
+        class="w-full py-3 rounded-xl text-[13px] font-bold text-white transition-all active:scale-95"
+        style="background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 14px rgba(22,163,74,0.38)">
+        ✓ Mark Ready
+      </button>
+      <div *ngIf="order.status === OrderStatus.PREPARED"
+        class="w-full py-3 rounded-xl text-[13px] font-bold text-center"
+        style="background:rgba(34,197,94,0.10);color:#4ade80;border:1px solid rgba(34,197,94,0.25)">
+        ✅ Ready for Pickup
       </div>
     </div>
   </div>
-</div>
+</ng-template>

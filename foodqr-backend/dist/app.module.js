@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const tenant_middleware_1 = require("./modules/tenants/tenant.middleware");
+const tenant_context_middleware_1 = require("./modules/tenants/connection/tenant-context.middleware");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const auth_module_1 = require("./modules/auth/auth.module");
@@ -56,7 +57,7 @@ const installer_module_1 = require("./modules/installer/installer.module");
 const tenants_module_1 = require("./modules/tenants/tenants.module");
 let AppModule = class AppModule {
     configure(consumer) {
-        consumer.apply(tenant_middleware_1.TenantMiddleware).forRoutes('*');
+        consumer.apply(tenant_middleware_1.TenantMiddleware, tenant_context_middleware_1.TenantContextMiddleware).forRoutes('*');
     }
 };
 exports.AppModule = AppModule;

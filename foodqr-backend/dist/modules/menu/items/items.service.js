@@ -22,6 +22,8 @@ const item_entity_1 = require("./entities/item.entity");
 const item_variation_entity_1 = require("../variations/entities/item-variation.entity");
 const item_category_entity_1 = require("../categories/entities/item-category.entity");
 const enums_1 = require("../../../common/enums");
+const tenant_connection_service_1 = require("../../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../../tenants/connection/tenant-aware-repo");
 class CreateItemDto {
 }
 exports.CreateItemDto = CreateItemDto;
@@ -146,10 +148,13 @@ __decorate([
     __metadata("design:type", Array)
 ], CreateItemDto.prototype, "variations", void 0);
 let ItemsService = class ItemsService {
-    constructor(itemRepo, variationRepo, catRepo) {
+    constructor(itemRepo, variationRepo, catRepo, connections) {
         this.itemRepo = itemRepo;
         this.variationRepo = variationRepo;
         this.catRepo = catRepo;
+        this.itemRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_entity_1.Item, itemRepo);
+        this.variationRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_variation_entity_1.ItemVariation, variationRepo);
+        this.catRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_category_entity_1.ItemCategory, catRepo);
     }
     async resolveCategoryIds(categoryId) {
         const children = await this.catRepo.find({ where: { parentCategoryId: categoryId } });
@@ -345,6 +350,7 @@ exports.ItemsService = ItemsService = __decorate([
     __param(2, (0, typeorm_1.InjectRepository)(item_category_entity_1.ItemCategory)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], ItemsService);
 //# sourceMappingURL=items.service.js.map

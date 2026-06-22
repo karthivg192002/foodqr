@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { DiningTable } from './entities/dining-table.entity';
 import { TableStatus } from '../../common/enums';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class CreateDiningTableDto {
     name: string;
     capacity?: number;
@@ -9,7 +10,7 @@ export declare class CreateDiningTableDto {
 }
 export declare class DiningTablesService {
     private tableRepo;
-    constructor(tableRepo: Repository<DiningTable>);
+    constructor(tableRepo: Repository<DiningTable>, connections: TenantConnectionService);
     findAll(branchId?: string): Promise<DiningTable[]>;
     findOne(id: string): Promise<DiningTable>;
     findBySlug(slug: string): Promise<DiningTable>;

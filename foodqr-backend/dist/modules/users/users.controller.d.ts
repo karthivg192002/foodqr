@@ -13,20 +13,20 @@ export declare class UsersController {
         role?: UserRole;
         branchId?: string;
         countryCode?: string;
-    }): Promise<any>;
+    }, currentUser: User): Promise<any>;
     changePassword(id: string, body: {
         password: string;
     }): Promise<{
         message: string;
     }>;
-    getCustomers(search?: string, page?: number, limit?: number): Promise<{
+    getCustomers(search?: string, page?: number, limit?: number, user?: User): Promise<{
         data: User[];
         total: number;
         page: number;
         limit: number;
         pages: number;
     }>;
-    getStaff(search?: string, page?: number, limit?: number): Promise<{
+    getStaff(search?: string, page?: number, limit?: number, user?: User): Promise<{
         data: User[];
         total: number;
         page: number;
@@ -77,14 +77,14 @@ export declare class UsersController {
             dialCode: string;
         }[];
     };
-    getAdministrators(search?: string, page?: number, limit?: number): Promise<{
+    getAdministrators(search?: string, page?: number, limit?: number, user?: User): Promise<{
         data: User[];
         total: number;
         page: number;
         limit: number;
         pages: number;
     }>;
-    getWaiters(search?: string, page?: number, limit?: number): Promise<{
+    getWaiters(search?: string, page?: number, limit?: number, user?: User): Promise<{
         data: User[];
         total: number;
         page: number;
@@ -98,7 +98,7 @@ export declare class UsersController {
         limit: number;
         pages: number;
     }>;
-    getChefs(search?: string, page?: number, limit?: number): Promise<{
+    getChefs(search?: string, page?: number, limit?: number, user?: User): Promise<{
         data: User[];
         total: number;
         page: number;
@@ -112,14 +112,14 @@ export declare class UsersController {
         limit: number;
         pages: number;
     }>;
-    getPosOperators(search?: string, page?: number, limit?: number): Promise<{
+    getPosOperators(search?: string, page?: number, limit?: number, user?: User): Promise<{
         data: User[];
         total: number;
         page: number;
         limit: number;
         pages: number;
     }>;
-    getBranchManagers(search?: string, page?: number, limit?: number): Promise<{
+    getBranchManagers(search?: string, page?: number, limit?: number, user?: User): Promise<{
         data: User[];
         total: number;
         page: number;

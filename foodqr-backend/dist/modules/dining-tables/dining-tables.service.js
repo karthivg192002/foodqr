@@ -21,6 +21,8 @@ const QRCode = require("qrcode");
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const dining_table_entity_1 = require("./entities/dining-table.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 class CreateDiningTableDto {
 }
 exports.CreateDiningTableDto = CreateDiningTableDto;
@@ -45,8 +47,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateDiningTableDto.prototype, "waiterId", void 0);
 let DiningTablesService = class DiningTablesService {
-    constructor(tableRepo) {
+    constructor(tableRepo, connections) {
         this.tableRepo = tableRepo;
+        this.tableRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, dining_table_entity_1.DiningTable, tableRepo);
     }
     async findAll(branchId) {
         const where = {};
@@ -131,6 +134,7 @@ exports.DiningTablesService = DiningTablesService;
 exports.DiningTablesService = DiningTablesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(dining_table_entity_1.DiningTable)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], DiningTablesService);
 //# sourceMappingURL=dining-tables.service.js.map

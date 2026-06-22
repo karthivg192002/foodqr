@@ -32,6 +32,6 @@ import { TenantBillingService } from './billing/tenant-billing.service';
   ],
   controllers: [TenantsController, TenantSelfController],
   providers: [TenantsService, TenantConnectionService, TenantProvisioningService, TenantContextMiddleware, TenantBillingService],
-  exports: [TenantsService, TenantConnectionService, TenantProvisioningService, TenantContextMiddleware, TenantBillingService],
+  exports: [TypeOrmModule, TenantsService, TenantConnectionService, TenantProvisioningService, TenantContextMiddleware, TenantBillingService],
 })
 export class TenantsModule {}
