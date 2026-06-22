@@ -13,21 +13,25 @@ export class CartService {
   get isEmpty(): boolean { return this.items.length === 0; }
 
   getItemPrice(cartItem: CartItem): number {
-    if (cartItem.variation) {
-      return cartItem.variation.price || (Number(cartItem.item.price) + Number(cartItem.variation.additionalPrice));
-    }
-    return Number(cartItem.item.price);
+    const base = cartItem.variation
+      ? cartItem.variation.price || (Number(cartItem.item.price) + Number(cartItem.variation.additionalPrice))
+      : Number(cartItem.item.price);
+    const extrasTotal = (cartItem.extras || []).reduce((sum, e) => sum + Number(e.price || 0), 0);
+    return base + extrasTotal;
   }
 
-  addItem(item: Item, quantity = 1, variation?: ItemVariation, specialNote?: string): void {
+  addItem(item: Item, quantity = 1, variation?: ItemVariation, specialNote?: string, extras?: any[]): void {
     const current = [...this.items];
-    const existingIndex = current.findIndex(
-      (i) => i.item.id === item.id && i.variation?.id === variation?.id
-    );
+    // Customized items (with extras or a note) are always added as a new line so
+    // each customization keeps its own price/quantity instead of merging into an
+    // existing identical-looking cart line.
+    const existingIndex = (extras?.length || specialNote)
+      ? -1
+      : current.findIndex((i) => i.item.id === item.id && i.variation?.id === variation?.id && !i.extras?.length && !i.specialNote);
     if (existingIndex > -1) {
       current[existingIndex] = { ...current[existingIndex], quantity: current[existingIndex].quantity + quantity };
     } else {
-      current.push({ item, variation, quantity, specialNote });
+      current.push({ item, variation, quantity, specialNote, extras });
     }
     this.cartSubject.next(current);
   }

@@ -13,6 +13,8 @@ import { CustomerDashboardComponent } from './dashboard/customer-dashboard.compo
 import { CustomerTrackComponent } from './track/customer-track.component';
 import { CustomerChatComponent } from './chat/customer-chat.component';
 import { CustomerScanComponent } from './scan/customer-scan.component';
+import { CustomerMenuComponent } from './menu/customer-menu.component';
+import { ItemDetailsComponent } from './item-details/item-details.component';
 
 const routes: Routes = [
   {
@@ -22,6 +24,8 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: CustomerDashboardComponent },
       { path: 'home', component: CustomerHomeComponent },
+      { path: 'menu', component: CustomerMenuComponent },
+      { path: 'item/:id', component: ItemDetailsComponent },
       { path: 'cart', component: CustomerCartComponent },
       { path: 'orders', component: CustomerOrdersComponent },
       { path: 'track/:token', component: CustomerTrackComponent },
@@ -38,7 +42,7 @@ const routes: Routes = [
     CustomerLayoutComponent, CustomerHomeComponent, CustomerCartComponent,
     CustomerOrdersComponent, CustomerProfileComponent, CustomerLoyaltyComponent,
     CustomerDashboardComponent, CustomerTrackComponent, CustomerChatComponent,
-    CustomerScanComponent,
+    CustomerScanComponent, CustomerMenuComponent, ItemDetailsComponent,
   ],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule.forChild(routes), SharedModule],
 })

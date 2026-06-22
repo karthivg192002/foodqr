@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { OrderType, CartItem } from '../../../core/models';
+import { OrderType, CartItem, Tax } from '../../../core/models';
 
 declare global {
   interface Window {
@@ -28,6 +28,7 @@ export class CustomerCartComponent implements OnInit {
   enabledGateways: any[] = [];
   savedAddresses: any[] = [];
   selectedAddressId = '';
+  defaultTax: Tax | null = null;
 
   constructor(
     public cartService: CartService,
@@ -40,6 +41,23 @@ export class CustomerCartComponent implements OnInit {
   ngOnInit(): void {
     this.loadGateways();
     this.loadAddresses();
+    this.loadTax();
+  }
+
+  loadTax(): void {
+    this.api.get<Tax[]>('frontend/taxes').subscribe({
+      next: (taxes) => { this.defaultTax = (taxes || []).find((t) => t.isDefault) || taxes?.[0] || null; },
+      error: () => {},
+    });
+  }
+
+  get taxAmount(): number {
+    if (!this.defaultTax || this.defaultTax.isIncluded) return 0;
+    return this.cartService.total * (Number(this.defaultTax.rate) / 100);
+  }
+
+  get grandTotal(): number {
+    return this.cartService.total + this.taxAmount;
   }
 
   loadGateways(): void {

@@ -5,6 +5,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Customer redesign — Material Symbols icon font (design/premium_fast_casual_digital_menu) */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 24px;
+  line-height: 1;
+  user-select: none;
+}
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* ─────────────────────────────────────────
    DESIGN TOKENS
 ───────────────────────────────────────── */

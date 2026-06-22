@@ -1,125 +1,145 @@
-<div class="px-4 py-4 animate-fade-in-up">
+<div class="bg-cust-surface min-h-screen font-work animate-fade-in-up px-5 pt-5">
   <div class="flex items-center gap-3 mb-5">
-    <a routerLink="/customer/home" class="text-gray-500 hover:text-gray-700 transition-colors">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    <a routerLink="/customer/home" class="text-cust-secondary hover:text-cust-on-surface transition-colors">
+      <span class="material-symbols-outlined">arrow_back</span>
     </a>
-    <h1 class="font-bold text-xl text-gray-900 tracking-tight">Your Cart</h1>
+    <h1 class="font-jakarta text-xl font-bold text-cust-on-surface">Your Selection</h1>
   </div>
 
   <!-- Empty state -->
   <div *ngIf="cartService.isEmpty" class="text-center py-16">
-    <div class="text-6xl mb-4">🛒</div>
-    <p class="text-gray-500 font-medium">Your cart is empty</p>
-    <a routerLink="/customer/home" class="btn-primary inline-block mt-4 px-6">Browse Menu</a>
+    <span class="material-symbols-outlined text-6xl text-cust-outline-variant">shopping_bag</span>
+    <p class="text-cust-secondary font-work font-medium mt-3">Your cart is empty</p>
+    <a routerLink="/customer/home" class="inline-block mt-4 px-6 py-3 rounded-full bg-cust-primary-container text-white font-work font-bold">Browse Menu</a>
   </div>
 
   <!-- Cart items -->
-  <div *ngIf="!cartService.isEmpty">
-    <div class="space-y-3 mb-5">
-      <div *ngFor="let item of cartService.items" class="bg-white rounded-2xl p-3 flex gap-3 shadow-card">
-        <div class="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
-          <img *ngIf="item.item.thumbImage" [src]="item.item.thumbImage" class="w-full h-full object-cover">
-          <div *ngIf="!item.item.thumbImage" class="w-full h-full flex items-center justify-center text-2xl">🍽️</div>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold text-gray-900 truncate">{{ item.item.name }}</p>
-          <p *ngIf="item.variation" class="text-xs text-gray-500">{{ item.variation.name }}</p>
-          <p class="text-orange-600 font-semibold mt-1">{{ getItemPrice(item) | fqrCurrency }}</p>
-        </div>
-        <div class="flex flex-col items-center justify-center gap-2">
-          <div class="flex items-center gap-2 bg-orange-50 rounded-full px-2 py-1">
-            <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity - 1)" class="text-orange-500 font-bold w-5 h-5 flex items-center justify-center text-lg">−</button>
-            <span class="text-orange-600 font-semibold text-sm w-5 text-center">{{ item.quantity }}</span>
-            <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity + 1)" class="text-orange-500 font-bold w-5 h-5 flex items-center justify-center text-lg">+</button>
+  <div *ngIf="!cartService.isEmpty" class="max-w-2xl mx-auto">
+    <section class="mb-6">
+      <div class="space-y-3">
+        <div *ngFor="let item of cartService.items" class="bg-cust-surface-container-lowest rounded-2xl p-3.5 flex gap-3.5 items-center shadow-cust-card">
+          <div class="w-20 h-20 bg-cust-surface-container rounded-xl overflow-hidden flex-shrink-0">
+            <img *ngIf="item.item.thumbImage" [src]="item.item.thumbImage" class="w-full h-full object-cover">
+            <div *ngIf="!item.item.thumbImage" class="w-full h-full flex items-center justify-center text-2xl">🍽️</div>
           </div>
-          <p class="text-sm font-bold text-gray-900">{{ getItemPrice(item) * item.quantity | fqrCurrency }}</p>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-start gap-2">
+              <h3 class="font-work font-semibold text-cust-on-surface truncate">{{ item.item.name }}</h3>
+              <span class="font-jakarta font-bold text-cust-primary whitespace-nowrap">{{ getItemPrice(item) | fqrCurrency }}</span>
+            </div>
+            <p *ngIf="item.variation || item.specialNote" class="text-cust-secondary text-sm line-clamp-1 mb-2">
+              {{ item.variation?.name }}{{ item.variation && item.specialNote ? ', ' : '' }}{{ item.specialNote }}
+            </p>
+            <div class="flex items-center gap-4 mt-1">
+              <div class="flex items-center bg-cust-surface-container rounded-full px-2 py-1">
+                <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity - 1)" class="w-7 h-7 flex items-center justify-center text-cust-primary active:scale-90 transition-all">
+                  <span class="material-symbols-outlined text-lg">remove</span>
+                </button>
+                <span class="px-3 font-work font-bold text-sm">{{ item.quantity }}</span>
+                <button (click)="cartService.updateQuantity(item.item.id, item.variation?.id, item.quantity + 1)" class="w-7 h-7 flex items-center justify-center text-cust-primary active:scale-90 transition-all">
+                  <span class="material-symbols-outlined text-lg">add</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Order Type -->
-    <div class="bg-white rounded-2xl p-4 shadow-card mb-4">
-      <h3 class="font-semibold text-gray-900 mb-3">Order Type</h3>
-      <div class="grid grid-cols-2 gap-2">
+    <section class="mb-6">
+      <h2 class="font-work text-xs font-bold text-cust-secondary mb-2.5 uppercase tracking-wide px-1">Order Type</h2>
+      <div class="grid grid-cols-2 gap-2.5">
         <button *ngFor="let type of [OrderType.DELIVERY, OrderType.TAKEAWAY]"
           (click)="orderType = type"
-          [class]="orderType === type ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-gray-200 text-gray-600'"
-          class="border-2 rounded-xl py-2 text-sm font-medium capitalize">
+          [class]="orderType === type ? 'border-cust-primary-container bg-cust-primary-fixed text-cust-on-primary-fixed-variant' : 'border-cust-outline-variant text-cust-secondary'"
+          class="border-2 rounded-xl py-2.5 text-sm font-work font-semibold capitalize transition-colors">
           {{ type }}
         </button>
       </div>
-    </div>
+    </section>
 
-    <!-- Delivery Address (only for delivery) -->
-    <div *ngIf="orderType === OrderType.DELIVERY" class="bg-white rounded-2xl p-4 shadow-card mb-4">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-semibold text-gray-900">Delivery Address</h3>
-        <a routerLink="/customer/profile" class="text-xs text-orange-500 font-medium">Manage</a>
+    <!-- Delivery Address -->
+    <section *ngIf="orderType === OrderType.DELIVERY" class="mb-6">
+      <div class="flex items-center justify-between mb-2.5 px-1">
+        <h2 class="font-work text-xs font-bold text-cust-secondary uppercase tracking-wide">Delivery Address</h2>
+        <a routerLink="/customer/profile" class="text-xs text-cust-primary font-work font-semibold">Manage</a>
       </div>
-      <div *ngIf="savedAddresses.length === 0" class="text-sm text-gray-400">
-        No saved addresses.
-        <a routerLink="/customer/profile" class="text-orange-500 underline">Add one →</a>
+      <div *ngIf="savedAddresses.length === 0" class="text-sm text-cust-secondary px-1">
+        No saved addresses. <a routerLink="/customer/profile" class="text-cust-primary underline">Add one →</a>
       </div>
       <div *ngIf="savedAddresses.length > 0" class="space-y-2">
         <label *ngFor="let addr of savedAddresses"
-          class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition"
-          [class]="selectedAddressId === addr.id ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
-          <input type="radio" [value]="addr.id" [(ngModel)]="selectedAddressId" class="mt-0.5 text-orange-500">
+          class="flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors"
+          [class]="selectedAddressId === addr.id ? 'border-cust-primary-container bg-cust-primary-fixed' : 'border-cust-outline-variant bg-cust-surface-container-lowest'">
+          <input type="radio" [value]="addr.id" [(ngModel)]="selectedAddressId" class="mt-0.5 text-cust-primary-container">
           <div>
-            <p class="font-medium text-sm text-gray-900">{{ addr.label || 'Address' }}
-              <span *ngIf="addr.isDefault" class="ml-2 text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded">Default</span>
+            <p class="font-work font-semibold text-sm text-cust-on-surface">{{ addr.label || 'Address' }}
+              <span *ngIf="addr.isDefault" class="ml-2 text-xs bg-cust-primary-fixed text-cust-on-primary-fixed-variant px-1.5 py-0.5 rounded">Default</span>
             </p>
-            <p class="text-xs text-gray-500">{{ addr.address }}, {{ addr.city }}</p>
-            <p *ngIf="addr.phone" class="text-xs text-gray-400">{{ addr.phone }}</p>
+            <p class="text-xs text-cust-secondary">{{ addr.address }}, {{ addr.city }}</p>
           </div>
         </label>
       </div>
-    </div>
+    </section>
 
-    <!-- Payment Method -->
-    <div class="bg-white rounded-2xl p-4 shadow-card mb-4">
-      <h3 class="font-semibold text-gray-900 mb-3">Payment Method</h3>
-      <div class="space-y-2">
-        <label *ngFor="let gw of enabledGateways"
-          class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition"
-          [class]="paymentMethod === gw.slug ? 'border-orange-500 bg-orange-50' : 'border-gray-200'">
-          <input type="radio" [value]="gw.slug" [(ngModel)]="paymentMethod" [disabled]="gw.isActive === false" class="text-orange-500">
-          <span class="text-sm font-medium text-gray-800">{{ gw.name }}</span>
-        </label>
+    <!-- Kitchen Note -->
+    <section class="mb-6">
+      <h2 class="font-work text-xs font-bold text-cust-secondary mb-2.5 uppercase tracking-wide px-1">Kitchen Note</h2>
+      <textarea [(ngModel)]="orderNote" placeholder="Allergies or special requests? Let us know here..."
+        class="w-full bg-cust-surface-container-lowest border-2 border-cust-surface-container rounded-xl p-3.5 focus:border-cust-primary-container focus:ring-0 transition-colors text-sm min-h-[100px] resize-none outline-none"></textarea>
+    </section>
+
+    <!-- Coupon -->
+    <section class="mb-6">
+      <h2 class="font-work text-xs font-bold text-cust-secondary mb-2.5 uppercase tracking-wide px-1">Coupon Code</h2>
+      <input [(ngModel)]="couponCode" placeholder="Enter coupon code"
+        class="w-full bg-cust-surface-container-lowest border-2 border-cust-surface-container rounded-xl p-3.5 text-sm outline-none focus:border-cust-primary-container">
+    </section>
+
+    <!-- Payment Methods -->
+    <section class="mb-6">
+      <h2 class="font-work text-xs font-bold text-cust-secondary mb-2.5 uppercase tracking-wide px-1">Payment Method</h2>
+      <div class="grid grid-cols-1 gap-2">
+        <button *ngFor="let gw of enabledGateways" type="button" (click)="paymentMethod = gw.slug"
+          class="flex items-center justify-between p-3.5 rounded-xl transition-all active:scale-[0.99]"
+          [class]="paymentMethod === gw.slug ? 'bg-cust-on-secondary-fixed text-white' : 'bg-cust-surface-container-lowest border-2 border-cust-surface-container text-cust-on-surface'">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined">{{ gw.slug === 'cash_on_delivery' ? 'payments' : gw.slug === 'e_wallet' ? 'account_balance_wallet' : 'credit_card' }}</span>
+            <span class="font-work font-semibold text-sm">{{ gw.name }}</span>
+          </div>
+          <span *ngIf="paymentMethod === gw.slug" class="material-symbols-outlined text-cust-primary-container">check_circle</span>
+          <div *ngIf="paymentMethod !== gw.slug" class="w-6 h-6 border-2 border-cust-surface-container rounded-full"></div>
+        </button>
       </div>
+    </section>
 
-      <!-- Payment Gateway Selection (when online payment is selected) -->
-      <div *ngIf="paymentMethod && paymentMethod !== 'cash_on_delivery' && paymentMethod !== 'e_wallet'" class="mt-4 pt-4 border-t">
-        <p class="text-xs text-gray-500 mb-2">Payment Gateway: <strong>{{ paymentLabel(paymentMethod) }}</strong></p>
+    <!-- Bill Summary -->
+    <section class="bg-cust-surface-container-low rounded-2xl p-4 space-y-2.5 mb-24">
+      <div class="flex justify-between text-cust-secondary text-sm">
+        <span>Subtotal</span><span>{{ cartService.total | fqrCurrency }}</span>
       </div>
-    </div>
-
-    <!-- Coupon Code -->
-    <div class="bg-white rounded-2xl p-4 shadow-card mb-4">
-      <h3 class="font-semibold text-gray-900 mb-2">Coupon Code</h3>
-      <div class="flex gap-2">
-        <input [(ngModel)]="couponCode" placeholder="Enter coupon code" class="input-field flex-1 text-sm">
+      <div class="flex justify-between text-cust-secondary text-sm">
+        <span>Tax{{ defaultTax ? ' (' + defaultTax.rate + '%)' : '' }}</span><span>{{ taxAmount | fqrCurrency }}</span>
       </div>
-    </div>
-
-    <!-- Note -->
-    <div class="bg-white rounded-2xl p-4 shadow-card mb-4">
-      <textarea [(ngModel)]="orderNote" placeholder="Add order note (optional)..."
-        class="w-full text-sm text-gray-700 resize-none focus:outline-none" rows="2"></textarea>
-    </div>
-
-    <!-- Summary -->
-    <div class="bg-white rounded-2xl p-4 shadow-card mb-5">
-      <div class="space-y-2 text-sm">
-        <div class="flex justify-between text-gray-600"><span>Subtotal</span><span>{{ cartService.total | fqrCurrency }}</span></div>
-        <div class="flex justify-between text-gray-600"><span>Delivery</span><span>Calculated at checkout</span></div>
-        <div class="flex justify-between font-bold text-gray-900 text-base pt-2 border-t"><span>Total</span><span>{{ cartService.total | fqrCurrency }}</span></div>
+      <div class="flex justify-between text-cust-secondary text-sm">
+        <span>Service Charge</span><span>{{ 0 | fqrCurrency }}</span>
       </div>
-    </div>
-
-    <button (click)="placeOrder()" [disabled]="placing" class="btn-primary w-full py-4 text-base font-bold rounded-2xl shadow-lg active:scale-[0.98] transition-transform">
-      <ng-container *ngIf="placing">Placing Order...</ng-container>
-      <ng-container *ngIf="!placing">Place Order · {{ cartService.total | fqrCurrency }}</ng-container>
-    </button>
+      <div class="pt-2.5 border-t border-cust-outline-variant flex justify-between items-center">
+        <span class="font-jakarta text-lg font-bold text-cust-on-surface">Total</span>
+        <span class="font-jakarta text-lg font-bold text-cust-primary">{{ grandTotal | fqrCurrency }}</span>
+      </div>
+    </section>
   </div>
+
+  <!-- Place Order -->
+  <footer *ngIf="!cartService.isEmpty" class="fixed bottom-0 left-0 right-0 z-40 px-5 pb-5 pt-3 bg-gradient-to-t from-cust-surface via-cust-surface to-transparent">
+    <div class="max-w-2xl mx-auto">
+      <button (click)="placeOrder()" [disabled]="placing"
+        class="w-full h-14 rounded-full bg-cust-primary-container text-white font-work font-bold active:scale-[0.98] transition-transform disabled:opacity-60">
+        <ng-container *ngIf="placing">Placing Order…</ng-container>
+        <ng-container *ngIf="!placing">Place Order · {{ grandTotal | fqrCurrency }}</ng-container>
+      </button>
+    </div>
+  </footer>
 </div>

@@ -143,6 +143,8 @@ export interface Item {
   name: string;
   slug: string;
   description?: string;
+  caution?: string;
+  ingredients?: string;
   price: number;
   categoryId?: string;
   category?: ItemCategory;
@@ -397,5 +399,7 @@ export interface ItemExtra {
   itemId: string;
   name: string;
   price: number;
+  maxQuantity?: number;
+  isRequired?: boolean;
   status: boolean;
 }

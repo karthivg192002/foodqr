@@ -1,183 +1,88 @@
-<div class="pb-6 bg-gray-50 min-h-screen">
+<div class="bg-cust-surface min-h-screen pb-6 font-work animate-fade-in-up">
 
-  <!-- Search bar + currency selector -->
-  <div class="sticky top-0 z-10 bg-gray-50/95 backdrop-blur px-4 pt-4 pb-3 flex items-center gap-2">
-    <div class="relative flex-1">
-      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-      <input [(ngModel)]="search" (ngModelChange)="loadItems()" type="text" placeholder="Search for dishes, cuisines..."
-        class="w-full pl-10 pr-4 py-3 bg-white rounded-2xl text-sm shadow-card border border-gray-100 transition-shadow focus:outline-none focus:ring-2 focus:ring-orange-400 focus:shadow-md">
-    </div>
-    <app-currency-selector></app-currency-selector>
-  </div>
+  <!-- Hero -->
+  <section class="px-5 pt-5 pb-6">
+    <h1 class="font-jakarta text-[30px] sm:text-[36px] font-extrabold leading-tight text-cust-on-surface">
+      {{ greeting }}<br/><span class="text-cust-primary-container">Hungry?</span>
+    </h1>
+    <p class="font-work text-cust-secondary mt-1">Discover the best flavors, freshly made for you.</p>
 
-  <!-- Hero banner -->
-  <div *ngIf="banners.length" class="px-4 animate-fade-in-up">
-    <div *ngFor="let banner of banners | slice:0:1"
-      class="relative rounded-3xl overflow-hidden h-48 shadow-xl">
-      <img *ngIf="banner.image" [src]="banner.image" class="w-full h-full object-cover">
-      <div *ngIf="!banner.image" class="w-full h-full bg-gradient-to-br from-orange-500 via-orange-600 to-amber-600"></div>
-      <div class="absolute inset-0 bg-gradient-to-r from-black/65 via-black/25 to-transparent flex flex-col justify-center p-6">
-        <span class="self-start text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/20 text-white mb-2 backdrop-blur-sm">Fresh &amp; Hot</span>
-        <h3 class="font-extrabold text-2xl text-white leading-tight max-w-[75%]">{{ banner.title }}</h3>
-        <p class="text-sm text-white/85 mt-1 max-w-[75%]">{{ banner.subtitle }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Promotion banners -->
-  <div *ngIf="promotionBanners.length" class="mt-4 px-4 flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-    <div *ngFor="let promo of promotionBanners" class="relative flex-shrink-0 w-64 rounded-2xl overflow-hidden h-28 shadow-sm">
-      <img *ngIf="promo.image" [src]="promo.image" class="w-full h-full object-cover">
-      <div *ngIf="!promo.image" class="w-full h-full bg-gradient-to-br from-orange-500 to-orange-600"></div>
-      <div class="absolute inset-0 bg-gradient-to-r from-black/55 to-transparent flex flex-col justify-center p-3">
-        <span *ngIf="promo.badgeText" class="self-start text-[10px] font-bold uppercase px-2 py-0.5 rounded-full mb-1"
-          [style.background]="promo.badgeColor || '#f97316'" style="color:#fff">{{ promo.badgeText }}</span>
-        <h3 class="font-bold text-white text-sm leading-tight">{{ promo.title }}</h3>
-        <p *ngIf="promo.subtitle" class="text-white text-xs opacity-90">{{ promo.subtitle }}</p>
-      </div>
-    </div>
-  </div>
+    <form (ngSubmit)="submitSearch()" class="relative flex items-center mt-4">
+      <span class="material-symbols-outlined absolute left-4 text-cust-secondary">search</span>
+      <input [(ngModel)]="search" name="search" type="text" placeholder="Search for dishes, drinks..."
+        class="w-full pl-12 pr-4 py-4 rounded-xl border-none bg-cust-surface-container-low shadow-sm focus:ring-2 focus:ring-cust-primary-container font-work outline-none text-cust-on-surface placeholder:text-cust-secondary">
+    </form>
+  </section>
 
   <!-- Categories -->
-  <div *ngIf="categories.length" class="mt-6">
-    <h2 class="px-4 font-bold text-gray-900 mb-3 text-[15px]">Categories</h2>
-    <div class="flex gap-4 overflow-x-auto px-4 pb-2 scrollbar-none">
-      <button (click)="selectCategory('')" class="flex-shrink-0 flex flex-col items-center gap-1.5 w-16 group">
-        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-xl transition-all duration-200 ease-spring group-hover:scale-105 group-active:scale-95"
-          [ngClass]="!selectedCategory ? 'bg-gradient-to-br from-orange-500 to-orange-600 shadow-md shadow-orange-200' : 'bg-white border border-gray-100 shadow-card'">
-          <span>🍽️</span>
-        </div>
-        <span class="text-xs font-medium text-center truncate w-full" [ngClass]="!selectedCategory ? 'text-orange-600' : 'text-gray-600'">All</span>
-      </button>
-      <button *ngFor="let cat of categories" (click)="selectCategory(cat.id)" class="flex-shrink-0 flex flex-col items-center gap-1.5 w-16 group">
-        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-xl overflow-hidden transition-all duration-200 ease-spring group-hover:scale-105 group-active:scale-95"
-          [ngClass]="selectedCategory === cat.id ? 'bg-gradient-to-br from-orange-500 to-orange-600 shadow-md shadow-orange-200' : 'bg-white border border-gray-100 shadow-card'">
+  <section *ngIf="categories.length" class="mb-7">
+    <div class="flex items-center justify-between px-5 mb-3">
+      <h2 class="font-jakarta text-lg font-bold text-cust-on-surface">Categories</h2>
+    </div>
+    <div class="flex gap-4 overflow-x-auto px-5 hide-scrollbar">
+      <button *ngFor="let cat of categories" (click)="goToCategory(cat.id)" class="flex flex-col items-center gap-1.5 shrink-0 active:scale-95 transition-transform">
+        <div class="w-16 h-16 rounded-full bg-cust-secondary-fixed flex items-center justify-center text-2xl overflow-hidden">
           <img *ngIf="cat.image" [src]="cat.image" class="w-full h-full object-cover">
           <span *ngIf="!cat.image">{{ cat.icon || '🍴' }}</span>
         </div>
-        <span class="text-xs font-medium text-center truncate w-full" [ngClass]="selectedCategory === cat.id ? 'text-orange-600' : 'text-gray-600'">{{ cat.name }}</span>
+        <span class="font-work text-xs font-semibold text-cust-on-surface">{{ cat.name }}</span>
       </button>
     </div>
-    <!-- Sub-category chips shown when a parent with children is selected -->
-    <div *ngIf="subCategories.length" class="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none mt-1">
-      <button (click)="selectSubCategory('')"
-        [class]="!selectedSubCategory ? 'bg-orange-200 text-orange-800' : 'bg-gray-50 text-gray-500'"
-        class="flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium border border-orange-200">All</button>
-      <button *ngFor="let sub of subCategories" (click)="selectSubCategory(sub.id)"
-        [class]="selectedSubCategory === sub.id ? 'bg-orange-200 text-orange-800' : 'bg-gray-50 text-gray-500'"
-        class="flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium border border-gray-200">
-        {{ sub.name }}
-      </button>
-    </div>
-  </div>
+  </section>
 
-  <!-- Offers -->
-  <div *ngIf="offers.length" class="mt-6">
-    <h2 class="px-4 font-bold text-gray-900 mb-3 text-[15px]">Offers for you</h2>
-    <div class="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-none">
-      <div *ngFor="let offer of offers" class="flex-shrink-0 w-44 bg-white rounded-2xl shadow-sm overflow-hidden border border-orange-100">
-        <div class="h-20 bg-gray-100 relative">
-          <img *ngIf="offer.image" [src]="offer.image" class="w-full h-full object-cover">
-          <div *ngIf="!offer.image" class="w-full h-full flex items-center justify-center text-2xl">🎁</div>
-          <span *ngIf="offer.badgeText" class="absolute top-1 left-1 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full"
-            [style.background]="offer.badgeColor || '#f97316'" style="color:#fff">{{ offer.badgeText }}</span>
-        </div>
-        <div class="p-2">
-          <p class="font-semibold text-gray-900 text-sm truncate">{{ offer.title }}</p>
-          <p *ngIf="offer.description" class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ offer.description }}</p>
-        </div>
+  <!-- Special offer banner -->
+  <section *ngIf="banners.length" class="px-5 mb-7">
+    <div *ngFor="let banner of banners | slice:0:1" class="relative w-full h-40 rounded-2xl overflow-hidden shadow-cust-banner">
+      <img *ngIf="banner.image" [src]="banner.image" class="absolute inset-0 w-full h-full object-cover">
+      <div *ngIf="!banner.image" class="absolute inset-0 bg-gradient-to-br from-cust-primary to-cust-primary-container"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center px-5">
+        <span class="inline-block px-2 py-1 bg-cust-primary-container text-white font-work font-semibold text-[11px] rounded w-fit mb-1.5 uppercase tracking-wider">Limited Time</span>
+        <h3 class="font-jakarta text-xl font-bold text-white">{{ banner.title }}</h3>
+        <p *ngIf="banner.subtitle" class="text-white/80 text-sm mt-0.5">{{ banner.subtitle }}</p>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Featured items -->
-  <div *ngIf="featuredItems.length && !search && !selectedCategory" class="mt-6">
-    <div class="flex items-center justify-between px-4 mb-3">
-      <h2 class="font-bold text-gray-900 text-[15px]">⭐ Featured</h2>
+  <!-- Recommended for You -->
+  <section *ngIf="featuredItems.length" class="mb-7">
+    <div class="flex items-center justify-between px-5 mb-3">
+      <h2 class="font-jakarta text-lg font-bold text-cust-on-surface">Recommended for You</h2>
+      <a routerLink="/customer/menu" class="text-cust-primary font-work font-semibold text-sm">View All</a>
     </div>
-    <div class="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-none">
-      <div *ngFor="let item of featuredItems" class="flex-shrink-0 w-44 bg-white rounded-2xl shadow-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
-        <div class="h-28 bg-gray-100 relative">
+    <div class="flex gap-4 overflow-x-auto px-5 pb-1 hide-scrollbar">
+      <div *ngFor="let item of featuredItems" (click)="goToItem(item)"
+        class="w-56 shrink-0 bg-cust-surface-container-lowest rounded-2xl shadow-cust-card overflow-hidden cursor-pointer active:scale-[0.98] transition-transform">
+        <div class="w-full h-36 bg-cust-surface-container relative">
           <img *ngIf="item.thumbImage" [src]="item.thumbImage" class="w-full h-full object-cover">
           <div *ngIf="!item.thumbImage" class="w-full h-full flex items-center justify-center text-3xl">🍽️</div>
-          <span class="absolute top-2 right-2 text-xs bg-yellow-400 text-white px-1.5 py-0.5 rounded-full shadow">⭐</span>
         </div>
-        <div class="p-2.5">
-          <p class="font-semibold text-gray-900 text-sm truncate">{{ item.name }}</p>
-          <div class="flex items-center justify-between mt-1.5">
-            <span class="text-orange-600 font-bold text-sm">{{ item.price | fqrCurrency }}</span>
-            <button (click)="addToCart(item)" class="w-7 h-7 bg-orange-500 hover:bg-orange-600 active:scale-90 rounded-full text-white text-lg flex items-center justify-center leading-none shadow-card transition-all">+</button>
+        <div class="p-3.5">
+          <h4 class="font-work font-semibold text-cust-on-surface truncate">{{ item.name }}</h4>
+          <p class="text-cust-secondary text-xs mt-0.5 line-clamp-1">{{ item.description }}</p>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="font-jakarta font-bold text-cust-on-surface">{{ item.price | fqrCurrency }}</span>
+            <button (click)="addToCart(item, $event)"
+              class="w-9 h-9 rounded-full border-2 border-cust-primary-container text-cust-primary-container flex items-center justify-center hover:bg-cust-primary-container hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-[20px]">add</span>
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Popular items -->
-  <div *ngIf="popularItems.length && !search && !selectedCategory" class="mt-6">
-    <div class="flex items-center justify-between px-4 mb-3">
-      <h2 class="font-bold text-gray-900 text-[15px]">🔥 Popular Right Now</h2>
-    </div>
-    <div class="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-none">
-      <div *ngFor="let item of popularItems" class="flex-shrink-0 w-44 bg-white rounded-2xl shadow-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
-        <div class="h-28 bg-gray-100 relative">
-          <img *ngIf="item.thumbImage" [src]="item.thumbImage" class="w-full h-full object-cover">
-          <div *ngIf="!item.thumbImage" class="w-full h-full flex items-center justify-center text-3xl">🍽️</div>
-          <span class="absolute top-2 right-2 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-red-500 text-white shadow">Trending</span>
-        </div>
-        <div class="p-2.5">
-          <p class="font-semibold text-gray-900 text-sm truncate">{{ item.name }}</p>
-          <div class="flex items-center justify-between mt-1.5">
-            <span class="text-orange-600 font-bold text-sm">{{ item.price | fqrCurrency }}</span>
-            <button (click)="addToCart(item)" class="w-7 h-7 bg-orange-500 hover:bg-orange-600 active:scale-90 rounded-full text-white text-lg flex items-center justify-center leading-none shadow-card transition-all">+</button>
-          </div>
+  <!-- Popular Choices bento grid -->
+  <section *ngIf="popularItems.length" class="px-5">
+    <h2 class="font-jakarta text-lg font-bold text-cust-on-surface mb-3">Popular Choices</h2>
+    <div class="grid grid-cols-2 gap-3">
+      <div *ngFor="let item of popularItems | slice:0:4; let i = index" (click)="goToItem(item)"
+        [class.col-span-2]="i === 3" class="h-36 rounded-2xl bg-cust-surface-container relative overflow-hidden cursor-pointer active:scale-[0.98] transition-transform">
+        <img *ngIf="item.thumbImage" [src]="item.thumbImage" class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent flex flex-col justify-end p-3.5">
+          <span class="text-white font-work font-semibold text-sm">{{ item.name }}</span>
+          <span class="text-white/70 text-xs">From {{ item.price | fqrCurrency }}</span>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- All items -->
-  <div class="mt-6 px-4">
-    <h2 class="font-bold text-gray-900 mb-3 text-[15px]">{{ selectedCategory ? 'Menu' : 'All Items' }}</h2>
-
-    <div *ngIf="loading" class="flex justify-center py-10">
-      <div class="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
-    </div>
-
-    <div *ngIf="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-      <div *ngFor="let item of allItems" class="bg-white rounded-2xl shadow-card hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col">
-        <div class="h-36 bg-gray-100 relative">
-          <img *ngIf="item.thumbImage" [src]="item.thumbImage" class="w-full h-full object-cover">
-          <div *ngIf="!item.thumbImage" class="w-full h-full flex items-center justify-center text-3xl">🍽️</div>
-          <span [ngClass]="item.itemType === 'veg' ? 'border-green-500' : 'border-red-500'"
-            class="absolute top-2 left-2 bg-white border-2 rounded w-5 h-5 flex items-center justify-center shadow-sm">
-            <span class="w-2 h-2 rounded-full" [ngClass]="item.itemType === 'veg' ? 'bg-green-500' : 'bg-red-500'"></span>
-          </span>
-          <span *ngIf="item.isFeatured" class="absolute top-2 right-2 text-xs bg-yellow-400 text-white px-1.5 py-0.5 rounded-full shadow">⭐</span>
-        </div>
-        <div class="p-3 flex-1 flex flex-col">
-          <h3 class="font-semibold text-gray-900 truncate">{{ item.name }}</h3>
-          <p class="text-xs text-gray-500 mt-0.5 line-clamp-2 flex-1">{{ item.description }}</p>
-          <div class="flex items-center justify-between mt-2.5">
-            <span class="text-orange-600 font-bold">{{ item.price | fqrCurrency }}</span>
-            <div class="flex items-center gap-2">
-              <ng-container *ngIf="getCartQty(item.id) > 0; else addBtn">
-                <div class="flex items-center gap-2 bg-orange-50 rounded-full px-2 py-1 animate-scale-in">
-                  <button (click)="cartService.updateQuantity(item.id, undefined, getCartQty(item.id) - 1)" class="text-orange-500 font-bold w-5 h-5 flex items-center justify-center active:scale-90 transition-transform">−</button>
-                  <span class="text-orange-600 font-semibold text-sm">{{ getCartQty(item.id) }}</span>
-                  <button (click)="addToCart(item)" class="text-orange-500 font-bold w-5 h-5 flex items-center justify-center active:scale-90 transition-transform">+</button>
-                </div>
-              </ng-container>
-              <ng-template #addBtn>
-                <button (click)="addToCart(item)" class="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white text-sm font-semibold px-3.5 py-1.5 rounded-full shadow-card transition-all">Add</button>
-              </ng-template>
-            </div>
-          </div>
-        </div>
-      </div>
-      <p *ngIf="!allItems.length" class="text-center text-gray-400 py-10 col-span-full">No items found</p>
-    </div>
-  </div>
+  </section>
 </div>

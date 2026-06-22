@@ -1,0 +1,92 @@
+<div *ngIf="loading" class="flex justify-center py-24">
+  <div class="animate-spin w-8 h-8 border-4 border-cust-primary-container border-t-transparent rounded-full"></div>
+</div>
+
+<div *ngIf="!loading && item" class="bg-cust-surface min-h-screen font-work animate-fade-in-up pb-4">
+
+  <!-- Back button (overlays hero) -->
+  <button (click)="goBack()"
+    class="fixed top-4 left-4 z-40 w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-cust-card active:scale-95 transition-transform">
+    <span class="material-symbols-outlined text-cust-primary">arrow_back</span>
+  </button>
+
+  <!-- Hero image -->
+  <div class="relative w-full aspect-[4/3] lg:aspect-[21/9] overflow-hidden">
+    <img *ngIf="item.coverImage || item.thumbImage" [src]="item.coverImage || item.thumbImage" class="w-full h-full object-cover">
+    <div *ngIf="!item.coverImage && !item.thumbImage" class="w-full h-full bg-cust-surface-container flex items-center justify-center text-6xl">🍽️</div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+  </div>
+
+  <!-- Content card -->
+  <div class="px-5 -mt-8 relative z-10 max-w-2xl mx-auto">
+    <div class="bg-cust-surface-container-lowest rounded-2xl shadow-cust-banner p-5">
+      <div class="flex justify-between items-start gap-3 mb-2">
+        <h1 class="font-jakarta text-2xl font-extrabold text-cust-on-surface">{{ item.name }}</h1>
+        <span class="font-jakarta font-bold text-lg text-cust-primary whitespace-nowrap">{{ unitPrice | fqrCurrency }}</span>
+      </div>
+      <p *ngIf="item.description" class="text-cust-on-surface-variant leading-relaxed mb-4">{{ item.description }}</p>
+
+      <!-- Ingredients -->
+      <div *ngIf="ingredients.length" class="mb-5">
+        <h3 class="font-work text-xs font-bold text-cust-secondary mb-2 uppercase tracking-wide">Ingredients</h3>
+        <div class="flex flex-wrap gap-2">
+          <span *ngFor="let ing of ingredients" class="bg-cust-surface-container px-3 py-1 rounded-full text-cust-on-surface-variant text-xs font-work font-semibold">{{ ing }}</span>
+        </div>
+      </div>
+
+      <p *ngIf="item.caution" class="text-xs text-cust-error mb-5">⚠ {{ item.caution }}</p>
+
+      <!-- Variations (mutually exclusive) -->
+      <section *ngIf="item.variations?.length" class="space-y-2.5 mb-6">
+        <h3 class="font-jakarta text-base font-bold text-cust-on-surface">Choose an Option</h3>
+        <label *ngFor="let v of item.variations" class="flex items-center justify-between p-3.5 bg-cust-surface-container-low rounded-xl cursor-pointer hover:bg-cust-surface-container transition-colors">
+          <div class="flex flex-col">
+            <span class="font-work font-semibold text-sm text-cust-on-surface">{{ v.name }}</span>
+            <span class="text-cust-secondary text-xs">{{ v.additionalPrice > 0 ? '+' + (v.additionalPrice | fqrCurrency) : (v.price ? (v.price | fqrCurrency) : 'Included') }}</span>
+          </div>
+          <input type="radio" name="variation" [value]="v.id" [(ngModel)]="selectedVariationId" class="w-5 h-5 text-cust-primary-container focus:ring-cust-primary-container">
+        </label>
+      </section>
+
+      <!-- Extras (multi-select) -->
+      <section *ngIf="extras.length" class="space-y-2.5 mb-6">
+        <h3 class="font-jakarta text-base font-bold text-cust-on-surface">Customize Your Order</h3>
+        <label *ngFor="let extra of extras" (click)="toggleExtra(extra.id)"
+          class="flex items-center justify-between p-3.5 bg-cust-surface-container-low rounded-xl cursor-pointer hover:bg-cust-surface-container transition-colors">
+          <div class="flex flex-col">
+            <span class="font-work font-semibold text-sm text-cust-on-surface">{{ extra.name }}</span>
+            <span class="text-cust-secondary text-xs">{{ extra.price > 0 ? '+' + (extra.price | fqrCurrency) : 'Free' }}</span>
+          </div>
+          <input type="checkbox" [checked]="selectedExtraIds.has(extra.id)" (click)="$event.stopPropagation(); toggleExtra(extra.id)"
+            class="w-6 h-6 rounded border-cust-outline text-cust-primary-container focus:ring-cust-primary-container">
+        </label>
+      </section>
+
+      <!-- Special requests -->
+      <div class="mb-2">
+        <h3 class="font-work text-xs font-bold text-cust-secondary mb-2 uppercase tracking-wide">Special Requests</h3>
+        <textarea [(ngModel)]="specialNote" placeholder="Add a note (e.g. well done, sauce on the side)..."
+          class="w-full h-24 p-3.5 rounded-xl border border-cust-outline-variant bg-transparent focus:border-cust-primary-container focus:ring-1 focus:ring-cust-primary-container transition-all outline-none resize-none placeholder:text-cust-outline-variant text-sm"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom action bar -->
+  <footer class="fixed bottom-0 w-full z-50 bg-cust-on-secondary-fixed shadow-cust-nav rounded-t-2xl px-5 py-4">
+    <div class="max-w-screen-md mx-auto flex items-center gap-4">
+      <div class="flex items-center bg-cust-surface-container-highest rounded-full h-14 px-2 flex-shrink-0">
+        <button (click)="decrementQty()" class="w-10 h-10 flex items-center justify-center text-cust-on-surface-variant active:scale-90 transition-transform">
+          <span class="material-symbols-outlined">remove</span>
+        </button>
+        <span class="w-8 text-center font-work font-bold text-cust-on-surface">{{ quantity }}</span>
+        <button (click)="incrementQty()" class="w-10 h-10 flex items-center justify-center text-cust-on-surface-variant active:scale-90 transition-transform">
+          <span class="material-symbols-outlined">add</span>
+        </button>
+      </div>
+      <button (click)="addToCart()"
+        class="flex-1 h-14 rounded-full bg-cust-primary-container text-white font-work font-bold active:scale-[0.98] transition-transform">
+        Add to Cart · {{ lineTotal | fqrCurrency }}
+      </button>
+    </div>
+  </footer>
+</div>
