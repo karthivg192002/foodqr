@@ -8,10 +8,11 @@ import { ApiService } from '../../../core/services/api.service';
   templateUrl: './currency-tax.component.html',
 })
 export class CurrencyTaxComponent implements OnInit {
-  activeTab: 'currencies' | 'taxes' = 'currencies';
+  activeTab: 'currencies' | 'taxes' | 'service-charges' = 'currencies';
 
   currencies: any[] = [];
   taxes: any[] = [];
+  serviceCharges: any[] = [];
   loading = false;
   saving = false;
 
@@ -24,6 +25,11 @@ export class CurrencyTaxComponent implements OnInit {
   showTaxModal = false;
   editingTaxId: string | null = null;
   taxForm: FormGroup;
+
+  // Service charge modal
+  showServiceChargeModal = false;
+  editingServiceChargeId: string | null = null;
+  serviceChargeForm: FormGroup;
 
   constructor(
     private api: ApiService,
@@ -46,11 +52,20 @@ export class CurrencyTaxComponent implements OnInit {
       isDefault: [false],
       status: [true],
     });
+
+    this.serviceChargeForm = this.fb.group({
+      name: ['', Validators.required],
+      rate: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      type: ['percentage'],
+      isDefault: [false],
+      status: [true],
+    });
   }
 
   ngOnInit(): void {
     this.loadCurrencies();
     this.loadTaxes();
+    this.loadServiceCharges();
   }
 
   loadCurrencies(): void {
@@ -64,6 +79,12 @@ export class CurrencyTaxComponent implements OnInit {
   loadTaxes(): void {
     this.api.get<any>('admin/taxes').subscribe({
       next: (res) => { this.taxes = Array.isArray(res) ? res : (res.data ?? []); },
+    });
+  }
+
+  loadServiceCharges(): void {
+    this.api.get<any>('admin/service-charges').subscribe({
+      next: (res) => { this.serviceCharges = Array.isArray(res) ? res : (res.data ?? []); },
     });
   }
 
@@ -150,6 +171,49 @@ export class CurrencyTaxComponent implements OnInit {
   setDefaultTax(id: string): void {
     this.api.patch(`admin/taxes/${id}/set-default`, {}).subscribe({
       next: () => { this.toastr.success('Default tax updated'); this.loadTaxes(); },
+    });
+  }
+
+  // ── Service Charge CRUD ──
+  openCreateServiceCharge(): void {
+    this.editingServiceChargeId = null;
+    this.serviceChargeForm.reset({ rate: 0, type: 'percentage', isDefault: false, status: true });
+    this.showServiceChargeModal = true;
+  }
+
+  openEditServiceCharge(c: any): void {
+    this.editingServiceChargeId = c.id;
+    this.serviceChargeForm.patchValue(c);
+    this.showServiceChargeModal = true;
+  }
+
+  saveServiceCharge(): void {
+    if (this.serviceChargeForm.invalid) { this.serviceChargeForm.markAllAsTouched(); return; }
+    this.saving = true;
+    const req = this.editingServiceChargeId
+      ? this.api.patch(`admin/service-charges/${this.editingServiceChargeId}`, this.serviceChargeForm.value)
+      : this.api.post('admin/service-charges', this.serviceChargeForm.value);
+    req.subscribe({
+      next: () => {
+        this.toastr.success(this.editingServiceChargeId ? 'Service charge updated' : 'Service charge created');
+        this.showServiceChargeModal = false;
+        this.saving = false;
+        this.loadServiceCharges();
+      },
+      error: () => { this.saving = false; },
+    });
+  }
+
+  deleteServiceCharge(id: string): void {
+    if (!confirm('Delete this service charge?')) return;
+    this.api.delete(`admin/service-charges/${id}`).subscribe({
+      next: () => { this.toastr.success('Service charge deleted'); this.loadServiceCharges(); },
+    });
+  }
+
+  setDefaultServiceCharge(id: string): void {
+    this.api.patch(`admin/service-charges/${id}/set-default`, {}).subscribe({
+      next: () => { this.toastr.success('Default service charge updated'); this.loadServiceCharges(); },
     });
   }
 }

@@ -8,9 +8,10 @@ import { DiningTable } from '../dining-tables/entities/dining-table.entity';
 import { Transaction } from '../payments/entities/transaction.entity';
 import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
+import { TenantsModule } from '../tenants/tenants.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, OrderItem, User, Item, DiningTable, Transaction])],
+  imports: [TypeOrmModule.forFeature([Order, OrderItem, User, Item, DiningTable, Transaction]), TenantsModule],
   controllers: [ReportsController],
   providers: [ReportsService],
 })

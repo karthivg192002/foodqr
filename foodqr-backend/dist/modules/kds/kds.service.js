@@ -18,9 +18,12 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const order_entity_1 = require("../orders/entities/order.entity");
 const enums_1 = require("../../common/enums");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let KdsService = class KdsService {
-    constructor(orderRepo) {
+    constructor(orderRepo, connections) {
         this.orderRepo = orderRepo;
+        this.orderRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, order_entity_1.Order, orderRepo);
     }
     async getKdsOrders(branchId) {
         const qb = this.orderRepo.createQueryBuilder('order')
@@ -48,6 +51,7 @@ exports.KdsService = KdsService;
 exports.KdsService = KdsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(order_entity_1.Order)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], KdsService);
 //# sourceMappingURL=kds.service.js.map

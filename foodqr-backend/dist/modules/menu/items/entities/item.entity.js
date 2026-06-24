@@ -14,6 +14,7 @@ const typeorm_1 = require("typeorm");
 const enums_1 = require("../../../../common/enums");
 const item_category_entity_1 = require("../../categories/entities/item-category.entity");
 const item_variation_entity_1 = require("../../variations/entities/item-variation.entity");
+const branch_entity_1 = require("../../../branches/entities/branch.entity");
 let Item = class Item {
 };
 exports.Item = Item;
@@ -58,6 +59,15 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Item.prototype, "subCategoryId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Item.prototype, "branchId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => branch_entity_1.Branch, { nullable: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'branchId' }),
+    __metadata("design:type", branch_entity_1.Branch)
+], Item.prototype, "branch", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'enum', enum: enums_1.ItemType, default: enums_1.ItemType.VEG }),
     __metadata("design:type", String)

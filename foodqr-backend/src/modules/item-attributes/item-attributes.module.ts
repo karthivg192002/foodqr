@@ -5,9 +5,10 @@ import { ItemCategoryAttribute } from './entities/item-category-attribute.entity
 import { ItemVariation } from '../menu/variations/entities/item-variation.entity';
 import { ItemAttributesService } from './item-attributes.service';
 import { ItemAttributesController } from './item-attributes.controller';
+import { TenantsModule } from '../tenants/tenants.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ItemAttribute, ItemCategoryAttribute, ItemVariation])],
+  imports: [TypeOrmModule.forFeature([ItemAttribute, ItemCategoryAttribute, ItemVariation]), TenantsModule],
   providers: [ItemAttributesService],
   controllers: [ItemAttributesController],
   exports: [ItemAttributesService],

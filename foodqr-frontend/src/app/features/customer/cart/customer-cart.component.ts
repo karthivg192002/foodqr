@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { OrderType, CartItem, Tax } from '../../../core/models';
+import { OrderType, CartItem, Tax, ServiceCharge } from '../../../core/models';
 
 declare global {
   interface Window {
@@ -29,6 +29,7 @@ export class CustomerCartComponent implements OnInit {
   savedAddresses: any[] = [];
   selectedAddressId = '';
   defaultTax: Tax | null = null;
+  defaultServiceCharge: ServiceCharge | null = null;
 
   constructor(
     public cartService: CartService,
@@ -42,6 +43,7 @@ export class CustomerCartComponent implements OnInit {
     this.loadGateways();
     this.loadAddresses();
     this.loadTax();
+    this.loadServiceCharge();
   }
 
   loadTax(): void {
@@ -51,13 +53,25 @@ export class CustomerCartComponent implements OnInit {
     });
   }
 
+  loadServiceCharge(): void {
+    this.api.get<ServiceCharge[]>('frontend/service-charges').subscribe({
+      next: (charges) => { this.defaultServiceCharge = (charges || []).find((c) => c.isDefault) || charges?.[0] || null; },
+      error: () => {},
+    });
+  }
+
   get taxAmount(): number {
     if (!this.defaultTax || this.defaultTax.isIncluded) return 0;
     return this.cartService.total * (Number(this.defaultTax.rate) / 100);
   }
 
+  get serviceChargeAmount(): number {
+    if (!this.defaultServiceCharge || this.defaultServiceCharge.isIncluded) return 0;
+    return this.cartService.total * (Number(this.defaultServiceCharge.rate) / 100);
+  }
+
   get grandTotal(): number {
-    return this.cartService.total + this.taxAmount;
+    return this.cartService.total + this.taxAmount + this.serviceChargeAmount;
   }
 
   loadGateways(): void {

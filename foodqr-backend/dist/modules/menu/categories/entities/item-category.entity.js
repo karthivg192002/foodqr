@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ItemCategory = void 0;
 const typeorm_1 = require("typeorm");
+const branch_entity_1 = require("../../../branches/entities/branch.entity");
 let ItemCategory = class ItemCategory {
 };
 exports.ItemCategory = ItemCategory;
@@ -51,6 +52,15 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => ItemCategory, (cat) => cat.parentCategory),
     __metadata("design:type", Array)
 ], ItemCategory.prototype, "children", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], ItemCategory.prototype, "branchId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => branch_entity_1.Branch, { nullable: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'branchId' }),
+    __metadata("design:type", branch_entity_1.Branch)
+], ItemCategory.prototype, "branch", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)

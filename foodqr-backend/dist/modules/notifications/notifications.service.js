@@ -22,13 +22,16 @@ const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 const user_entity_1 = require("../users/entities/user.entity");
 const sms_gateways_service_1 = require("../sms-gateways/sms-gateways.service");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let NotificationsService = NotificationsService_1 = class NotificationsService {
-    constructor(userRepo, configService, smsService) {
+    constructor(userRepo, configService, smsService, connections) {
         this.userRepo = userRepo;
         this.configService = configService;
         this.smsService = smsService;
         this.logger = new common_1.Logger(NotificationsService_1.name);
         this.firebaseInitialized = false;
+        this.userRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, user_entity_1.User, userRepo);
         this.initFirebase();
         this.initEmail();
     }
@@ -130,6 +133,7 @@ exports.NotificationsService = NotificationsService = NotificationsService_1 = _
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         config_1.ConfigService,
-        sms_gateways_service_1.SmsGatewaysService])
+        sms_gateways_service_1.SmsGatewaysService,
+        tenant_connection_service_1.TenantConnectionService])
 ], NotificationsService);
 //# sourceMappingURL=notifications.service.js.map

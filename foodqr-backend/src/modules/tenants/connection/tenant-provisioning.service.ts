@@ -78,12 +78,32 @@ export class TenantProvisioningService {
     if (!tenant) throw new BadRequestException('Tenant not found');
     if (!tenant.dbName) throw new BadRequestException('Tenant has no physical database to migrate');
 
+    const backupName = await this.backupTenantDb(tenant.dbName);
+
     const syncDs = this.connections.createSyncDataSource(tenant.dbName);
     await syncDs.initialize();
     await syncDs.destroy();
 
     await this.tenantRepo.update(tenant.id, { lastMigrationAt: new Date() });
-    return { message: 'Schema synchronized', lastMigrationAt: new Date() };
+    return { message: 'Schema synchronized', lastMigrationAt: new Date(), backupName };
+  }
+
+  /**
+   * Snapshots a tenant DB via Postgres's native `CREATE DATABASE ... TEMPLATE` before a schema sync —
+   * cheap (file-level copy, no dump/restore) and requires no extra tooling, but only works if there are
+   * no other open connections to the source DB at the moment of the copy (true here: this only runs
+   * standalone from runMigration, never concurrently with a live request against the same tenant).
+   */
+  private async backupTenantDb(dbName: string): Promise<string> {
+    const backupName = `${dbName}_bak_${Date.now()}`;
+    const adminDs = await this.connections.getAdminDataSource();
+    try {
+      await adminDs.query(`CREATE DATABASE "${backupName}" TEMPLATE "${dbName}"`);
+      this.logger.log(`Backed up ${dbName} -> ${backupName} before schema sync`);
+    } finally {
+      await adminDs.destroy();
+    }
+    return backupName;
   }
 
   async runMigrationForAllActive() {

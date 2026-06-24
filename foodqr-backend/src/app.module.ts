@@ -20,6 +20,7 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { CurrencyModule } from './modules/currency/currency.module';
 import { TaxModule } from './modules/tax/tax.module';
+import { ServiceChargeModule } from './modules/service-charge/service-charge.module';
 import { ItemAttributesModule } from './modules/item-attributes/item-attributes.module';
 import { ItemAddonsModule } from './modules/item-addons/item-addons.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
@@ -88,6 +89,7 @@ import { TenantsModule } from './modules/tenants/tenants.module';
     UploadModule,
     CurrencyModule,
     TaxModule,
+    ServiceChargeModule,
     ItemAttributesModule,
     ItemAddonsModule,
     AddressesModule,

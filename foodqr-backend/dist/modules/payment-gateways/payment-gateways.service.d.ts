@@ -1,8 +1,9 @@
 import { Repository } from 'typeorm';
 import { PaymentGateway } from './entities/payment-gateway.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class PaymentGatewaysService {
     private repo;
-    constructor(repo: Repository<PaymentGateway>);
+    constructor(repo: Repository<PaymentGateway>, connections: TenantConnectionService);
     onModuleInit(): Promise<void>;
     findAll(): Promise<PaymentGateway[]>;
     findActive(): Promise<PaymentGateway[]>;

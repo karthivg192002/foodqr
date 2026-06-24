@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const page_entity_1 = require("./entities/page.entity");
 const pages_service_1 = require("./pages.service");
 const pages_controller_1 = require("./pages.controller");
+const tenants_module_1 = require("../tenants/tenants.module");
 let PagesModule = class PagesModule {
 };
 exports.PagesModule = PagesModule;
 exports.PagesModule = PagesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([page_entity_1.Page])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([page_entity_1.Page]), tenants_module_1.TenantsModule],
         providers: [pages_service_1.PagesService],
         controllers: [pages_controller_1.PagesController],
         exports: [pages_service_1.PagesService],

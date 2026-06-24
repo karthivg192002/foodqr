@@ -62,6 +62,11 @@ __decorate([
     __metadata("design:type", String)
 ], CreateItemDto.prototype, "subCategoryId", void 0);
 __decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateItemDto.prototype, "branchId", void 0);
+__decorate([
     (0, class_validator_1.IsEnum)(enums_1.ItemType),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -160,7 +165,7 @@ let ItemsService = class ItemsService {
         const children = await this.catRepo.find({ where: { parentCategoryId: categoryId } });
         return [categoryId, ...children.map((c) => c.id)];
     }
-    async findAll(search, categoryId, isFeatured, page = 1, limit = 20) {
+    async findAll(search, categoryId, isFeatured, page = 1, limit = 20, branchId) {
         const qb = this.itemRepo.createQueryBuilder('item')
             .leftJoinAndSelect('item.category', 'category')
             .leftJoinAndSelect('item.variations', 'variations')
@@ -176,10 +181,12 @@ let ItemsService = class ItemsService {
         }
         if (isFeatured !== undefined)
             qb.andWhere('item.isFeatured = :isFeatured', { isFeatured });
+        if (branchId)
+            qb.andWhere('(item.branchId IS NULL OR item.branchId = :branchId)', { branchId });
         const [data, total] = await qb.getManyAndCount();
         return { data, total, page, limit, pages: Math.ceil(total / limit) };
     }
-    async findAllAdmin(search, categoryId, page = 1, limit = 20) {
+    async findAllAdmin(search, categoryId, page = 1, limit = 20, branchId) {
         const qb = this.itemRepo.createQueryBuilder('item')
             .leftJoinAndSelect('item.category', 'category')
             .leftJoinAndSelect('item.variations', 'variations')
@@ -192,6 +199,8 @@ let ItemsService = class ItemsService {
             const categoryIds = await this.resolveCategoryIds(categoryId);
             qb.andWhere('(item.categoryId IN (:...categoryIds) OR item.subCategoryId IN (:...categoryIds))', { categoryIds });
         }
+        if (branchId)
+            qb.andWhere('(item.branchId IS NULL OR item.branchId = :branchId)', { branchId });
         const [data, total] = await qb.getManyAndCount();
         return { data, total, page, limit, pages: Math.ceil(total / limit) };
     }

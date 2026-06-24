@@ -2,6 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn,
   UpdateDateColumn, ManyToOne, OneToMany, JoinColumn,
 } from 'typeorm';
+import { Branch } from '../../../branches/entities/branch.entity';
 
 @Entity('item_categories')
 export class ItemCategory {
@@ -32,6 +33,14 @@ export class ItemCategory {
 
   @OneToMany(() => ItemCategory, (cat) => cat.parentCategory)
   children: ItemCategory[];
+
+  /** Null = visible at every branch. Set to scope a category to a single branch's menu. */
+  @Column({ nullable: true })
+  branchId: string;
+
+  @ManyToOne(() => Branch, { nullable: true })
+  @JoinColumn({ name: 'branchId' })
+  branch: Branch;
 
   @Column({ default: true })
   status: boolean;

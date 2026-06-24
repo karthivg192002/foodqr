@@ -2,6 +2,7 @@ import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../users/entities/user.entity';
 import { SmsGatewaysService } from '../sms-gateways/sms-gateways.service';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class NotificationsService {
     private userRepo;
     private configService;
@@ -9,7 +10,7 @@ export declare class NotificationsService {
     private readonly logger;
     private firebaseInitialized;
     private transporter;
-    constructor(userRepo: Repository<User>, configService: ConfigService, smsService: SmsGatewaysService);
+    constructor(userRepo: Repository<User>, configService: ConfigService, smsService: SmsGatewaysService, connections: TenantConnectionService);
     private initFirebase;
     private initEmail;
     sendPushNotification(token: string, title: string, body: string, data?: Record<string, string>): Promise<void>;

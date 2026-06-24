@@ -2,12 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DeliveryZone, ZoneVertex } from './entities/delivery-zone.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class DeliveryZonesService {
   constructor(
     @InjectRepository(DeliveryZone) private zoneRepo: Repository<DeliveryZone>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.zoneRepo = tenantAwareRepo(connections, DeliveryZone, zoneRepo);
+  }
 
   findAll(branchId?: string) {
     const where: any = {};

@@ -3,7 +3,7 @@ import { ItemsService, CreateItemDto } from './items.service';
 export declare class ItemsController {
     private readonly itemsService;
     constructor(itemsService: ItemsService);
-    findAll(search?: string, categoryId?: string, page?: number, limit?: number): Promise<{
+    findAll(search?: string, categoryId?: string, page?: number, limit?: number, branchId?: string): Promise<{
         data: import("./entities/item.entity").Item[];
         total: number;
         page: number;
@@ -13,7 +13,7 @@ export declare class ItemsController {
     getFeatured(): Promise<import("./entities/item.entity").Item[]>;
     getPopular(): Promise<import("./entities/item.entity").Item[]>;
     findOne(id: string): Promise<import("./entities/item.entity").Item>;
-    findAllAdmin(search?: string, categoryId?: string, page?: number, limit?: number): Promise<{
+    findAllAdmin(search?: string, categoryId?: string, page?: number, limit?: number, branchId?: string): Promise<{
         data: import("./entities/item.entity").Item[];
         total: number;
         page: number;

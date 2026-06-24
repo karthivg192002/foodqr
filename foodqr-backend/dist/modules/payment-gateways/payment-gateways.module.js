@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const payment_gateway_entity_1 = require("./entities/payment-gateway.entity");
 const payment_gateways_service_1 = require("./payment-gateways.service");
 const payment_gateways_controller_1 = require("./payment-gateways.controller");
+const tenants_module_1 = require("../tenants/tenants.module");
 let PaymentGatewaysModule = class PaymentGatewaysModule {
 };
 exports.PaymentGatewaysModule = PaymentGatewaysModule;
 exports.PaymentGatewaysModule = PaymentGatewaysModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([payment_gateway_entity_1.PaymentGateway])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([payment_gateway_entity_1.PaymentGateway]), tenants_module_1.TenantsModule],
         providers: [payment_gateways_service_1.PaymentGatewaysService],
         controllers: [payment_gateways_controller_1.PaymentGatewaysController],
         exports: [payment_gateways_service_1.PaymentGatewaysService],

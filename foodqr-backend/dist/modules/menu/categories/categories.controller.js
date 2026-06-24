@@ -26,9 +26,9 @@ let CategoriesController = class CategoriesController {
     constructor(categoriesService) {
         this.categoriesService = categoriesService;
     }
-    findAll() { return this.categoriesService.findAll(); }
+    findAll(branchId) { return this.categoriesService.findAll(true, branchId); }
     findOne(id) { return this.categoriesService.findOne(id); }
-    findAllAdmin() { return this.categoriesService.findAllFlat(); }
+    findAllAdmin(branchId) { return this.categoriesService.findAllFlat(branchId); }
     create(dto) { return this.categoriesService.create(dto); }
     update(id, dto) {
         return this.categoriesService.update(id, dto);
@@ -60,8 +60,9 @@ exports.CategoriesController = CategoriesController;
 __decorate([
     (0, decorators_1.Public)(),
     (0, common_1.Get)('frontend/categories'),
+    __param(0, (0, common_1.Query)('branchId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], CategoriesController.prototype, "findAll", null);
 __decorate([
@@ -77,8 +78,9 @@ __decorate([
     (0, decorators_1.Roles)(enums_1.UserRole.ADMIN, enums_1.UserRole.BRANCH_MANAGER),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Get)('admin/categories'),
+    __param(0, (0, common_1.Query)('branchId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], CategoriesController.prototype, "findAllAdmin", null);
 __decorate([

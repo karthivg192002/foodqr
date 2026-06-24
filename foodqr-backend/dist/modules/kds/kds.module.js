@@ -13,12 +13,13 @@ const order_entity_1 = require("../orders/entities/order.entity");
 const order_item_entity_1 = require("../orders/entities/order-item.entity");
 const kds_controller_1 = require("./kds.controller");
 const kds_service_1 = require("./kds.service");
+const tenants_module_1 = require("../tenants/tenants.module");
 let KdsModule = class KdsModule {
 };
 exports.KdsModule = KdsModule;
 exports.KdsModule = KdsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([order_entity_1.Order, order_item_entity_1.OrderItem])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([order_entity_1.Order, order_item_entity_1.OrderItem]), tenants_module_1.TenantsModule],
         controllers: [kds_controller_1.KdsController],
         providers: [kds_service_1.KdsService],
     })

@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NavMenu } from './entities/nav-menu.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 export const NAV_MENU_SEED_ITEMS: Partial<NavMenu>[] = [
   // Overview
@@ -51,7 +53,12 @@ export const NAV_MENU_SEED_ITEMS: Partial<NavMenu>[] = [
 
 @Injectable()
 export class NavMenusService {
-  constructor(@InjectRepository(NavMenu) private repo: Repository<NavMenu>) {}
+  constructor(
+    @InjectRepository(NavMenu) private repo: Repository<NavMenu>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, NavMenu, repo);
+  }
 
   findAll() {
     return this.repo.find({ where: { isActive: true }, order: { groupOrder: 'ASC', sortOrder: 'ASC' } });

@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { ItemAttribute } from './entities/item-attribute.entity';
 import { ItemCategoryAttribute } from './entities/item-category-attribute.entity';
 import { ItemVariation } from '../menu/variations/entities/item-variation.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class ItemAttributesService {
@@ -11,7 +13,12 @@ export class ItemAttributesService {
     @InjectRepository(ItemAttribute) private attrRepo: Repository<ItemAttribute>,
     @InjectRepository(ItemCategoryAttribute) private pivotRepo: Repository<ItemCategoryAttribute>,
     @InjectRepository(ItemVariation) private variationRepo: Repository<ItemVariation>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.attrRepo = tenantAwareRepo(connections, ItemAttribute, attrRepo);
+    this.pivotRepo = tenantAwareRepo(connections, ItemCategoryAttribute, pivotRepo);
+    this.variationRepo = tenantAwareRepo(connections, ItemVariation, variationRepo);
+  }
 
   findAll() {
     return this.attrRepo.find({ order: { name: 'ASC' } });

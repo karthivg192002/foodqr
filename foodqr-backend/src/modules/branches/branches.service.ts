@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IsString, IsOptional, IsBoolean } from 'class-validator';
 import { Branch } from './entities/branch.entity';
 import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { TenantsService } from '../tenants/tenants.service';
 
 export class CreateBranchDto {
   @IsString()
@@ -51,6 +52,7 @@ export class BranchesService {
   constructor(
     @InjectRepository(Branch) private branchRepo: Repository<Branch>,
     private connections: TenantConnectionService,
+    private tenantsService: TenantsService,
   ) {}
 
   /** Resolved per-request: the tenant's own database if this is a physical-DB tenant, else the master/shared DB. */
@@ -73,10 +75,26 @@ export class BranchesService {
   }
 
   async create(dto: CreateBranchDto, tenantId?: string) {
+    if (tenantId) await this.assertWithinBranchLimit(tenantId);
+
     const slug = dto.slug || dto.name.toLowerCase().replace(/\s+/g, '-');
     const scopedTenantId = this.connections.hasTenantContext() ? undefined : tenantId;
     const branch = this.repo.create({ ...dto, slug, tenantId: scopedTenantId });
     return this.repo.save(branch);
+  }
+
+  /** Throws if the tenant's plan has a branch cap and they're already at it. `maxBranches <= 0` means unlimited. */
+  private async assertWithinBranchLimit(tenantId: string): Promise<void> {
+    const tenant = await this.tenantsService.findOne(tenantId).catch(() => null);
+    const maxBranches = tenant?.plan?.maxBranches;
+    if (!maxBranches || maxBranches <= 0) return;
+
+    const where: any = {};
+    if (!this.connections.hasTenantContext()) where.tenantId = tenantId;
+    const count = await this.repo.count({ where });
+    if (count >= maxBranches) {
+      throw new BadRequestException(`Branch limit reached for your plan (max ${maxBranches})`);
+    }
   }
 
   async update(id: string, dto: Partial<CreateBranchDto>, tenantId?: string) {

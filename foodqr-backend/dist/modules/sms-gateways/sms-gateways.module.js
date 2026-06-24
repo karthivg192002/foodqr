@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const sms_gateway_entity_1 = require("./entities/sms-gateway.entity");
 const sms_gateways_service_1 = require("./sms-gateways.service");
 const sms_gateways_controller_1 = require("./sms-gateways.controller");
+const tenants_module_1 = require("../tenants/tenants.module");
 let SmsGatewaysModule = class SmsGatewaysModule {
 };
 exports.SmsGatewaysModule = SmsGatewaysModule;
 exports.SmsGatewaysModule = SmsGatewaysModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([sms_gateway_entity_1.SmsGateway])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([sms_gateway_entity_1.SmsGateway]), tenants_module_1.TenantsModule],
         providers: [sms_gateways_service_1.SmsGatewaysService],
         controllers: [sms_gateways_controller_1.SmsGatewaysController],
         exports: [sms_gateways_service_1.SmsGatewaysService],

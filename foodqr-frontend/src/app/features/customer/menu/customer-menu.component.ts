@@ -38,7 +38,9 @@ export class CustomerMenuComponent implements OnInit {
   }
 
   loadCategories(): void {
-    this.api.get<ItemCategory[]>('frontend/categories').subscribe({ next: (d) => (this.categories = d || []) });
+    const params: any = {};
+    if (this.cartService.branchId) params.branchId = this.cartService.branchId;
+    this.api.get<ItemCategory[]>('frontend/categories', params).subscribe({ next: (d) => (this.categories = d || []) });
   }
 
   selectCategory(catId: string): void {
@@ -55,6 +57,7 @@ export class CustomerMenuComponent implements OnInit {
     const params: any = { limit: 100 };
     if (this.search) params.search = this.search;
     if (this.selectedCategoryId) params.categoryId = this.selectedCategoryId;
+    if (this.cartService.branchId) params.branchId = this.cartService.branchId;
     this.api.get<any>('frontend/items', params).subscribe({
       next: (res) => {
         const items: Item[] = Array.isArray(res) ? res : (res.data ?? []);

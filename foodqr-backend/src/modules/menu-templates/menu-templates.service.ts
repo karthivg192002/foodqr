@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { IsString, IsOptional, IsBoolean, IsNumber, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import { MenuTemplate } from './entities/menu-template.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 export class CreateMenuTemplateDto {
   @IsString()
@@ -27,7 +29,12 @@ export class CreateMenuTemplateDto {
 
 @Injectable()
 export class MenuTemplatesService {
-  constructor(@InjectRepository(MenuTemplate) private repo: Repository<MenuTemplate>) {}
+  constructor(
+    @InjectRepository(MenuTemplate) private repo: Repository<MenuTemplate>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, MenuTemplate, repo);
+  }
 
   findAll() {
     return this.repo.find({ order: { sortOrder: 'ASC', name: 'ASC' } });

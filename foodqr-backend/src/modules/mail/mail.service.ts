@@ -3,12 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as nodemailer from 'nodemailer';
 import { AppSetting } from '../settings/entities/app-setting.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
 
-  constructor(@InjectRepository(AppSetting) private settingRepo: Repository<AppSetting>) {}
+  constructor(
+    @InjectRepository(AppSetting) private settingRepo: Repository<AppSetting>,
+    connections: TenantConnectionService,
+  ) {
+    this.settingRepo = tenantAwareRepo(connections, AppSetting, settingRepo);
+  }
 
   private async getSmtpConfig() {
     const keys = ['mail_host', 'mail_port', 'mail_username', 'mail_password', 'mail_encryption', 'mail_from_address', 'mail_from_name'];

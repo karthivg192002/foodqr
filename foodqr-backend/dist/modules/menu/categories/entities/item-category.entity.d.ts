@@ -1,3 +1,4 @@
+import { Branch } from '../../../branches/entities/branch.entity';
 export declare class ItemCategory {
     id: string;
     name: string;
@@ -8,6 +9,8 @@ export declare class ItemCategory {
     parentCategoryId: string;
     parentCategory: ItemCategory;
     children: ItemCategory[];
+    branchId: string;
+    branch: Branch;
     status: boolean;
     variationOnly: boolean;
     sortOrder: number;

@@ -123,7 +123,7 @@
         <span>Tax{{ defaultTax ? ' (' + defaultTax.rate + '%)' : '' }}</span><span>{{ taxAmount | fqrCurrency }}</span>
       </div>
       <div class="flex justify-between text-cust-secondary text-sm">
-        <span>Service Charge</span><span>{{ 0 | fqrCurrency }}</span>
+        <span>Service Charge{{ defaultServiceCharge ? ' (' + defaultServiceCharge.rate + '%)' : '' }}</span><span>{{ serviceChargeAmount | fqrCurrency }}</span>
       </div>
       <div class="pt-2.5 border-t border-cust-outline-variant flex justify-between items-center">
         <span class="font-jakarta text-lg font-bold text-cust-on-surface">Total</span>

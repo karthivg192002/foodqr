@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, ParseUUIDPipe, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, ParseUUIDPipe, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -16,7 +16,7 @@ export class CategoriesController {
 
   @Public()
   @Get('frontend/categories')
-  findAll() { return this.categoriesService.findAll(); }
+  findAll(@Query('branchId') branchId?: string) { return this.categoriesService.findAll(true, branchId); }
 
   @Public()
   @Get('frontend/categories/:id')
@@ -26,7 +26,7 @@ export class CategoriesController {
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)
   @ApiBearerAuth()
   @Get('admin/categories')
-  findAllAdmin() { return this.categoriesService.findAllFlat(); }
+  findAllAdmin(@Query('branchId') branchId?: string) { return this.categoriesService.findAllFlat(branchId); }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.BRANCH_MANAGER)

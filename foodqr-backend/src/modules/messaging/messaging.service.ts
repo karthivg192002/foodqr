@@ -3,13 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Message } from './entities/message.entity';
 import { MessageHistory } from './entities/message-history.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class MessagingService {
   constructor(
     @InjectRepository(Message) private msgRepo: Repository<Message>,
     @InjectRepository(MessageHistory) private historyRepo: Repository<MessageHistory>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.msgRepo = tenantAwareRepo(connections, Message, msgRepo);
+    this.historyRepo = tenantAwareRepo(connections, MessageHistory, historyRepo);
+  }
 
   async getOrCreateThread(userId: string, branchId: string) {
     let thread = await this.msgRepo.findOne({ where: { userId, branchId } });

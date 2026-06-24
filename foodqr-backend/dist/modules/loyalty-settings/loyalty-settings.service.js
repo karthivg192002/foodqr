@@ -17,9 +17,12 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const loyalty_setting_entity_1 = require("./entities/loyalty-setting.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let LoyaltySettingsService = class LoyaltySettingsService {
-    constructor(repo) {
+    constructor(repo, connections) {
         this.repo = repo;
+        this.repo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, loyalty_setting_entity_1.LoyaltySetting, repo);
     }
     findAll() { return this.repo.find(); }
     async get(key) {
@@ -47,6 +50,7 @@ exports.LoyaltySettingsService = LoyaltySettingsService;
 exports.LoyaltySettingsService = LoyaltySettingsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(loyalty_setting_entity_1.LoyaltySetting)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], LoyaltySettingsService);
 //# sourceMappingURL=loyalty-settings.service.js.map

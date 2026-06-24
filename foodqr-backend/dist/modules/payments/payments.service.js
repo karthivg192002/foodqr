@@ -24,13 +24,19 @@ const order_entity_1 = require("../orders/entities/order.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 const payment_gateway_entity_1 = require("../payment-gateways/entities/payment-gateway.entity");
 const enums_1 = require("../../common/enums");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let PaymentsService = class PaymentsService {
-    constructor(transactionRepo, orderRepo, userRepo, paymentGatewayRepo, configService) {
+    constructor(transactionRepo, orderRepo, userRepo, paymentGatewayRepo, configService, connections) {
         this.transactionRepo = transactionRepo;
         this.orderRepo = orderRepo;
         this.userRepo = userRepo;
         this.paymentGatewayRepo = paymentGatewayRepo;
         this.configService = configService;
+        this.transactionRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, transaction_entity_1.Transaction, transactionRepo);
+        this.orderRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, order_entity_1.Order, orderRepo);
+        this.userRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, user_entity_1.User, userRepo);
+        this.paymentGatewayRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, payment_gateway_entity_1.PaymentGateway, paymentGatewayRepo);
         const stripeKey = this.configService.get('STRIPE_SECRET_KEY');
         if (stripeKey)
             this.stripe = new stripe_1.default(stripeKey, { apiVersion: '2023-10-16' });
@@ -387,6 +393,7 @@ exports.PaymentsService = PaymentsService = __decorate([
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        tenant_connection_service_1.TenantConnectionService])
 ], PaymentsService);
 //# sourceMappingURL=payments.service.js.map

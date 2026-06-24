@@ -13,12 +13,13 @@ const item_addon_entity_1 = require("./entities/item-addon.entity");
 const item_entity_1 = require("../menu/items/entities/item.entity");
 const item_addons_service_1 = require("./item-addons.service");
 const item_addons_controller_1 = require("./item-addons.controller");
+const tenants_module_1 = require("../tenants/tenants.module");
 let ItemAddonsModule = class ItemAddonsModule {
 };
 exports.ItemAddonsModule = ItemAddonsModule;
 exports.ItemAddonsModule = ItemAddonsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([item_addon_entity_1.ItemAddon, item_entity_1.Item])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([item_addon_entity_1.ItemAddon, item_entity_1.Item]), tenants_module_1.TenantsModule],
         providers: [item_addons_service_1.ItemAddonsService],
         controllers: [item_addons_controller_1.ItemAddonsController],
         exports: [item_addons_service_1.ItemAddonsService],

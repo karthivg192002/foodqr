@@ -62,6 +62,7 @@ export class TableCartComponent {
             ? this.paymentMethod
             : null,
           diningTableId: table.id,
+          branchId: table.branchId,
           items: this.cartService.toOrderItems(),
           orderNote: this.orderNote,
         };

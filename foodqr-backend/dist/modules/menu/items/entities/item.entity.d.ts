@@ -1,6 +1,7 @@
 import { ItemType } from '../../../../common/enums';
 import { ItemCategory } from '../../categories/entities/item-category.entity';
 import { ItemVariation } from '../../variations/entities/item-variation.entity';
+import { Branch } from '../../../branches/entities/branch.entity';
 export declare class Item {
     id: string;
     name: string;
@@ -12,6 +13,8 @@ export declare class Item {
     categoryId: string;
     category: ItemCategory;
     subCategoryId: string;
+    branchId: string;
+    branch: Branch;
     itemType: ItemType;
     thumbImage: string;
     coverImage: string;

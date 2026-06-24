@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const tax_entity_1 = require("./entities/tax.entity");
 const tax_controller_1 = require("./tax.controller");
 const tax_service_1 = require("./tax.service");
+const tenants_module_1 = require("../tenants/tenants.module");
 let TaxModule = class TaxModule {
 };
 exports.TaxModule = TaxModule;
 exports.TaxModule = TaxModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([tax_entity_1.Tax])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([tax_entity_1.Tax]), tenants_module_1.TenantsModule],
         controllers: [tax_controller_1.TaxController],
         providers: [tax_service_1.TaxService],
         exports: [tax_service_1.TaxService],

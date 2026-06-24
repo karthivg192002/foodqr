@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import * as https from 'https';
 import * as querystring from 'querystring';
 import { SmsGateway } from './entities/sms-gateway.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 const DEFAULT_GATEWAYS = [
   { name: 'Twilio', slug: 'twilio' },
@@ -18,7 +20,12 @@ const DEFAULT_GATEWAYS = [
 export class SmsGatewaysService {
   private readonly logger = new Logger(SmsGatewaysService.name);
 
-  constructor(@InjectRepository(SmsGateway) private repo: Repository<SmsGateway>) {}
+  constructor(
+    @InjectRepository(SmsGateway) private repo: Repository<SmsGateway>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, SmsGateway, repo);
+  }
 
   async onModuleInit() {
     for (const gw of DEFAULT_GATEWAYS) {

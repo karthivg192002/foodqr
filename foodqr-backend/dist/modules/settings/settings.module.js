@@ -13,12 +13,13 @@ const settings_controller_1 = require("./settings.controller");
 const settings_service_1 = require("./settings.service");
 const app_setting_entity_1 = require("./entities/app-setting.entity");
 const upload_module_1 = require("../upload/upload.module");
+const tenants_module_1 = require("../tenants/tenants.module");
 let SettingsModule = class SettingsModule {
 };
 exports.SettingsModule = SettingsModule;
 exports.SettingsModule = SettingsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([app_setting_entity_1.AppSetting]), upload_module_1.UploadModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([app_setting_entity_1.AppSetting]), upload_module_1.UploadModule, tenants_module_1.TenantsModule],
         controllers: [settings_controller_1.SettingsController],
         providers: [settings_service_1.SettingsService],
         exports: [settings_service_1.SettingsService],

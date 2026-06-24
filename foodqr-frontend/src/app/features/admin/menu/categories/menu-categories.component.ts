@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../../core/services/api.service';
-import { ItemCategory } from '../../../../core/models';
+import { ItemCategory, Branch } from '../../../../core/models';
 
 @Component({ selector: 'app-menu-categories', templateUrl: './menu-categories.component.html' })
 export class MenuCategoriesComponent implements OnInit {
   categories: ItemCategory[] = [];
+  branches: Branch[] = [];
   loading = false;
   showForm = false;
   editingId: string | null = null;
@@ -16,7 +17,7 @@ export class MenuCategoriesComponent implements OnInit {
   uploadingImage = false;
 
   constructor(private api: ApiService, private toastr: ToastrService, private fb: FormBuilder) {
-    this.form = this.fb.group({ name: ['', Validators.required], description: [''], icon: [''], image: [''], status: [true] });
+    this.form = this.fb.group({ name: ['', Validators.required], description: [''], icon: [''], image: [''], branchId: [''], status: [true] });
   }
 
   onImageSelected(event: Event): void {
@@ -29,7 +30,10 @@ export class MenuCategoriesComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+    this.api.get<Branch[]>('admin/branches').subscribe({ next: (b) => this.branches = b || [] });
+  }
 
   load(): void {
     this.loading = true;

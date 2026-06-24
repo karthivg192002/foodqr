@@ -9,6 +9,8 @@ import { Order } from '../orders/entities/order.entity';
 import { User } from '../users/entities/user.entity';
 import { PaymentGateway } from '../payment-gateways/entities/payment-gateway.entity';
 import { PaymentMethod, PaymentStatus } from '../../common/enums';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class PaymentsService {
@@ -20,7 +22,12 @@ export class PaymentsService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(PaymentGateway) private paymentGatewayRepo: Repository<PaymentGateway>,
     private configService: ConfigService,
+    connections: TenantConnectionService,
   ) {
+    this.transactionRepo = tenantAwareRepo(connections, Transaction, transactionRepo);
+    this.orderRepo = tenantAwareRepo(connections, Order, orderRepo);
+    this.userRepo = tenantAwareRepo(connections, User, userRepo);
+    this.paymentGatewayRepo = tenantAwareRepo(connections, PaymentGateway, paymentGatewayRepo);
     const stripeKey = this.configService.get('STRIPE_SECRET_KEY');
     if (stripeKey) this.stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
   }

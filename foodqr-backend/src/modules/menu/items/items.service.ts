@@ -32,6 +32,9 @@ export class CreateItemDto {
   @IsString() @IsOptional()
   subCategoryId?: string;
 
+  @IsString() @IsOptional()
+  branchId?: string;
+
   @IsEnum(ItemType) @IsOptional()
   itemType?: ItemType;
 
@@ -100,7 +103,7 @@ export class ItemsService {
     return [categoryId, ...children.map((c) => c.id)];
   }
 
-  async findAll(search?: string, categoryId?: string, isFeatured?: boolean, page = 1, limit = 20) {
+  async findAll(search?: string, categoryId?: string, isFeatured?: boolean, page = 1, limit = 20, branchId?: string) {
     const qb = this.itemRepo.createQueryBuilder('item')
       .leftJoinAndSelect('item.category', 'category')
       .leftJoinAndSelect('item.variations', 'variations')
@@ -115,12 +118,13 @@ export class ItemsService {
       qb.andWhere('(item.categoryId IN (:...categoryIds) OR item.subCategoryId IN (:...categoryIds))', { categoryIds });
     }
     if (isFeatured !== undefined) qb.andWhere('item.isFeatured = :isFeatured', { isFeatured });
+    if (branchId) qb.andWhere('(item.branchId IS NULL OR item.branchId = :branchId)', { branchId });
 
     const [data, total] = await qb.getManyAndCount();
     return { data, total, page, limit, pages: Math.ceil(total / limit) };
   }
 
-  async findAllAdmin(search?: string, categoryId?: string, page = 1, limit = 20) {
+  async findAllAdmin(search?: string, categoryId?: string, page = 1, limit = 20, branchId?: string) {
     const qb = this.itemRepo.createQueryBuilder('item')
       .leftJoinAndSelect('item.category', 'category')
       .leftJoinAndSelect('item.variations', 'variations')
@@ -133,6 +137,7 @@ export class ItemsService {
       const categoryIds = await this.resolveCategoryIds(categoryId);
       qb.andWhere('(item.categoryId IN (:...categoryIds) OR item.subCategoryId IN (:...categoryIds))', { categoryIds });
     }
+    if (branchId) qb.andWhere('(item.branchId IS NULL OR item.branchId = :branchId)', { branchId });
 
     const [data, total] = await qb.getManyAndCount();
     return { data, total, page, limit, pages: Math.ceil(total / limit) };

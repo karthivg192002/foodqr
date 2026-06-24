@@ -17,9 +17,12 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const app_setting_entity_1 = require("./entities/app-setting.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let SettingsService = class SettingsService {
-    constructor(settingRepo) {
+    constructor(settingRepo, connections) {
         this.settingRepo = settingRepo;
+        this.settingRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, app_setting_entity_1.AppSetting, settingRepo);
     }
     async getAll(group) {
         const where = {};
@@ -73,6 +76,7 @@ exports.SettingsService = SettingsService;
 exports.SettingsService = SettingsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(app_setting_entity_1.AppSetting)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], SettingsService);
 //# sourceMappingURL=settings.service.js.map

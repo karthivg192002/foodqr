@@ -2,12 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AnalyticSection } from './entities/analytic-section.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class AnalyticsSectionsService {
   constructor(
     @InjectRepository(AnalyticSection) private repo: Repository<AnalyticSection>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, AnalyticSection, repo);
+  }
 
   findAll() {
     return this.repo.find({ order: { sortOrder: 'ASC' } });

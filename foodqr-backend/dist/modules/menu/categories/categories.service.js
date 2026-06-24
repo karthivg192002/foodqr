@@ -49,6 +49,11 @@ __decorate([
     __metadata("design:type", String)
 ], CreateCategoryDto.prototype, "parentCategoryId", void 0);
 __decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "branchId", void 0);
+__decorate([
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
@@ -69,16 +74,24 @@ let CategoriesService = class CategoriesService {
         this.catRepo = catRepo;
         this.catRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_category_entity_1.ItemCategory, catRepo);
     }
-    async findAll(includeChildren = true) {
-        const categories = await this.catRepo.find({
-            where: { parentCategoryId: (0, typeorm_2.IsNull)() },
-            relations: includeChildren ? ['children'] : [],
-            order: { sortOrder: 'ASC', name: 'ASC' },
-        });
-        return categories;
+    async findAll(includeChildren = true, branchId) {
+        const qb = this.catRepo.createQueryBuilder('category')
+            .where('category.parentCategoryId IS NULL')
+            .orderBy('category.sortOrder', 'ASC')
+            .addOrderBy('category.name', 'ASC');
+        if (includeChildren)
+            qb.leftJoinAndSelect('category.children', 'children');
+        if (branchId)
+            qb.andWhere('(category.branchId IS NULL OR category.branchId = :branchId)', { branchId });
+        return qb.getMany();
     }
-    async findAllFlat() {
-        return this.catRepo.find({ order: { sortOrder: 'ASC', name: 'ASC' } });
+    async findAllFlat(branchId) {
+        const qb = this.catRepo.createQueryBuilder('category')
+            .orderBy('category.sortOrder', 'ASC')
+            .addOrderBy('category.name', 'ASC');
+        if (branchId)
+            qb.andWhere('(category.branchId IS NULL OR category.branchId = :branchId)', { branchId });
+        return qb.getMany();
     }
     async findOne(id) {
         const cat = await this.catRepo.findOne({ where: { id }, relations: ['children', 'parentCategory'] });

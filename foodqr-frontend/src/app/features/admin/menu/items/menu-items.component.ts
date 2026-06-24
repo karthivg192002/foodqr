@@ -2,13 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../../core/services/api.service';
-import { Item, ItemCategory } from '../../../../core/models';
+import { Item, ItemCategory, Branch } from '../../../../core/models';
 
 @Component({ selector: 'app-menu-items', templateUrl: './menu-items.component.html' })
 export class MenuItemsComponent implements OnInit {
   items: Item[] = [];
   categories: ItemCategory[] = [];
   subCategories: ItemCategory[] = [];
+  branches: Branch[] = [];
   total = 0;
   page = 1;
   limit = 20;
@@ -38,6 +39,7 @@ export class MenuItemsComponent implements OnInit {
       price: [0, [Validators.required, Validators.min(0)]],
       categoryId: [''],
       subCategoryId: [''],
+      branchId: [''],
       itemType: ['veg'],
       taxRate: [0],
       isFeatured: [false],
@@ -80,6 +82,7 @@ export class MenuItemsComponent implements OnInit {
   ngOnInit(): void {
     this.loadItems();
     this.api.get<ItemCategory[]>('frontend/categories').subscribe({ next: (c) => this.categories = c });
+    this.api.get<Branch[]>('admin/branches').subscribe({ next: (b) => this.branches = b || [] });
   }
 
   onCategoryChange(categoryId: string): void {

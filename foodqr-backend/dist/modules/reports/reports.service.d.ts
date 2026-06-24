@@ -5,6 +5,7 @@ import { User } from '../users/entities/user.entity';
 import { Item } from '../menu/items/entities/item.entity';
 import { DiningTable } from '../dining-tables/entities/dining-table.entity';
 import { Transaction } from '../payments/entities/transaction.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class ReportsService {
     private orderRepo;
     private orderItemRepo;
@@ -12,7 +13,7 @@ export declare class ReportsService {
     private itemRepo;
     private tableRepo;
     private transactionRepo;
-    constructor(orderRepo: Repository<Order>, orderItemRepo: Repository<OrderItem>, userRepo: Repository<User>, itemRepo: Repository<Item>, tableRepo: Repository<DiningTable>, transactionRepo: Repository<Transaction>);
+    constructor(orderRepo: Repository<Order>, orderItemRepo: Repository<OrderItem>, userRepo: Repository<User>, itemRepo: Repository<Item>, tableRepo: Repository<DiningTable>, transactionRepo: Repository<Transaction>, connections: TenantConnectionService);
     getDashboardSummary(): Promise<{
         totalOrders: number;
         todayOrders: number;

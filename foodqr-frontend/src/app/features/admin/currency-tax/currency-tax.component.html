@@ -14,12 +14,17 @@
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       Add Tax Rate
     </button>
+    <button *ngIf="activeTab==='service-charges'" (click)="openCreateServiceCharge()" class="btn-primary btn-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Add Service Charge
+    </button>
   </div>
 
   <!-- Tab pills -->
   <div class="tab-bar">
     <button (click)="activeTab='currencies'" [class.active]="activeTab==='currencies'">Currencies</button>
     <button (click)="activeTab='taxes'" [class.active]="activeTab==='taxes'">Tax Rates</button>
+    <button (click)="activeTab='service-charges'" [class.active]="activeTab==='service-charges'">Service Charges</button>
   </div>
 
   <!-- ── CURRENCIES ── -->
@@ -121,6 +126,56 @@
       </tbody>
     </table>
   </div>
+
+  <!-- ── SERVICE CHARGES ── -->
+  <div *ngIf="activeTab==='service-charges'" class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Service Charge</th>
+          <th style="text-align:right">Rate</th>
+          <th>Type</th>
+          <th style="text-align:center">Status</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of serviceCharges">
+          <td>
+            <div class="flex items-center gap-2">
+              <span style="font-size:13.5px;font-weight:600;color:#0f172a">{{ c.name }}</span>
+              <span *ngIf="c.isDefault" class="badge-orange badge-plain">Default</span>
+            </div>
+          </td>
+          <td style="text-align:right;font-size:14px;font-weight:700;color:#0f172a">
+            {{ c.rate }}{{ c.type==='percentage' ? '%' : '' }}
+          </td>
+          <td style="font-size:13px;color:#64748b;text-transform:capitalize">{{ c.type }}</td>
+          <td style="text-align:center">
+            <span [class]="c.status ? 'badge-success' : 'badge-danger'">{{ c.status ? 'Active' : 'Inactive' }}</span>
+          </td>
+          <td style="text-align:right">
+            <div class="flex items-center justify-end gap-1">
+              <button *ngIf="!c.isDefault" (click)="setDefaultServiceCharge(c.id)" class="action-link action-link-blue">Set Default</button>
+              <button (click)="openEditServiceCharge(c)" class="action-link action-link-gray">Edit</button>
+              <button (click)="deleteServiceCharge(c.id)" class="action-link action-link-danger">Delete</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="serviceCharges.length===0">
+          <td colspan="5">
+            <div class="empty-state">
+              <div class="empty-state-icon">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              </div>
+              <p class="empty-state-title">No service charges configured</p>
+              <p class="empty-state-desc">Add a service charge to apply it to the customer bill summary.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <!-- ── Currency Modal ── -->
@@ -212,6 +267,53 @@
         <button type="button" (click)="showTaxModal=false" class="btn-secondary btn-sm">Cancel</button>
         <button type="submit" [disabled]="saving" class="btn-primary btn-sm">
           {{ saving ? 'Saving…' : (editingTaxId ? 'Update' : 'Create') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Service Charge Modal ── -->
+<div *ngIf="showServiceChargeModal" class="modal-backdrop">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <p class="modal-header-title">{{ editingServiceChargeId ? 'Edit Service Charge' : 'Add Service Charge' }}</p>
+      <button (click)="showServiceChargeModal=false" class="modal-close-btn">×</button>
+    </div>
+    <form [formGroup]="serviceChargeForm" (ngSubmit)="saveServiceCharge()">
+      <div class="modal-body space-y-4">
+        <div class="form-group">
+          <label class="label">Name <span style="color:#dc2626">*</span></label>
+          <input formControlName="name" class="input-field" placeholder="Service Charge">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="label">Rate <span style="color:#dc2626">*</span></label>
+            <input formControlName="rate" type="number" step="0.01" class="input-field" placeholder="5">
+          </div>
+          <div class="form-group">
+            <label class="label">Type</label>
+            <select formControlName="type" class="input-field">
+              <option value="percentage">Percentage</option>
+              <option value="fixed">Fixed</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+            <input type="checkbox" formControlName="isDefault" id="scDefault" class="w-4 h-4">
+            <label for="scDefault" style="font-size:13px;font-weight:500;color:#334155;cursor:pointer">Set as Default</label>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
+            <input type="checkbox" formControlName="status" id="scStatus" class="w-4 h-4">
+            <label for="scStatus" style="font-size:13px;font-weight:500;color:#334155;cursor:pointer">Active</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" (click)="showServiceChargeModal=false" class="btn-secondary btn-sm">Cancel</button>
+        <button type="submit" [disabled]="saving" class="btn-primary btn-sm">
+          {{ saving ? 'Saving…' : (editingServiceChargeId ? 'Update' : 'Create') }}
         </button>
       </div>
     </form>

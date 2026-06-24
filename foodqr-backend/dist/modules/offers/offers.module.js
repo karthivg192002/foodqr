@@ -15,12 +15,13 @@ const promotion_banner_entity_1 = require("./entities/promotion-banner.entity");
 const offer_item_entity_1 = require("./entities/offer-item.entity");
 const offers_controller_1 = require("./offers.controller");
 const offers_service_1 = require("./offers.service");
+const tenants_module_1 = require("../tenants/tenants.module");
 let OffersModule = class OffersModule {
 };
 exports.OffersModule = OffersModule;
 exports.OffersModule = OffersModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([offer_entity_1.Offer, banner_entity_1.Banner, promotion_banner_entity_1.PromotionBanner, offer_item_entity_1.OfferItem])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([offer_entity_1.Offer, banner_entity_1.Banner, promotion_banner_entity_1.PromotionBanner, offer_item_entity_1.OfferItem]), tenants_module_1.TenantsModule],
         controllers: [offers_controller_1.OffersController],
         providers: [offers_service_1.OffersService],
         exports: [offers_service_1.OffersService, typeorm_1.TypeOrmModule],

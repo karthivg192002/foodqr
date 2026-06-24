@@ -19,6 +19,7 @@ const typeorm_2 = require("typeorm");
 const class_validator_1 = require("class-validator");
 const branch_entity_1 = require("./entities/branch.entity");
 const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenants_service_1 = require("../tenants/tenants.service");
 class CreateBranchDto {
 }
 exports.CreateBranchDto = CreateBranchDto;
@@ -87,9 +88,10 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateBranchDto.prototype, "status", void 0);
 let BranchesService = class BranchesService {
-    constructor(branchRepo, connections) {
+    constructor(branchRepo, connections, tenantsService) {
         this.branchRepo = branchRepo;
         this.connections = connections;
+        this.tenantsService = tenantsService;
     }
     get repo() {
         return this.connections.repoOrDefault(branch_entity_1.Branch, this.branchRepo);
@@ -110,10 +112,25 @@ let BranchesService = class BranchesService {
         return branch;
     }
     async create(dto, tenantId) {
+        if (tenantId)
+            await this.assertWithinBranchLimit(tenantId);
         const slug = dto.slug || dto.name.toLowerCase().replace(/\s+/g, '-');
         const scopedTenantId = this.connections.hasTenantContext() ? undefined : tenantId;
         const branch = this.repo.create({ ...dto, slug, tenantId: scopedTenantId });
         return this.repo.save(branch);
+    }
+    async assertWithinBranchLimit(tenantId) {
+        const tenant = await this.tenantsService.findOne(tenantId).catch(() => null);
+        const maxBranches = tenant?.plan?.maxBranches;
+        if (!maxBranches || maxBranches <= 0)
+            return;
+        const where = {};
+        if (!this.connections.hasTenantContext())
+            where.tenantId = tenantId;
+        const count = await this.repo.count({ where });
+        if (count >= maxBranches) {
+            throw new common_1.BadRequestException(`Branch limit reached for your plan (max ${maxBranches})`);
+        }
     }
     async update(id, dto, tenantId) {
         await this.findOne(id, tenantId);
@@ -148,6 +165,7 @@ exports.BranchesService = BranchesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(branch_entity_1.Branch)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        tenant_connection_service_1.TenantConnectionService])
+        tenant_connection_service_1.TenantConnectionService,
+        tenants_service_1.TenantsService])
 ], BranchesService);
 //# sourceMappingURL=branches.service.js.map

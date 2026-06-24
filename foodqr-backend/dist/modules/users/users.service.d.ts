@@ -4,6 +4,7 @@ import { Order } from '../orders/entities/order.entity';
 import { Address } from '../addresses/entities/address.entity';
 import { TenantUserIndex } from '../tenants/entities/tenant-user-index.entity';
 import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { TenantsService } from '../tenants/tenants.service';
 import { UserRole } from '../../common/enums';
 import { UpdateUserDto, UpdateDeviceTokenDto } from './dto/user.dto';
 export declare class UsersService {
@@ -12,8 +13,10 @@ export declare class UsersService {
     private addressRepo;
     private tenantUserIndexRepo;
     private connections;
-    constructor(userRepo: Repository<User>, orderRepo: Repository<Order>, addressRepo: Repository<Address>, tenantUserIndexRepo: Repository<TenantUserIndex>, connections: TenantConnectionService);
+    private tenantsService;
+    constructor(userRepo: Repository<User>, orderRepo: Repository<Order>, addressRepo: Repository<Address>, tenantUserIndexRepo: Repository<TenantUserIndex>, connections: TenantConnectionService, tenantsService: TenantsService);
     private get repo();
+    private assertWithinStaffLimit;
     private get orders();
     private get addresses();
     findAll(role?: UserRole, search?: string, page?: number, limit?: number, tenantId?: string): Promise<{

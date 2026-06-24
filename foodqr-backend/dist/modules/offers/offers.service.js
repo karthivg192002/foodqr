@@ -20,12 +20,18 @@ const offer_entity_1 = require("./entities/offer.entity");
 const banner_entity_1 = require("./entities/banner.entity");
 const promotion_banner_entity_1 = require("./entities/promotion-banner.entity");
 const offer_item_entity_1 = require("./entities/offer-item.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let OffersService = class OffersService {
-    constructor(offerRepo, bannerRepo, promoRepo, offerItemRepo) {
+    constructor(offerRepo, bannerRepo, promoRepo, offerItemRepo, connections) {
         this.offerRepo = offerRepo;
         this.bannerRepo = bannerRepo;
         this.promoRepo = promoRepo;
         this.offerItemRepo = offerItemRepo;
+        this.offerRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, offer_entity_1.Offer, offerRepo);
+        this.bannerRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, banner_entity_1.Banner, bannerRepo);
+        this.promoRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, promotion_banner_entity_1.PromotionBanner, promoRepo);
+        this.offerItemRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, offer_item_entity_1.OfferItem, offerItemRepo);
     }
     getActiveOffers() {
         const now = new Date();
@@ -134,6 +140,7 @@ exports.OffersService = OffersService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], OffersService);
 //# sourceMappingURL=offers.service.js.map

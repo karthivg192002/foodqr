@@ -42,7 +42,9 @@ export class CustomerHomeComponent implements OnInit {
   }
 
   loadCategories(): void {
-    this.api.get<ItemCategory[]>('frontend/categories').subscribe({ next: (d) => (this.categories = d || []) });
+    const params: any = {};
+    if (this.cartService.branchId) params.branchId = this.cartService.branchId;
+    this.api.get<ItemCategory[]>('frontend/categories', params).subscribe({ next: (d) => (this.categories = d || []) });
   }
 
   loadFeatured(): void {

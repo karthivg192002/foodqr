@@ -2,10 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TimeSlot } from './entities/time-slot.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class TimeSlotsService {
-  constructor(@InjectRepository(TimeSlot) private repo: Repository<TimeSlot>) {}
+  constructor(
+    @InjectRepository(TimeSlot) private repo: Repository<TimeSlot>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, TimeSlot, repo);
+  }
 
   findByBranch(branchId: string) {
     return this.repo.find({ where: { branchId }, order: { day: 'ASC' } });

@@ -2,10 +2,40 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { CartItem, Item, ItemVariation } from '../models';
 
+const BRANCH_STORAGE_KEY = 'fqr_selected_branch';
+
 @Injectable({ providedIn: 'root' })
 export class CartService {
   private cartSubject = new BehaviorSubject<CartItem[]>([]);
   cart$ = this.cartSubject.asObservable();
+
+  /** Branch the current cart/menu is scoped to — set from a scanned table or a branch picker. */
+  tableId?: string;
+
+  private selectedBranchSubject = new BehaviorSubject<{ id: string; name: string } | null>(this.loadStoredBranch());
+  selectedBranch$ = this.selectedBranchSubject.asObservable();
+
+  get branchId(): string | undefined { return this.selectedBranchSubject.value?.id; }
+  set branchId(id: string | undefined) {
+    if (this.selectedBranchSubject.value?.id === id) return;
+    this.selectedBranchSubject.next(id ? { id, name: this.selectedBranchSubject.value?.name || '' } : null);
+  }
+
+  /** Sets the branch context from a branch picker (persists across reloads, unlike a scanned table's branch). */
+  selectBranch(id: string, name: string): void {
+    const branch = { id, name };
+    this.selectedBranchSubject.next(branch);
+    localStorage.setItem(BRANCH_STORAGE_KEY, JSON.stringify(branch));
+  }
+
+  private loadStoredBranch(): { id: string; name: string } | null {
+    try {
+      const raw = localStorage.getItem(BRANCH_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
 
   get items(): CartItem[] { return this.cartSubject.value; }
   get count(): number { return this.items.reduce((sum, i) => sum + i.quantity, 0); }
@@ -50,7 +80,10 @@ export class CartService {
     ));
   }
 
-  clear(): void { this.cartSubject.next([]); }
+  clear(): void {
+    this.cartSubject.next([]);
+    this.tableId = undefined;
+  }
 
   toOrderItems(): any[] {
     return this.items.map((i) => ({

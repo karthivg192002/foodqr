@@ -14,12 +14,13 @@ const item_category_attribute_entity_1 = require("./entities/item-category-attri
 const item_variation_entity_1 = require("../menu/variations/entities/item-variation.entity");
 const item_attributes_service_1 = require("./item-attributes.service");
 const item_attributes_controller_1 = require("./item-attributes.controller");
+const tenants_module_1 = require("../tenants/tenants.module");
 let ItemAttributesModule = class ItemAttributesModule {
 };
 exports.ItemAttributesModule = ItemAttributesModule;
 exports.ItemAttributesModule = ItemAttributesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([item_attribute_entity_1.ItemAttribute, item_category_attribute_entity_1.ItemCategoryAttribute, item_variation_entity_1.ItemVariation])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([item_attribute_entity_1.ItemAttribute, item_category_attribute_entity_1.ItemCategoryAttribute, item_variation_entity_1.ItemVariation]), tenants_module_1.TenantsModule],
         providers: [item_attributes_service_1.ItemAttributesService],
         controllers: [item_attributes_controller_1.ItemAttributesController],
         exports: [item_attributes_service_1.ItemAttributesService],

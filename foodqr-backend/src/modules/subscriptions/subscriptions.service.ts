@@ -4,6 +4,8 @@ import { Repository, LessThanOrEqual } from 'typeorm';
 import { Subscription, SubscriptionFrequency } from './entities/subscription.entity';
 import { OrdersService } from '../orders/orders.service';
 import { OrderType, PaymentMethod } from '../../common/enums';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class SubscriptionsService implements OnModuleInit, OnModuleDestroy {
@@ -12,7 +14,10 @@ export class SubscriptionsService implements OnModuleInit, OnModuleDestroy {
   constructor(
     @InjectRepository(Subscription) private subRepo: Repository<Subscription>,
     private readonly ordersService: OrdersService,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.subRepo = tenantAwareRepo(connections, Subscription, subRepo);
+  }
 
   onModuleInit() {
     // Check for due subscriptions every 15 minutes

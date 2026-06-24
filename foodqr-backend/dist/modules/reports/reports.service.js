@@ -23,14 +23,22 @@ const item_entity_1 = require("../menu/items/entities/item.entity");
 const dining_table_entity_1 = require("../dining-tables/entities/dining-table.entity");
 const transaction_entity_1 = require("../payments/entities/transaction.entity");
 const enums_1 = require("../../common/enums");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let ReportsService = class ReportsService {
-    constructor(orderRepo, orderItemRepo, userRepo, itemRepo, tableRepo, transactionRepo) {
+    constructor(orderRepo, orderItemRepo, userRepo, itemRepo, tableRepo, transactionRepo, connections) {
         this.orderRepo = orderRepo;
         this.orderItemRepo = orderItemRepo;
         this.userRepo = userRepo;
         this.itemRepo = itemRepo;
         this.tableRepo = tableRepo;
         this.transactionRepo = transactionRepo;
+        this.orderRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, order_entity_1.Order, orderRepo);
+        this.orderItemRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, order_item_entity_1.OrderItem, orderItemRepo);
+        this.userRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, user_entity_1.User, userRepo);
+        this.itemRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_entity_1.Item, itemRepo);
+        this.tableRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, dining_table_entity_1.DiningTable, tableRepo);
+        this.transactionRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, transaction_entity_1.Transaction, transactionRepo);
     }
     async getDashboardSummary() {
         const today = new Date();
@@ -347,6 +355,7 @@ exports.ReportsService = ReportsService = __decorate([
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], ReportsService);
 //# sourceMappingURL=reports.service.js.map

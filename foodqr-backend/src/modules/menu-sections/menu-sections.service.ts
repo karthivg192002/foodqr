@@ -2,13 +2,19 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Menu, MenuSection } from './entities/menu-section.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class MenuSectionsService {
   constructor(
     @InjectRepository(Menu) private menuRepo: Repository<Menu>,
     @InjectRepository(MenuSection) private sectionRepo: Repository<MenuSection>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.menuRepo = tenantAwareRepo(connections, Menu, menuRepo);
+    this.sectionRepo = tenantAwareRepo(connections, MenuSection, sectionRepo);
+  }
 
   // ─── Menus ───────────────────────────────────────────────────────────────
 

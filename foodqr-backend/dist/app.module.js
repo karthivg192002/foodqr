@@ -29,6 +29,7 @@ const settings_module_1 = require("./modules/settings/settings.module");
 const upload_module_1 = require("./modules/upload/upload.module");
 const currency_module_1 = require("./modules/currency/currency.module");
 const tax_module_1 = require("./modules/tax/tax.module");
+const service_charge_module_1 = require("./modules/service-charge/service-charge.module");
 const item_attributes_module_1 = require("./modules/item-attributes/item-attributes.module");
 const item_addons_module_1 = require("./modules/item-addons/item-addons.module");
 const addresses_module_1 = require("./modules/addresses/addresses.module");
@@ -103,6 +104,7 @@ exports.AppModule = AppModule = __decorate([
             upload_module_1.UploadModule,
             currency_module_1.CurrencyModule,
             tax_module_1.TaxModule,
+            service_charge_module_1.ServiceChargeModule,
             item_attributes_module_1.ItemAttributesModule,
             item_addons_module_1.ItemAddonsModule,
             addresses_module_1.AddressesModule,

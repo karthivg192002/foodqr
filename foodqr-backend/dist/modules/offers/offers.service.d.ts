@@ -3,12 +3,13 @@ import { Offer } from './entities/offer.entity';
 import { Banner } from './entities/banner.entity';
 import { PromotionBanner } from './entities/promotion-banner.entity';
 import { OfferItem } from './entities/offer-item.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class OffersService {
     private offerRepo;
     private bannerRepo;
     private promoRepo;
     private offerItemRepo;
-    constructor(offerRepo: Repository<Offer>, bannerRepo: Repository<Banner>, promoRepo: Repository<PromotionBanner>, offerItemRepo: Repository<OfferItem>);
+    constructor(offerRepo: Repository<Offer>, bannerRepo: Repository<Banner>, promoRepo: Repository<PromotionBanner>, offerItemRepo: Repository<OfferItem>, connections: TenantConnectionService);
     getActiveOffers(): Promise<Offer[]>;
     getAllOffers(): Promise<Offer[]>;
     createOffer(data: Partial<Offer>): Promise<Offer>;

@@ -1,8 +1,9 @@
 import { Repository } from 'typeorm';
 import { Address } from './entities/address.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class AddressesService {
     private repo;
-    constructor(repo: Repository<Address>);
+    constructor(repo: Repository<Address>, connections: TenantConnectionService);
     findByUser(userId: string): Promise<Address[]>;
     findOne(id: string, userId: string): Promise<Address>;
     create(userId: string, dto: {

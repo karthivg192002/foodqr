@@ -20,6 +20,8 @@ const typeorm_2 = require("typeorm");
 const https = require("https");
 const querystring = require("querystring");
 const sms_gateway_entity_1 = require("./entities/sms-gateway.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 const DEFAULT_GATEWAYS = [
     { name: 'Twilio', slug: 'twilio' },
     { name: 'Nexmo', slug: 'nexmo' },
@@ -29,9 +31,10 @@ const DEFAULT_GATEWAYS = [
     { name: 'Telesign', slug: 'telesign' },
 ];
 let SmsGatewaysService = SmsGatewaysService_1 = class SmsGatewaysService {
-    constructor(repo) {
+    constructor(repo, connections) {
         this.repo = repo;
         this.logger = new common_1.Logger(SmsGatewaysService_1.name);
+        this.repo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, sms_gateway_entity_1.SmsGateway, repo);
     }
     async onModuleInit() {
         for (const gw of DEFAULT_GATEWAYS) {
@@ -104,6 +107,7 @@ exports.SmsGatewaysService = SmsGatewaysService;
 exports.SmsGatewaysService = SmsGatewaysService = SmsGatewaysService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(sms_gateway_entity_1.SmsGateway)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], SmsGatewaysService);
 //# sourceMappingURL=sms-gateways.service.js.map

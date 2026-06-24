@@ -2,10 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Address } from './entities/address.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class AddressesService {
-  constructor(@InjectRepository(Address) private repo: Repository<Address>) {}
+  constructor(
+    @InjectRepository(Address) private repo: Repository<Address>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, Address, repo);
+  }
 
   findByUser(userId: string) {
     return this.repo.find({ where: { userId }, order: { isDefault: 'DESC', createdAt: 'DESC' } });

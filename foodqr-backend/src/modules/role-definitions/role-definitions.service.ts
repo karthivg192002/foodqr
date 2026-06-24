@@ -2,6 +2,8 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RoleDefinition } from './entities/role-definition.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 const SEED_ROLES: Partial<RoleDefinition>[] = [
   { name: 'admin',          label: 'Admin',          description: 'Full system access — manages all settings, users, and reports', color: 'purple', isSystem: true },
@@ -15,7 +17,12 @@ const SEED_ROLES: Partial<RoleDefinition>[] = [
 
 @Injectable()
 export class RoleDefinitionsService {
-  constructor(@InjectRepository(RoleDefinition) private repo: Repository<RoleDefinition>) {}
+  constructor(
+    @InjectRepository(RoleDefinition) private repo: Repository<RoleDefinition>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, RoleDefinition, repo);
+  }
 
   findAll() {
     return this.repo.find({ order: { isSystem: 'DESC', label: 'ASC' } });

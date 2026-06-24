@@ -49,9 +49,12 @@
 
     <!-- Mobile top app bar -->
     <header class="lg:hidden fixed top-0 inset-x-0 z-50 flex justify-between items-center px-5 h-16 bg-cust-surface shadow-cust-banner">
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-[18px]" style="color:#a73a00">location_on</span>
-        <span class="font-jakarta font-bold text-[17px] text-cust-on-surface">{{ (branding$ | async)?.productName }}</span>
+      <div class="flex flex-col">
+        <span class="font-jakarta font-bold text-[17px] text-cust-on-surface leading-tight">{{ (branding$ | async)?.productName }}</span>
+        <button (click)="toggleBranchPicker()" class="flex items-center gap-1 -ml-0.5">
+          <span class="material-symbols-outlined text-[14px]" style="color:#a73a00">location_on</span>
+          <span class="font-work text-[11px] text-cust-secondary truncate max-w-[160px]">{{ (selectedBranch$ | async)?.name || 'Select branch' }}</span>
+        </button>
       </div>
       <div class="flex items-center gap-3">
         <a routerLink="/customer/orders" class="text-cust-secondary hover:opacity-70 transition-opacity active:scale-90">
@@ -68,13 +71,35 @@
       </div>
     </header>
 
+    <!-- Mobile branch picker dropdown -->
+    <div *ngIf="showBranchPicker" class="lg:hidden fixed top-16 left-4 right-4 z-50 rounded-xl shadow-cust-modal bg-white border overflow-hidden" style="border-color:#e8e5e4">
+      <button *ngFor="let b of branches" (click)="pickBranch(b)"
+        class="w-full text-left px-4 py-2.5 text-[13px] font-work hover:bg-cust-surface transition-colors"
+        [class.font-semibold]="(selectedBranch$ | async)?.id === b.id">
+        {{ b.name }}
+      </button>
+      <p *ngIf="!branches.length" class="px-4 py-2.5 text-[13px] text-cust-secondary">No branches available</p>
+    </div>
+
     <!-- Desktop top bar -->
-    <header class="hidden lg:flex items-center justify-between px-8 border-b"
+    <header class="hidden lg:flex items-center justify-between px-8 border-b relative"
       style="height:56px;background:#fff;border-color:#e8e5e4;box-shadow:0 1px 3px rgba(0,0,0,0.04);flex-shrink:0">
-      <div class="flex items-center gap-2 text-[13px]" style="color:#8f7065">
+      <button (click)="toggleBranchPicker()" class="flex items-center gap-2 text-[13px]" style="color:#8f7065">
         <span class="material-symbols-outlined text-[16px]">location_on</span>
-        <span class="font-work font-medium">Dine in / Takeaway</span>
+        <span class="font-work font-medium">{{ (selectedBranch$ | async)?.name || 'Select branch' }}</span>
+        <span class="material-symbols-outlined text-[16px]">expand_more</span>
+      </button>
+
+      <!-- Branch picker dropdown -->
+      <div *ngIf="showBranchPicker" class="absolute left-8 top-14 z-50 w-64 rounded-xl shadow-cust-modal bg-white border overflow-hidden" style="border-color:#e8e5e4">
+        <button *ngFor="let b of branches" (click)="pickBranch(b)"
+          class="w-full text-left px-4 py-2.5 text-[13px] font-work hover:bg-cust-surface transition-colors"
+          [class.font-semibold]="(selectedBranch$ | async)?.id === b.id">
+          {{ b.name }}
+        </button>
+        <p *ngIf="!branches.length" class="px-4 py-2.5 text-[13px] text-cust-secondary">No branches available</p>
       </div>
+
       <a routerLink="/customer/menu"
         class="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-work font-medium transition-all"
         style="background:#f5f3f3;color:#5b4137;border:1px solid #e4beb1"

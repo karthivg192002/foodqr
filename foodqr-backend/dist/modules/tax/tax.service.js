@@ -16,13 +16,47 @@ exports.TaxService = exports.CreateTaxDto = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const tax_entity_1 = require("./entities/tax.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 class CreateTaxDto {
 }
 exports.CreateTaxDto = CreateTaxDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTaxDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], CreateTaxDto.prototype, "rate", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateTaxDto.prototype, "type", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateTaxDto.prototype, "isIncluded", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateTaxDto.prototype, "isDefault", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], CreateTaxDto.prototype, "status", void 0);
 let TaxService = class TaxService {
-    constructor(taxRepo) {
+    constructor(taxRepo, connections) {
         this.taxRepo = taxRepo;
+        this.taxRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, tax_entity_1.Tax, taxRepo);
     }
     async findAll() {
         return this.taxRepo.find({ order: { isDefault: 'DESC', name: 'ASC' } });
@@ -64,6 +98,7 @@ exports.TaxService = TaxService;
 exports.TaxService = TaxService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(tax_entity_1.Tax)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], TaxService);
 //# sourceMappingURL=tax.service.js.map

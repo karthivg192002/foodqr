@@ -19,11 +19,16 @@ const typeorm_2 = require("typeorm");
 const item_attribute_entity_1 = require("./entities/item-attribute.entity");
 const item_category_attribute_entity_1 = require("./entities/item-category-attribute.entity");
 const item_variation_entity_1 = require("../menu/variations/entities/item-variation.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let ItemAttributesService = class ItemAttributesService {
-    constructor(attrRepo, pivotRepo, variationRepo) {
+    constructor(attrRepo, pivotRepo, variationRepo, connections) {
         this.attrRepo = attrRepo;
         this.pivotRepo = pivotRepo;
         this.variationRepo = variationRepo;
+        this.attrRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_attribute_entity_1.ItemAttribute, attrRepo);
+        this.pivotRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_category_attribute_entity_1.ItemCategoryAttribute, pivotRepo);
+        this.variationRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, item_variation_entity_1.ItemVariation, variationRepo);
     }
     findAll() {
         return this.attrRepo.find({ order: { name: 'ASC' } });
@@ -82,6 +87,7 @@ exports.ItemAttributesService = ItemAttributesService = __decorate([
     __param(2, (0, typeorm_1.InjectRepository)(item_variation_entity_1.ItemVariation)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], ItemAttributesService);
 //# sourceMappingURL=item-attributes.service.js.map

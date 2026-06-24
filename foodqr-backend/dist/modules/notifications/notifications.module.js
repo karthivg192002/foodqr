@@ -13,12 +13,13 @@ const user_entity_1 = require("../users/entities/user.entity");
 const notifications_controller_1 = require("./notifications.controller");
 const notifications_service_1 = require("./notifications.service");
 const sms_gateways_module_1 = require("../sms-gateways/sms-gateways.module");
+const tenants_module_1 = require("../tenants/tenants.module");
 let NotificationsModule = class NotificationsModule {
 };
 exports.NotificationsModule = NotificationsModule;
 exports.NotificationsModule = NotificationsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]), sms_gateways_module_1.SmsGatewaysModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]), sms_gateways_module_1.SmsGatewaysModule, tenants_module_1.TenantsModule],
         controllers: [notifications_controller_1.NotificationsController],
         providers: [notifications_service_1.NotificationsService],
         exports: [notifications_service_1.NotificationsService],

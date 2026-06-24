@@ -1,8 +1,9 @@
 import { Repository } from 'typeorm';
 import { PushNotification } from './entities/push-notification.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class PushNotificationsService {
     private repo;
-    constructor(repo: Repository<PushNotification>);
+    constructor(repo: Repository<PushNotification>, connections: TenantConnectionService);
     send(dto: {
         userId?: string;
         title: string;

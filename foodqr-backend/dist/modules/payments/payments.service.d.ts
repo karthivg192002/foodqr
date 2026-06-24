@@ -4,6 +4,7 @@ import { Transaction } from './entities/transaction.entity';
 import { Order } from '../orders/entities/order.entity';
 import { User } from '../users/entities/user.entity';
 import { PaymentGateway } from '../payment-gateways/entities/payment-gateway.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class PaymentsService {
     private transactionRepo;
     private orderRepo;
@@ -11,7 +12,7 @@ export declare class PaymentsService {
     private paymentGatewayRepo;
     private configService;
     private stripe;
-    constructor(transactionRepo: Repository<Transaction>, orderRepo: Repository<Order>, userRepo: Repository<User>, paymentGatewayRepo: Repository<PaymentGateway>, configService: ConfigService);
+    constructor(transactionRepo: Repository<Transaction>, orderRepo: Repository<Order>, userRepo: Repository<User>, paymentGatewayRepo: Repository<PaymentGateway>, configService: ConfigService, connections: TenantConnectionService);
     createStripePaymentIntent(orderId: string, userId: string): Promise<{
         clientSecret: string;
         paymentIntentId: string;

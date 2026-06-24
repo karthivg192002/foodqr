@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const payment_gateway_entity_1 = require("./entities/payment-gateway.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 const DEFAULT_GATEWAYS = [
     { name: 'Stripe', slug: 'stripe' },
     { name: 'PayPal', slug: 'paypal' },
@@ -30,8 +32,9 @@ const DEFAULT_GATEWAYS = [
     { name: 'bKash', slug: 'bkash' },
 ];
 let PaymentGatewaysService = class PaymentGatewaysService {
-    constructor(repo) {
+    constructor(repo, connections) {
         this.repo = repo;
+        this.repo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, payment_gateway_entity_1.PaymentGateway, repo);
     }
     async onModuleInit() {
         for (const gw of DEFAULT_GATEWAYS) {
@@ -58,6 +61,7 @@ exports.PaymentGatewaysService = PaymentGatewaysService;
 exports.PaymentGatewaysService = PaymentGatewaysService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(payment_gateway_entity_1.PaymentGateway)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], PaymentGatewaysService);
 //# sourceMappingURL=payment-gateways.service.js.map

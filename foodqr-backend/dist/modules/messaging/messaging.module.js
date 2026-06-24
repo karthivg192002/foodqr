@@ -19,12 +19,13 @@ const loyalty_stamp_entity_1 = require("../loyalty/entities/loyalty-stamp.entity
 const loyalty_program_entity_1 = require("../loyalty/entities/loyalty-program.entity");
 const loyalty_reward_entity_1 = require("../loyalty/entities/loyalty-reward.entity");
 const item_entity_1 = require("../menu/items/entities/item.entity");
+const tenants_module_1 = require("../tenants/tenants.module");
 let MessagingModule = class MessagingModule {
 };
 exports.MessagingModule = MessagingModule;
 exports.MessagingModule = MessagingModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([message_entity_1.Message, message_history_entity_1.MessageHistory, order_entity_1.Order, loyalty_stamp_entity_1.LoyaltyStamp, loyalty_program_entity_1.LoyaltyProgram, loyalty_reward_entity_1.LoyaltyReward, item_entity_1.Item])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([message_entity_1.Message, message_history_entity_1.MessageHistory, order_entity_1.Order, loyalty_stamp_entity_1.LoyaltyStamp, loyalty_program_entity_1.LoyaltyProgram, loyalty_reward_entity_1.LoyaltyReward, item_entity_1.Item]), tenants_module_1.TenantsModule],
         providers: [messaging_service_1.MessagingService, chatbot_service_1.ChatbotService],
         controllers: [messaging_controller_1.MessagingController],
         exports: [messaging_service_1.MessagingService],

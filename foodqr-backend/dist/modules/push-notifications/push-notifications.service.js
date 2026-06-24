@@ -17,9 +17,12 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const push_notification_entity_1 = require("./entities/push-notification.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let PushNotificationsService = class PushNotificationsService {
-    constructor(repo) {
+    constructor(repo, connections) {
         this.repo = repo;
+        this.repo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, push_notification_entity_1.PushNotification, repo);
     }
     async send(dto) {
         const log = this.repo.create({
@@ -53,6 +56,7 @@ exports.PushNotificationsService = PushNotificationsService;
 exports.PushNotificationsService = PushNotificationsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(push_notification_entity_1.PushNotification)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], PushNotificationsService);
 //# sourceMappingURL=push-notifications.service.js.map

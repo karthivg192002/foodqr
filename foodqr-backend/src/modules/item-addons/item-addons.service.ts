@@ -2,10 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ItemAddon } from './entities/item-addon.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class ItemAddonsService {
-  constructor(@InjectRepository(ItemAddon) private repo: Repository<ItemAddon>) {}
+  constructor(
+    @InjectRepository(ItemAddon) private repo: Repository<ItemAddon>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, ItemAddon, repo);
+  }
 
   findByItem(itemId: string) {
     return this.repo.find({ where: { itemId }, relations: ['addonItem'] });

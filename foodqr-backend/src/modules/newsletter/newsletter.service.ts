@@ -2,12 +2,17 @@ import { Injectable, ConflictException, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subscriber } from './entities/subscriber.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class NewsletterService {
   constructor(
     @InjectRepository(Subscriber) private subRepo: Repository<Subscriber>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.subRepo = tenantAwareRepo(connections, Subscriber, subRepo);
+  }
 
   async subscribe(email: string) {
     const existing = await this.subRepo.findOne({ where: { email } });

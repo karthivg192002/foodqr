@@ -12,6 +12,7 @@ export declare class CreateItemDto {
     price: number;
     categoryId?: string;
     subCategoryId?: string;
+    branchId?: string;
     itemType?: ItemType;
     thumbImage?: string;
     coverImage?: string;
@@ -40,14 +41,14 @@ export declare class ItemsService {
     private catRepo;
     constructor(itemRepo: Repository<Item>, variationRepo: Repository<ItemVariation>, catRepo: Repository<ItemCategory>, connections: TenantConnectionService);
     private resolveCategoryIds;
-    findAll(search?: string, categoryId?: string, isFeatured?: boolean, page?: number, limit?: number): Promise<{
+    findAll(search?: string, categoryId?: string, isFeatured?: boolean, page?: number, limit?: number, branchId?: string): Promise<{
         data: Item[];
         total: number;
         page: number;
         limit: number;
         pages: number;
     }>;
-    findAllAdmin(search?: string, categoryId?: string, page?: number, limit?: number): Promise<{
+    findAllAdmin(search?: string, categoryId?: string, page?: number, limit?: number, branchId?: string): Promise<{
         data: Item[];
         total: number;
         page: number;

@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const notification_alert_entity_1 = require("./entities/notification-alert.entity");
 const notification_alerts_service_1 = require("./notification-alerts.service");
 const notification_alerts_controller_1 = require("./notification-alerts.controller");
+const tenants_module_1 = require("../tenants/tenants.module");
 let NotificationAlertsModule = class NotificationAlertsModule {
 };
 exports.NotificationAlertsModule = NotificationAlertsModule;
 exports.NotificationAlertsModule = NotificationAlertsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([notification_alert_entity_1.NotificationAlert])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([notification_alert_entity_1.NotificationAlert]), tenants_module_1.TenantsModule],
         providers: [notification_alerts_service_1.NotificationAlertsService],
         controllers: [notification_alerts_controller_1.NotificationAlertsController],
         exports: [notification_alerts_service_1.NotificationAlertsService],

@@ -3,13 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Language } from './entities/language.entity';
 import { LanguageTranslation } from './entities/language-translation.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class LanguagesService {
   constructor(
     @InjectRepository(Language) private langRepo: Repository<Language>,
     @InjectRepository(LanguageTranslation) private translationRepo: Repository<LanguageTranslation>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.langRepo = tenantAwareRepo(connections, Language, langRepo);
+    this.translationRepo = tenantAwareRepo(connections, LanguageTranslation, translationRepo);
+  }
 
   findAll() {
     return this.langRepo.find({ order: { isDefault: 'DESC', name: 'ASC' } });

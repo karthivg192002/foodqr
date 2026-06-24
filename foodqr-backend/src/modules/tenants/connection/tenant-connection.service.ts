@@ -23,6 +23,9 @@ const SWEEP_INTERVAL_MS = 5 * 60 * 1000;
 export class TenantConnectionService implements OnModuleDestroy {
   private readonly logger = new Logger(TenantConnectionService.name);
   private readonly cache = new Map<string, CacheEntry>();
+  /** In-flight initialize() promises, keyed by dbName — de-dupes concurrent first-requests for the
+   *  same tenant so they await one connection instead of racing to open (and orphan) several. */
+  private readonly pending = new Map<string, Promise<DataSource>>();
   private readonly sweepHandle: NodeJS.Timeout;
 
   constructor(private config: ConfigService) {
@@ -65,11 +68,24 @@ export class TenantConnectionService implements OnModuleDestroy {
       cached.lastUsedAt = Date.now();
       return cached.dataSource;
     }
-    const dataSource = new DataSource(this.baseOptions(dbName, false));
-    await dataSource.initialize();
-    this.cache.set(dbName, { dataSource, lastUsedAt: Date.now() });
-    this.logger.log(`Opened tenant connection: ${dbName}`);
-    return dataSource;
+
+    const inFlight = this.pending.get(dbName);
+    if (inFlight) return inFlight;
+
+    const initPromise = (async () => {
+      const dataSource = new DataSource(this.baseOptions(dbName, false));
+      await dataSource.initialize();
+      this.cache.set(dbName, { dataSource, lastUsedAt: Date.now() });
+      this.logger.log(`Opened tenant connection: ${dbName}`);
+      return dataSource;
+    })();
+
+    this.pending.set(dbName, initPromise);
+    try {
+      return await initPromise;
+    } finally {
+      this.pending.delete(dbName);
+    }
   }
 
   /** Returns the tenant-scoped repository if the current request belongs to a physical-DB tenant, else the default (master) repository. */

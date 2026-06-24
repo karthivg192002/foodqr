@@ -8,6 +8,8 @@ import { Item } from '../menu/items/entities/item.entity';
 import { DiningTable } from '../dining-tables/entities/dining-table.entity';
 import { Transaction } from '../payments/entities/transaction.entity';
 import { OrderStatus, PaymentStatus, UserRole } from '../../common/enums';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class ReportsService {
@@ -18,7 +20,15 @@ export class ReportsService {
     @InjectRepository(Item) private itemRepo: Repository<Item>,
     @InjectRepository(DiningTable) private tableRepo: Repository<DiningTable>,
     @InjectRepository(Transaction) private transactionRepo: Repository<Transaction>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.orderRepo = tenantAwareRepo(connections, Order, orderRepo);
+    this.orderItemRepo = tenantAwareRepo(connections, OrderItem, orderItemRepo);
+    this.userRepo = tenantAwareRepo(connections, User, userRepo);
+    this.itemRepo = tenantAwareRepo(connections, Item, itemRepo);
+    this.tableRepo = tenantAwareRepo(connections, DiningTable, tableRepo);
+    this.transactionRepo = tenantAwareRepo(connections, Transaction, transactionRepo);
+  }
 
   async getDashboardSummary() {
     const today = new Date();

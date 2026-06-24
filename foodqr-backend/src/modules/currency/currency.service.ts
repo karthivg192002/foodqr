@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IsString, IsOptional, IsNumber, IsBoolean, IsNotEmpty } from 'class-validator';
 import { Currency } from './entities/currency.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 export class CreateCurrencyDto {
   @IsString()
@@ -34,7 +36,10 @@ export class CreateCurrencyDto {
 export class CurrencyService {
   constructor(
     @InjectRepository(Currency) private currencyRepo: Repository<Currency>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.currencyRepo = tenantAwareRepo(connections, Currency, currencyRepo);
+  }
 
   async findAll(): Promise<Currency[]> {
     return this.currencyRepo.find({ order: { isDefault: 'DESC', name: 'ASC' } });

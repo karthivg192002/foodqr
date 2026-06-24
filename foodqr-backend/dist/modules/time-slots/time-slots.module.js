@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const time_slot_entity_1 = require("./entities/time-slot.entity");
 const time_slots_service_1 = require("./time-slots.service");
 const time_slots_controller_1 = require("./time-slots.controller");
+const tenants_module_1 = require("../tenants/tenants.module");
 let TimeSlotsModule = class TimeSlotsModule {
 };
 exports.TimeSlotsModule = TimeSlotsModule;
 exports.TimeSlotsModule = TimeSlotsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([time_slot_entity_1.TimeSlot])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([time_slot_entity_1.TimeSlot]), tenants_module_1.TenantsModule],
         providers: [time_slots_service_1.TimeSlotsService],
         controllers: [time_slots_controller_1.TimeSlotsController],
         exports: [time_slots_service_1.TimeSlotsService],

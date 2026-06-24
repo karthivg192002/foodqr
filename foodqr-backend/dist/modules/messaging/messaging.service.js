@@ -18,10 +18,14 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const message_entity_1 = require("./entities/message.entity");
 const message_history_entity_1 = require("./entities/message-history.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let MessagingService = class MessagingService {
-    constructor(msgRepo, historyRepo) {
+    constructor(msgRepo, historyRepo, connections) {
         this.msgRepo = msgRepo;
         this.historyRepo = historyRepo;
+        this.msgRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, message_entity_1.Message, msgRepo);
+        this.historyRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, message_history_entity_1.MessageHistory, historyRepo);
     }
     async getOrCreateThread(userId, branchId) {
         let thread = await this.msgRepo.findOne({ where: { userId, branchId } });
@@ -55,6 +59,7 @@ exports.MessagingService = MessagingService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(message_entity_1.Message)),
     __param(1, (0, typeorm_1.InjectRepository)(message_history_entity_1.MessageHistory)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], MessagingService);
 //# sourceMappingURL=messaging.service.js.map

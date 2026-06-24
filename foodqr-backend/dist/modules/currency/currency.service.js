@@ -18,6 +18,8 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const class_validator_1 = require("class-validator");
 const currency_entity_1 = require("./entities/currency.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 class CreateCurrencyDto {
 }
 exports.CreateCurrencyDto = CreateCurrencyDto;
@@ -52,8 +54,9 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateCurrencyDto.prototype, "status", void 0);
 let CurrencyService = class CurrencyService {
-    constructor(currencyRepo) {
+    constructor(currencyRepo, connections) {
         this.currencyRepo = currencyRepo;
+        this.currencyRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, currency_entity_1.Currency, currencyRepo);
     }
     async findAll() {
         return this.currencyRepo.find({ order: { isDefault: 'DESC', name: 'ASC' } });
@@ -120,6 +123,7 @@ exports.CurrencyService = CurrencyService;
 exports.CurrencyService = CurrencyService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(currency_entity_1.Currency)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], CurrencyService);
 //# sourceMappingURL=currency.service.js.map

@@ -2,10 +2,17 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AppSetting } from '../settings/entities/app-setting.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class LicenseService {
-  constructor(@InjectRepository(AppSetting) private settingRepo: Repository<AppSetting>) {}
+  constructor(
+    @InjectRepository(AppSetting) private settingRepo: Repository<AppSetting>,
+    connections: TenantConnectionService,
+  ) {
+    this.settingRepo = tenantAwareRepo(connections, AppSetting, settingRepo);
+  }
 
   private async getSetting(key: string) {
     const s = await this.settingRepo.findOne({ where: { key } });

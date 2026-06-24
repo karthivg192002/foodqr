@@ -7,6 +7,7 @@ export declare class CreateCategoryDto {
     icon?: string;
     image?: string;
     parentCategoryId?: string;
+    branchId?: string;
     status?: boolean;
     variationOnly?: boolean;
     sortOrder?: number;
@@ -14,8 +15,8 @@ export declare class CreateCategoryDto {
 export declare class CategoriesService {
     private catRepo;
     constructor(catRepo: Repository<ItemCategory>, connections: TenantConnectionService);
-    findAll(includeChildren?: boolean): Promise<ItemCategory[]>;
-    findAllFlat(): Promise<ItemCategory[]>;
+    findAll(includeChildren?: boolean, branchId?: string): Promise<ItemCategory[]>;
+    findAllFlat(branchId?: string): Promise<ItemCategory[]>;
     findOne(id: string): Promise<ItemCategory>;
     create(dto: CreateCategoryDto): Promise<ItemCategory>;
     update(id: string, dto: Partial<CreateCategoryDto>): Promise<ItemCategory>;

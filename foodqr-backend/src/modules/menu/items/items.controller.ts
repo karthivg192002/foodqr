@@ -23,13 +23,15 @@ export class ItemsController {
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'categoryId', required: false })
   @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'branchId', required: false })
   findAll(
     @Query('search') search?: string,
     @Query('categoryId') categoryId?: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
+    @Query('branchId') branchId?: string,
   ) {
-    return this.itemsService.findAll(search, categoryId, undefined, page, limit);
+    return this.itemsService.findAll(search, categoryId, undefined, page, limit, branchId);
   }
 
   @Public()
@@ -53,8 +55,9 @@ export class ItemsController {
     @Query('categoryId') categoryId?: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
+    @Query('branchId') branchId?: string,
   ) {
-    return this.itemsService.findAllAdmin(search, categoryId, page, limit);
+    return this.itemsService.findAllAdmin(search, categoryId, page, limit, branchId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

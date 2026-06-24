@@ -1,5 +1,6 @@
 import { Repository } from 'typeorm';
 import { Currency } from './entities/currency.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class CreateCurrencyDto {
     name: string;
     code: string;
@@ -10,7 +11,7 @@ export declare class CreateCurrencyDto {
 }
 export declare class CurrencyService {
     private currencyRepo;
-    constructor(currencyRepo: Repository<Currency>);
+    constructor(currencyRepo: Repository<Currency>, connections: TenantConnectionService);
     findAll(): Promise<Currency[]>;
     findActive(): Promise<Currency[]>;
     findOne(id: string): Promise<Currency>;

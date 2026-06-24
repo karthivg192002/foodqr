@@ -26,14 +26,14 @@ let ItemsController = class ItemsController {
     constructor(itemsService) {
         this.itemsService = itemsService;
     }
-    findAll(search, categoryId, page, limit) {
-        return this.itemsService.findAll(search, categoryId, undefined, page, limit);
+    findAll(search, categoryId, page, limit, branchId) {
+        return this.itemsService.findAll(search, categoryId, undefined, page, limit, branchId);
     }
     getFeatured() { return this.itemsService.getFeatured(); }
     getPopular() { return this.itemsService.getPopular(); }
     findOne(id) { return this.itemsService.findOne(id); }
-    findAllAdmin(search, categoryId, page, limit) {
-        return this.itemsService.findAllAdmin(search, categoryId, page, limit);
+    findAllAdmin(search, categoryId, page, limit, branchId) {
+        return this.itemsService.findAllAdmin(search, categoryId, page, limit, branchId);
     }
     create(dto) { return this.itemsService.create(dto); }
     update(id, dto) {
@@ -67,12 +67,14 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'search', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'categoryId', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'page', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'branchId', required: false }),
     __param(0, (0, common_1.Query)('search')),
     __param(1, (0, common_1.Query)('categoryId')),
     __param(2, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
     __param(3, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __param(4, (0, common_1.Query)('branchId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Number, Number]),
+    __metadata("design:paramtypes", [String, String, Number, Number, String]),
     __metadata("design:returntype", void 0)
 ], ItemsController.prototype, "findAll", null);
 __decorate([
@@ -106,8 +108,9 @@ __decorate([
     __param(1, (0, common_1.Query)('categoryId')),
     __param(2, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
     __param(3, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __param(4, (0, common_1.Query)('branchId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Number, Number]),
+    __metadata("design:paramtypes", [String, String, Number, Number, String]),
     __metadata("design:returntype", void 0)
 ], ItemsController.prototype, "findAllAdmin", null);
 __decorate([

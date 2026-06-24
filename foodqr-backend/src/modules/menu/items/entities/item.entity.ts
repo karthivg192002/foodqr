@@ -5,6 +5,7 @@ import {
 import { ItemType } from '../../../../common/enums';
 import { ItemCategory } from '../../categories/entities/item-category.entity';
 import { ItemVariation } from '../../variations/entities/item-variation.entity';
+import { Branch } from '../../../branches/entities/branch.entity';
 
 @Entity('items')
 export class Item {
@@ -38,6 +39,14 @@ export class Item {
 
   @Column({ nullable: true })
   subCategoryId: string;
+
+  /** Null = visible at every branch. Set to scope an item to a single branch's menu. */
+  @Column({ nullable: true })
+  branchId: string;
+
+  @ManyToOne(() => Branch, { nullable: true })
+  @JoinColumn({ name: 'branchId' })
+  branch: Branch;
 
   @Column({ type: 'enum', enum: ItemType, default: ItemType.VEG })
   itemType: ItemType;

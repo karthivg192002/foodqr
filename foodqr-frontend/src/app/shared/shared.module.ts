@@ -5,10 +5,11 @@ import { CurrencySelectorComponent } from './currency-selector/currency-selector
 import { CurrencyConvertPipe } from './pipes/currency-convert.pipe';
 import { LogoComponent } from './components/logo/logo.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { ProductTileComponent } from './components/product-tile/product-tile.component';
 
 @NgModule({
-  declarations: [CurrencySelectorComponent, CurrencyConvertPipe, LogoComponent, FooterComponent],
+  declarations: [CurrencySelectorComponent, CurrencyConvertPipe, LogoComponent, FooterComponent, ProductTileComponent],
   imports: [CommonModule, FormsModule],
-  exports: [CurrencySelectorComponent, CurrencyConvertPipe, LogoComponent, FooterComponent],
+  exports: [CurrencySelectorComponent, CurrencyConvertPipe, LogoComponent, FooterComponent, ProductTileComponent],
 })
 export class SharedModule {}

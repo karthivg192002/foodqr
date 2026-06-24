@@ -22,23 +22,44 @@ const order_entity_1 = require("../orders/entities/order.entity");
 const address_entity_1 = require("../addresses/entities/address.entity");
 const tenant_user_index_entity_1 = require("../tenants/entities/tenant-user-index.entity");
 const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
+const tenants_service_1 = require("../tenants/tenants.service");
 const enums_1 = require("../../common/enums");
 let UsersService = class UsersService {
-    constructor(userRepo, orderRepo, addressRepo, tenantUserIndexRepo, connections) {
+    constructor(userRepo, orderRepo, addressRepo, tenantUserIndexRepo, connections, tenantsService) {
         this.userRepo = userRepo;
         this.orderRepo = orderRepo;
         this.addressRepo = addressRepo;
         this.tenantUserIndexRepo = tenantUserIndexRepo;
         this.connections = connections;
+        this.tenantsService = tenantsService;
+        this.userRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, user_entity_1.User, userRepo);
+        this.orderRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, order_entity_1.Order, orderRepo);
+        this.addressRepo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, address_entity_1.Address, addressRepo);
     }
     get repo() {
-        return this.connections.repoOrDefault(user_entity_1.User, this.userRepo);
+        return this.userRepo;
+    }
+    async assertWithinStaffLimit(tenantId, role) {
+        if (role === enums_1.UserRole.CUSTOMER)
+            return;
+        const tenant = await this.tenantsService.findOne(tenantId).catch(() => null);
+        const maxStaff = tenant?.plan?.maxStaff;
+        if (!maxStaff || maxStaff <= 0)
+            return;
+        const where = { role: (0, typeorm_2.Not)(enums_1.UserRole.CUSTOMER) };
+        if (!this.connections.hasTenantContext())
+            where.tenantId = tenantId;
+        const count = await this.repo.count({ where });
+        if (count >= maxStaff) {
+            throw new common_1.BadRequestException(`Staff limit reached for your plan (max ${maxStaff})`);
+        }
     }
     get orders() {
-        return this.connections.repoOrDefault(order_entity_1.Order, this.orderRepo);
+        return this.orderRepo;
     }
     get addresses() {
-        return this.connections.repoOrDefault(address_entity_1.Address, this.addressRepo);
+        return this.addressRepo;
     }
     async findAll(role, search, page = 1, limit = 20, tenantId) {
         const where = {};
@@ -101,6 +122,8 @@ let UsersService = class UsersService {
             if (exists)
                 throw new common_1.BadRequestException('Email already registered');
         }
+        if (tenantId)
+            await this.assertWithinStaffLimit(tenantId, dto.role);
         const hashed = await bcrypt.hash(dto.password, 12);
         const scopedTenantId = this.connections.hasTenantContext() ? undefined : tenantId;
         const user = this.repo.create({
@@ -208,6 +231,7 @@ exports.UsersService = UsersService = __decorate([
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        tenant_connection_service_1.TenantConnectionService])
+        tenant_connection_service_1.TenantConnectionService,
+        tenants_service_1.TenantsService])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

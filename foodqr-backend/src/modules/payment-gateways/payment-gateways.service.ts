@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaymentGateway } from './entities/payment-gateway.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 const DEFAULT_GATEWAYS = [
   { name: 'Stripe', slug: 'stripe' },
@@ -18,7 +20,12 @@ const DEFAULT_GATEWAYS = [
 
 @Injectable()
 export class PaymentGatewaysService {
-  constructor(@InjectRepository(PaymentGateway) private repo: Repository<PaymentGateway>) {}
+  constructor(
+    @InjectRepository(PaymentGateway) private repo: Repository<PaymentGateway>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, PaymentGateway, repo);
+  }
 
   async onModuleInit() {
     for (const gw of DEFAULT_GATEWAYS) {

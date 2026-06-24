@@ -2,10 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AppSetting } from './entities/app-setting.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class SettingsService {
-  constructor(@InjectRepository(AppSetting) private settingRepo: Repository<AppSetting>) {}
+  constructor(
+    @InjectRepository(AppSetting) private settingRepo: Repository<AppSetting>,
+    connections: TenantConnectionService,
+  ) {
+    this.settingRepo = tenantAwareRepo(connections, AppSetting, settingRepo);
+  }
 
   async getAll(group?: string) {
     const where: any = {};

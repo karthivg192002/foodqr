@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const loyalty_setting_entity_1 = require("./entities/loyalty-setting.entity");
 const loyalty_settings_service_1 = require("./loyalty-settings.service");
 const loyalty_settings_controller_1 = require("./loyalty-settings.controller");
+const tenants_module_1 = require("../tenants/tenants.module");
 let LoyaltySettingsModule = class LoyaltySettingsModule {
 };
 exports.LoyaltySettingsModule = LoyaltySettingsModule;
 exports.LoyaltySettingsModule = LoyaltySettingsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([loyalty_setting_entity_1.LoyaltySetting])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([loyalty_setting_entity_1.LoyaltySetting]), tenants_module_1.TenantsModule],
         providers: [loyalty_settings_service_1.LoyaltySettingsService],
         controllers: [loyalty_settings_controller_1.LoyaltySettingsController],
         exports: [loyalty_settings_service_1.LoyaltySettingsService],

@@ -2,11 +2,12 @@ import { Repository } from 'typeorm';
 import { ItemAttribute } from './entities/item-attribute.entity';
 import { ItemCategoryAttribute } from './entities/item-category-attribute.entity';
 import { ItemVariation } from '../menu/variations/entities/item-variation.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class ItemAttributesService {
     private attrRepo;
     private pivotRepo;
     private variationRepo;
-    constructor(attrRepo: Repository<ItemAttribute>, pivotRepo: Repository<ItemCategoryAttribute>, variationRepo: Repository<ItemVariation>);
+    constructor(attrRepo: Repository<ItemAttribute>, pivotRepo: Repository<ItemCategoryAttribute>, variationRepo: Repository<ItemVariation>, connections: TenantConnectionService);
     findAll(): Promise<ItemAttribute[]>;
     findOne(id: string): Promise<ItemAttribute>;
     create(dto: {

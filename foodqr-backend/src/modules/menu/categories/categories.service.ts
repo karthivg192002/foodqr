@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull } from 'typeorm';
+import { Repository } from 'typeorm';
 import { IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ItemCategory } from './entities/item-category.entity';
@@ -23,6 +23,9 @@ export class CreateCategoryDto {
   @IsString() @IsOptional()
   parentCategoryId?: string;
 
+  @IsString() @IsOptional()
+  branchId?: string;
+
   @IsBoolean() @IsOptional()
   status?: boolean;
 
@@ -42,17 +45,22 @@ export class CategoriesService {
     this.catRepo = tenantAwareRepo(connections, ItemCategory, catRepo);
   }
 
-  async findAll(includeChildren = true) {
-    const categories = await this.catRepo.find({
-      where: { parentCategoryId: IsNull() },
-      relations: includeChildren ? ['children'] : [],
-      order: { sortOrder: 'ASC', name: 'ASC' },
-    });
-    return categories;
+  async findAll(includeChildren = true, branchId?: string) {
+    const qb = this.catRepo.createQueryBuilder('category')
+      .where('category.parentCategoryId IS NULL')
+      .orderBy('category.sortOrder', 'ASC')
+      .addOrderBy('category.name', 'ASC');
+    if (includeChildren) qb.leftJoinAndSelect('category.children', 'children');
+    if (branchId) qb.andWhere('(category.branchId IS NULL OR category.branchId = :branchId)', { branchId });
+    return qb.getMany();
   }
 
-  async findAllFlat() {
-    return this.catRepo.find({ order: { sortOrder: 'ASC', name: 'ASC' } });
+  async findAllFlat(branchId?: string) {
+    const qb = this.catRepo.createQueryBuilder('category')
+      .orderBy('category.sortOrder', 'ASC')
+      .addOrderBy('category.name', 'ASC');
+    if (branchId) qb.andWhere('(category.branchId IS NULL OR category.branchId = :branchId)', { branchId });
+    return qb.getMany();
   }
 
   async findOne(id: string) {

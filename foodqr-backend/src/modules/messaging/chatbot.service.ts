@@ -6,6 +6,8 @@ import { LoyaltyStamp } from '../loyalty/entities/loyalty-stamp.entity';
 import { LoyaltyProgram } from '../loyalty/entities/loyalty-program.entity';
 import { LoyaltyReward } from '../loyalty/entities/loyalty-reward.entity';
 import { Item } from '../menu/items/entities/item.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class ChatbotService {
@@ -15,7 +17,14 @@ export class ChatbotService {
     @InjectRepository(LoyaltyProgram) private programRepo: Repository<LoyaltyProgram>,
     @InjectRepository(LoyaltyReward) private rewardRepo: Repository<LoyaltyReward>,
     @InjectRepository(Item) private itemRepo: Repository<Item>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.orderRepo = tenantAwareRepo(connections, Order, orderRepo);
+    this.stampRepo = tenantAwareRepo(connections, LoyaltyStamp, stampRepo);
+    this.programRepo = tenantAwareRepo(connections, LoyaltyProgram, programRepo);
+    this.rewardRepo = tenantAwareRepo(connections, LoyaltyReward, rewardRepo);
+    this.itemRepo = tenantAwareRepo(connections, Item, itemRepo);
+  }
 
   async respond(userId: string, text: string): Promise<{ reply: string; type: string }> {
     const intent = this.detectIntent(text.toLowerCase());

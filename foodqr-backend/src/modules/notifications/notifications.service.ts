@@ -6,6 +6,8 @@ import * as admin from 'firebase-admin';
 import * as nodemailer from 'nodemailer';
 import { User } from '../users/entities/user.entity';
 import { SmsGatewaysService } from '../sms-gateways/sms-gateways.service';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class NotificationsService {
@@ -17,7 +19,9 @@ export class NotificationsService {
     @InjectRepository(User) private userRepo: Repository<User>,
     private configService: ConfigService,
     private smsService: SmsGatewaysService,
+    connections: TenantConnectionService,
   ) {
+    this.userRepo = tenantAwareRepo(connections, User, userRepo);
     this.initFirebase();
     this.initEmail();
   }

@@ -1,13 +1,29 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 import { Tax } from './entities/tax.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 export class CreateTaxDto {
+  @IsString()
   name: string;
+
+  @IsNumber() @Type(() => Number)
   rate: number;
+
+  @IsString() @IsOptional()
+  type?: string;
+
+  @IsBoolean() @IsOptional()
   isIncluded?: boolean;
+
+  @IsBoolean() @IsOptional()
   isDefault?: boolean;
+
+  @IsBoolean() @IsOptional()
   status?: boolean;
 }
 
@@ -15,7 +31,10 @@ export class CreateTaxDto {
 export class TaxService {
   constructor(
     @InjectRepository(Tax) private taxRepo: Repository<Tax>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.taxRepo = tenantAwareRepo(connections, Tax, taxRepo);
+  }
 
   async findAll(): Promise<Tax[]> {
     return this.taxRepo.find({ order: { isDefault: 'DESC', name: 'ASC' } });

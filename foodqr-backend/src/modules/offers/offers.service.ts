@@ -5,6 +5,8 @@ import { Offer } from './entities/offer.entity';
 import { Banner } from './entities/banner.entity';
 import { PromotionBanner } from './entities/promotion-banner.entity';
 import { OfferItem } from './entities/offer-item.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class OffersService {
@@ -13,7 +15,13 @@ export class OffersService {
     @InjectRepository(Banner) private bannerRepo: Repository<Banner>,
     @InjectRepository(PromotionBanner) private promoRepo: Repository<PromotionBanner>,
     @InjectRepository(OfferItem) private offerItemRepo: Repository<OfferItem>,
-  ) {}
+    connections: TenantConnectionService,
+  ) {
+    this.offerRepo = tenantAwareRepo(connections, Offer, offerRepo);
+    this.bannerRepo = tenantAwareRepo(connections, Banner, bannerRepo);
+    this.promoRepo = tenantAwareRepo(connections, PromotionBanner, promoRepo);
+    this.offerItemRepo = tenantAwareRepo(connections, OfferItem, offerItemRepo);
+  }
 
   getActiveOffers() {
     const now = new Date();

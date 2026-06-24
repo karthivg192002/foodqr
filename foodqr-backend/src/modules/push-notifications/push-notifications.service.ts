@@ -2,10 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PushNotification } from './entities/push-notification.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class PushNotificationsService {
-  constructor(@InjectRepository(PushNotification) private repo: Repository<PushNotification>) {}
+  constructor(
+    @InjectRepository(PushNotification) private repo: Repository<PushNotification>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, PushNotification, repo);
+  }
 
   async send(dto: {
     userId?: string;

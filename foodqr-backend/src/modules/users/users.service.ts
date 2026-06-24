@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, Not } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { User } from './entities/user.entity';
 import { Order } from '../orders/entities/order.entity';
 import { Address } from '../addresses/entities/address.entity';
 import { TenantUserIndex } from '../tenants/entities/tenant-user-index.entity';
 import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
+import { TenantsService } from '../tenants/tenants.service';
 import { UserRole, UserStatus } from '../../common/enums';
 import { UpdateUserDto, UpdateDeviceTokenDto } from './dto/user.dto';
 
@@ -18,18 +20,39 @@ export class UsersService {
     @InjectRepository(Address) private addressRepo: Repository<Address>,
     @InjectRepository(TenantUserIndex) private tenantUserIndexRepo: Repository<TenantUserIndex>,
     private connections: TenantConnectionService,
-  ) {}
+    private tenantsService: TenantsService,
+  ) {
+    this.userRepo = tenantAwareRepo(connections, User, userRepo);
+    this.orderRepo = tenantAwareRepo(connections, Order, orderRepo);
+    this.addressRepo = tenantAwareRepo(connections, Address, addressRepo);
+  }
 
   private get repo(): Repository<User> {
-    return this.connections.repoOrDefault(User, this.userRepo);
+    return this.userRepo;
+  }
+
+  /** Throws if the tenant's plan has a staff cap and they're already at it. `maxStaff <= 0` means unlimited.
+   *  Customers don't count against the staff limit — only operational roles do. */
+  private async assertWithinStaffLimit(tenantId: string, role?: UserRole): Promise<void> {
+    if (role === UserRole.CUSTOMER) return;
+    const tenant = await this.tenantsService.findOne(tenantId).catch(() => null);
+    const maxStaff = tenant?.plan?.maxStaff;
+    if (!maxStaff || maxStaff <= 0) return;
+
+    const where: any = { role: Not(UserRole.CUSTOMER) };
+    if (!this.connections.hasTenantContext()) where.tenantId = tenantId;
+    const count = await this.repo.count({ where });
+    if (count >= maxStaff) {
+      throw new BadRequestException(`Staff limit reached for your plan (max ${maxStaff})`);
+    }
   }
 
   private get orders(): Repository<Order> {
-    return this.connections.repoOrDefault(Order, this.orderRepo);
+    return this.orderRepo;
   }
 
   private get addresses(): Repository<Address> {
-    return this.connections.repoOrDefault(Address, this.addressRepo);
+    return this.addressRepo;
   }
 
   async findAll(role?: UserRole, search?: string, page = 1, limit = 20, tenantId?: string) {
@@ -97,6 +120,7 @@ export class UsersService {
       const exists = await this.repo.findOne({ where: { email: dto.email } });
       if (exists) throw new BadRequestException('Email already registered');
     }
+    if (tenantId) await this.assertWithinStaffLimit(tenantId, dto.role);
     const hashed = await bcrypt.hash(dto.password, 12);
     const scopedTenantId = this.connections.hasTenantContext() ? undefined : tenantId;
     const user = this.repo.create({

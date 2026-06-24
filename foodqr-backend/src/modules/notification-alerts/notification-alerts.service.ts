@@ -2,10 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotificationAlert } from './entities/notification-alert.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class NotificationAlertsService {
-  constructor(@InjectRepository(NotificationAlert) private repo: Repository<NotificationAlert>) {}
+  constructor(
+    @InjectRepository(NotificationAlert) private repo: Repository<NotificationAlert>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, NotificationAlert, repo);
+  }
 
   findAll() { return this.repo.find(); }
 

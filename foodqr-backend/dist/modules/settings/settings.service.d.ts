@@ -1,8 +1,9 @@
 import { Repository } from 'typeorm';
 import { AppSetting } from './entities/app-setting.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
 export declare class SettingsService {
     private settingRepo;
-    constructor(settingRepo: Repository<AppSetting>);
+    constructor(settingRepo: Repository<AppSetting>, connections: TenantConnectionService);
     getAll(group?: string): Promise<{}>;
     get(key: string): Promise<string>;
     set(key: string, value: string, group?: string): Promise<{

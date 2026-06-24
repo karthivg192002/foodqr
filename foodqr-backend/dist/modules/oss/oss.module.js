@@ -13,12 +13,13 @@ const order_entity_1 = require("../orders/entities/order.entity");
 const orders_module_1 = require("../orders/orders.module");
 const oss_controller_1 = require("./oss.controller");
 const oss_service_1 = require("./oss.service");
+const tenants_module_1 = require("../tenants/tenants.module");
 let OssModule = class OssModule {
 };
 exports.OssModule = OssModule;
 exports.OssModule = OssModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([order_entity_1.Order]), orders_module_1.OrdersModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([order_entity_1.Order]), orders_module_1.OrdersModule, tenants_module_1.TenantsModule],
         controllers: [oss_controller_1.OssController],
         providers: [oss_service_1.OssService],
     })

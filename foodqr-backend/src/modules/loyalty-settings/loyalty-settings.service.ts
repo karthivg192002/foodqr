@@ -2,10 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LoyaltySetting } from './entities/loyalty-setting.entity';
+import { TenantConnectionService } from '../tenants/connection/tenant-connection.service';
+import { tenantAwareRepo } from '../tenants/connection/tenant-aware-repo';
 
 @Injectable()
 export class LoyaltySettingsService {
-  constructor(@InjectRepository(LoyaltySetting) private repo: Repository<LoyaltySetting>) {}
+  constructor(
+    @InjectRepository(LoyaltySetting) private repo: Repository<LoyaltySetting>,
+    connections: TenantConnectionService,
+  ) {
+    this.repo = tenantAwareRepo(connections, LoyaltySetting, repo);
+  }
 
   findAll() { return this.repo.find(); }
 

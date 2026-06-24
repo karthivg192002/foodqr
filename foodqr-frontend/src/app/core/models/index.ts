@@ -395,6 +395,15 @@ export interface Tax {
   status: boolean;
 }
 
+export interface ServiceCharge {
+  id: string;
+  name: string;
+  rate: number;
+  isIncluded: boolean;
+  isDefault: boolean;
+  status: boolean;
+}
+
 export interface ItemExtra {
   id: string;
   itemId: string;

@@ -17,9 +17,12 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const page_entity_1 = require("./entities/page.entity");
+const tenant_connection_service_1 = require("../tenants/connection/tenant-connection.service");
+const tenant_aware_repo_1 = require("../tenants/connection/tenant-aware-repo");
 let PagesService = class PagesService {
-    constructor(repo) {
+    constructor(repo, connections) {
         this.repo = repo;
+        this.repo = (0, tenant_aware_repo_1.tenantAwareRepo)(connections, page_entity_1.Page, repo);
     }
     findAll() { return this.repo.find({ order: { title: 'ASC' } }); }
     async findBySlug(slug) {
@@ -50,6 +53,7 @@ exports.PagesService = PagesService;
 exports.PagesService = PagesService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(page_entity_1.Page)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenant_connection_service_1.TenantConnectionService])
 ], PagesService);
 //# sourceMappingURL=pages.service.js.map

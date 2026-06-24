@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const push_notification_entity_1 = require("./entities/push-notification.entity");
 const push_notifications_service_1 = require("./push-notifications.service");
 const push_notifications_controller_1 = require("./push-notifications.controller");
+const tenants_module_1 = require("../tenants/tenants.module");
 let PushNotificationsModule = class PushNotificationsModule {
 };
 exports.PushNotificationsModule = PushNotificationsModule;
 exports.PushNotificationsModule = PushNotificationsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([push_notification_entity_1.PushNotification])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([push_notification_entity_1.PushNotification]), tenants_module_1.TenantsModule],
         providers: [push_notifications_service_1.PushNotificationsService],
         controllers: [push_notifications_controller_1.PushNotificationsController],
         exports: [push_notifications_service_1.PushNotificationsService],

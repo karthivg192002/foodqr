@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { CartService } from '../../../core/services/cart.service';
 import { ApiService } from '../../../core/services/api.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { Branch } from '../../../core/models';
 
 interface CustomerNavItem {
   label: string;
@@ -15,6 +16,7 @@ interface CustomerNavItem {
 /** Desktop sidebar — operational navigation */
 const DESKTOP_NAV_ITEMS: CustomerNavItem[] = [
   { label: 'Home',    icon: 'home',   route: '/customer/home' },
+  { label: 'Menu',    icon: 'menu',   route: '/customer/menu' },
   { label: 'Orders',  icon: 'orders', route: '/customer/orders' },
   { label: 'Scan',    icon: 'qr',     route: '/customer/scan' },
   { label: 'Rewards', icon: 'star',   route: '/customer/loyalty' },
@@ -41,6 +43,10 @@ export class CustomerLayoutComponent implements OnInit {
   branding$ = this.themeService.branding$;
   hideNavChrome = false;
 
+  branches: Branch[] = [];
+  showBranchPicker = false;
+  selectedBranch$ = this.cartService.selectedBranch$;
+
   constructor(
     public cartService: CartService,
     public authService: AuthService,
@@ -66,6 +72,26 @@ export class CustomerLayoutComponent implements OnInit {
       .subscribe((e: any) => {
         this.hideNavChrome = this.isHiddenRoute(e.urlAfterRedirects);
       });
+
+    this.api.get<Branch[]>('frontend/branches').subscribe({
+      next: (branches) => {
+        this.branches = branches || [];
+        if (!this.cartService.branchId) {
+          const defaultBranch = this.branches.find((b) => b.isDefault) || this.branches[0];
+          if (defaultBranch) this.cartService.selectBranch(defaultBranch.id, defaultBranch.name);
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  toggleBranchPicker(): void {
+    this.showBranchPicker = !this.showBranchPicker;
+  }
+
+  pickBranch(branch: Branch): void {
+    this.cartService.selectBranch(branch.id, branch.name);
+    this.showBranchPicker = false;
   }
 
   private isHiddenRoute(url: string): boolean {
